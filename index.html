@@ -32,33 +32,48 @@
   </style>
 </head>
 <body>
-  <div id="app">Loading...</div>
+  <div id="app">
+    <div style="max-width: 400px; margin: 100px auto; padding: 30px; background: white; border-radius: 8px; text-align: center;">
+      <h2>Loading...</h2>
+      <p id="loadingStatus">Initializing app...</p>
+    </div>
+  </div>
 
   <!-- Import Appwrite SDK -->
   <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
 
   <script>
-    // Wait for Appwrite to load
-    let appwriteReady = false;
-    
-    window.addEventListener('load', function() {
-      console.log("Page loaded, checking Appwrite...");
-      if (window.Appwrite) {
-        console.log("✓ Appwrite SDK loaded");
-        appwriteReady = true;
-        initializeApp();
-      } else {
-        console.log("❌ Appwrite SDK not loaded, retrying...");
-        setTimeout(initializeApp, 2000);
-      }
-    });
+    let retryCount = 0;
+    const maxRetries = 10;
+
+    function updateLoadingStatus(message) {
+      const status = document.getElementById('loadingStatus');
+      if (status) status.textContent = message;
+      console.log(message);
+    }
 
     function initializeApp() {
-      if (!appwriteReady && !window.Appwrite) {
-        console.log("Waiting for Appwrite SDK...");
-        setTimeout(initializeApp, 1000);
+      updateLoadingStatus(`Checking Appwrite SDK... (attempt ${retryCount + 1}/${maxRetries})`);
+      
+      if (!window.Appwrite) {
+        retryCount++;
+        if (retryCount < maxRetries) {
+          setTimeout(initializeApp, 500);
+        } else {
+          document.getElementById('app').innerHTML = `
+            <div style="max-width: 400px; margin: 100px auto; padding: 30px; background: white; border-radius: 8px; text-align: center;">
+              <h2 style="color: red;">❌ Failed to Load</h2>
+              <p>Appwrite SDK could not be loaded. Please refresh the page.</p>
+              <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Refresh Page
+              </button>
+            </div>
+          `;
+        }
         return;
       }
+
+      updateLoadingStatus("Appwrite SDK loaded, initializing...");
 
       const { Client, Account } = window.Appwrite;
 

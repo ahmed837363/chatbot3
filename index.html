@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot SaaS - Merchant Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    #app {
+      width: 100%;
+    }
+
+    input, button {
+      font-family: inherit;
+    }
+
+    a {
+      text-decoration: none;
+      color: #1a73e8;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">Loading...</div>
+
+  <!-- Import Appwrite SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
+
+  <script>
+    // Wait for Appwrite to load
+    let appwriteReady = false;
+    
+    window.addEventListener('load', function() {
+      console.log("Page loaded, checking Appwrite...");
+      if (window.Appwrite) {
+        console.log("✓ Appwrite SDK loaded");
+        appwriteReady = true;
+        initializeApp();
+      } else {
+        console.log("❌ Appwrite SDK not loaded, retrying...");
+        setTimeout(initializeApp, 2000);
+      }
+    });
+
+    function initializeApp() {
+      if (!appwriteReady && !window.Appwrite) {
+        console.log("Waiting for Appwrite SDK...");
+        setTimeout(initializeApp, 1000);
+        return;
+      }
+
+      const { Client, Account } = window.Appwrite;
+
+      // Initialize Appwrite
+      const client = new Client()
+        .setEndpoint("https://fra.cloud.appwrite.io/v1")
+        .setProject("6946698400109020ea3f6")
+        .setSelfSigned();
+
+      const account = new Account(client);
+
+      // Auth functions
+      async function signUp(email, password, name) {
+        try {
+          const user = await account.create("unique()", email, password, name);
+          console.log("✓ Account created:", user);
+          await account.createEmailSession(email, password);
+          console.log("✓ Logged in automatically");
+          return user;
+        } catch (error) {
+          console.error("❌ Signup failed:", error.message);
+          throw error;
+        }
+      }
+
+      async function login(email, password) {
+        try {
+          const session = await account.createEmailSession(email, password);
+          console.log("✓ Logged in successfully");
+          return session;
+        } catch (error) {
+          console.error("❌ Login failed:", error.message);
+          throw error;
+        }
+      }
+
+      async function getCurrentUser() {
+        try {
+          const user = await account.get();
+          console.log("✓ Current user:", user);
+          return user;
+        } catch (error) {
+          return null;
+        }
+      }
+
+      async function logout() {
+        try {
+          await account.deleteSession("current");
+          console.log("✓ Logged out successfully");
+        } catch (error) {
+          console.error("❌ Logout failed:", error.message);
+          throw error;
+        }
+      }
+
+      // Router
+      class App {
+        constructor() {
+          this.setupRouter();
+        }
+
+        setupRouter() {
+          window.addEventListener("hashchange", () => this.render());
+          this.render();
+        }
+
+        async render() {
+          const hash = window.location.hash.substring(1) || "login";
+          const user = await getCurrentUser();
+
+          if (user && (hash === "login" || hash === "signup")) {
+            window.location.hash = "#dashboard";
+            return;
+          }
+
+          if (!user && hash === "dashboard") {
+            window.location.hash = "#login";
+            return;
+          }
+
+          const app = document.getElementById("app");
+
+          if (hash === "login") {
+            this.renderLogin(app);
+          } else if (hash === "signup") {
+            this.renderSignup(app);
+          } else if (hash === "dashboard") {
+            this.renderDashboard(app);
+          } else {
+            window.location.hash = "#login";
+          }
+        }
+
+        renderLogin(container) {
+          container.innerHTML = `
+            <div style="max-width: 400px; margin: 50px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+              <h1 style="margin-bottom: 10px; color: #333;">Merchant Login</h1>
+              <p style="color: #666; margin-bottom: 30px;">Sign in to manage your chatbot</p>
+              
+              <form id="loginForm" onsubmit="window.app.handleLogin(event)">
+                <div style="margin-bottom: 15px;">
+                  <label style="display: block; margin-bottom: 5px; font-weight: 500;">Email:</label>
+                  <input 
+                    type="email" 
+                    id="loginEmail" 
+                    placeholder="merchant@example.com" 
+                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                    required
+                  />
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                  <label style="display: block; margin-bottom: 5px; font-weight: 500;">Password:</label>
+                  <input 
+                    type="password" 
+                    id="loginPassword" 
+                    placeholder="••••••••" 
+                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                    required
+                  />
+                </div>
+
+                <button 
+                  type="submit"
+                  style="width: 100%; padding: 12px; background-color: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: 500;"
+                >
+                  Login
+                </button>
+              </form>
+
+              <p id="loginStatus" style="text-align: center; margin-top: 15px; font-weight: 500;"></p>
+              <p style="text-align: center; margin-top: 20px; color: #666;">
+                Don't have an account? <a href="#signup" style="color: #1a73e8; text-decoration: none;">Create one here</a>
+              </p>
+            </div>
+          `;
+        }
+
+        renderSignup(container) {
+          container.innerHTML = `
+            <div style="max-width: 400px; margin: 50px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+              <h1 style="margin-bottom: 10px; color: #333;">Create Account</h1>
+              <p style="color: #666; margin-bottom: 30px;">Join our chatbot platform</p>
+              
+              <form id="signupForm" onsubmit="window.app.handleSignup(event)">
+                <div style="margin-bottom: 15px;">
+                  <label style="display: block; margin-bottom: 5px; font-weight: 500;">Business Name:</label>
+                  <input 
+                    type="text" 
+                    id="signupName" 
+                    placeholder="My Store" 
+                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                    required
+                  />
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                  <label style="display: block; margin-bottom: 5px; font-weight: 500;">Email:</label>
+                  <input 
+                    type="email" 
+                    id="signupEmail" 
+                    placeholder="merchant@example.com" 
+                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                    required
+                  />
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                  <label style="display: block; margin-bottom: 5px; font-weight: 500;">Password:</label>
+                  <input 
+                    type="password" 
+                    id="signupPassword" 
+                    placeholder="••••••••" 
+                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                    required
+                  />
+                </div>
+
+                <button 
+                  type="submit"
+                  style="width: 100%; padding: 12px; background-color: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: 500;"
+                >
+                  Create Account
+                </button>
+              </form>
+
+              <p id="signupStatus" style="text-align: center; margin-top: 15px; font-weight: 500;"></p>
+              <p style="text-align: center; margin-top: 20px; color: #666;">
+                Already have an account? <a href="#login" style="color: #1a73e8; text-decoration: none;">Login here</a>
+              </p>
+            </div>
+          `;
+        }
+
+        renderDashboard(container) {
+          container.innerHTML = `
+            <div style="max-width: 600px; margin: 50px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+              <h1 style="margin-bottom: 20px; color: #333;">✓ Dashboard</h1>
+              <p style="color: #666; margin-bottom: 30px; font-size: 18px;">You are logged in!</p>
+              <button 
+                onclick="window.app.handleLogout()"
+                style="padding: 12px 24px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: 500;"
+              >
+                Logout
+              </button>
+            </div>
+          `;
+        }
+
+        async handleLogin(event) {
+          event.preventDefault();
+          const email = document.getElementById("loginEmail").value;
+          const password = document.getElementById("loginPassword").value;
+          const status = document.getElementById("loginStatus");
+
+          try {
+            status.textContent = "⏳ Logging in...";
+            status.style.color = "blue";
+
+            await login(email, password);
+
+            status.textContent = "✓ Login successful! Redirecting...";
+            status.style.color = "green";
+
+            setTimeout(() => {
+              window.location.hash = "#dashboard";
+            }, 1000);
+          } catch (error) {
+            status.textContent = `❌ ${error.message}`;
+            status.style.color = "red";
+          }
+        }
+
+        async handleSignup(event) {
+          event.preventDefault();
+          const name = document.getElementById("signupName").value;
+          const email = document.getElementById("signupEmail").value;
+          const password = document.getElementById("signupPassword").value;
+          const status = document.getElementById("signupStatus");
+
+          if (password.length < 8) {
+            status.textContent = "❌ Password must be at least 8 characters";
+            status.style.color = "red";
+            return;
+          }
+
+          try {
+            status.textContent = "⏳ Creating account...";
+            status.style.color = "blue";
+
+            await signUp(email, password, name);
+
+            status.textContent = "✓ Account created! Redirecting...";
+            status.style.color = "green";
+
+            setTimeout(() => {
+              window.location.hash = "#dashboard";
+            }, 1000);
+          } catch (error) {
+            status.textContent = `❌ ${error.message}`;
+            status.style.color = "red";
+          }
+        }
+
+        async handleLogout() {
+          try {
+            await logout();
+            window.location.hash = "#login";
+          } catch (error) {
+            console.error("Logout failed:", error);
+          }
+        }
+      }
+
+      window.app = new App();
+      console.log("✓ App initialized");
+    }
+  </script>
+</body>
+</html>

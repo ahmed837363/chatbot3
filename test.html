@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot SaaS - Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 100%;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #1557b0;
+    }
+    #status {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Sign Up Test - Debug</h1>
+    <p>Project ID: <code>6946698400109020ea3f6</code></p>
+    <p>Endpoint: <code>https://fra.cloud.appwrite.io/v1</code></p>
+    <hr/>
+    <input type="text" id="name" placeholder="Business Name" value="Test"/>
+    <input type="email" id="email" placeholder="Email" value="test@example.com" />
+    <input type="password" id="password" placeholder="Password (8+ chars)" value="Password123456" />
+    <button onclick="testSignup()">Create Account</button>
+    <div id="status"></div>
+    <hr/>
+    <h3>Debug Info:</h3>
+    <div id="debug" style="background: #f0f0f0; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto;"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
+  <script>
+    const debugDiv = document.getElementById('debug');
+    
+    function debug(msg) {
+      console.log(msg);
+      debugDiv.innerHTML += msg + '<br/>';
+    }
+    
+    debug('Page loaded, checking Appwrite SDK...');
+    
+    // Wait for Appwrite SDK
+    let sdkReady = false;
+    
+    function checkSDK() {
+      if (window.Appwrite) {
+        debug('✓ Appwrite SDK found');
+        sdkReady = true;
+        initClient();
+      } else {
+        debug('⏳ Waiting for Appwrite SDK...');
+        setTimeout(checkSDK, 500);
+      }
+    }
+    
+    function initClient() {
+      try {
+        const { Client, Account } = window.Appwrite;
+        debug('✓ Client and Account imported');
+        
+        window.client = new Client()
+          .setEndpoint("https://fra.cloud.appwrite.io/v1")
+          .setProject("6946698400109020ea3f6");
+        
+        debug('✓ Client initialized');
+        debug('✓ Endpoint: https://fra.cloud.appwrite.io/v1');
+        debug('✓ Project: 6946698400109020ea3f6');
+        
+        window.account = new Account(window.client);
+        debug('✓ Account initialized');
+        debug('Ready to test!');
+      } catch (error) {
+        debug('❌ Init error: ' + error.message);
+      }
+    }
+    
+    async function testSignup() {
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const status = document.getElementById('status');
+
+      if (!name || !email || !password) {
+        status.innerHTML = '<span style="color: red;">❌ Please fill all fields</span>';
+        return;
+      }
+
+      if (password.length < 8) {
+        status.innerHTML = '<span style="color: red;">❌ Password must be 8+ characters</span>';
+        return;
+      }
+
+      try {
+        status.innerHTML = '<span style="color: blue;">⏳ Creating account...</span>';
+        debug('Attempting signup with: ' + email);
+        
+        const user = await window.account.create("unique()", email, password, name);
+        
+        debug('✓ Account created! ID: ' + user.$id);
+        status.innerHTML = '<span style="color: green;">✓ Account created! ID: ' + user.$id + '</span>';
+        
+        console.log("Success:", user);
+      } catch (error) {
+        debug('❌ Error: ' + error.message);
+        status.innerHTML = '<span style="color: red;">❌ ' + error.message + '</span>';
+        console.error("Error:", error);
+      }
+    }
+    
+    checkSDK();
+  </script>
+</body>
+</html>

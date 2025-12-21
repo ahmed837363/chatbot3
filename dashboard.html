@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Connect Stores</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 40px;
+    }
+    .stores-section {
+      margin-bottom: 40px;
+    }
+    .stores-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .store-card {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .store-card:hover {
+      border-color: #1a73e8;
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.15);
+    }
+    .store-logo {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 15px;
+      background: #f0f0f0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    .store-name {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .store-desc {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    .btn-primary {
+      background: #1a73e8;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #1557b0;
+    }
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+      display: none;
+    }
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🤖 Chatbot Dashboard</h1>
+    <p class="subtitle">Connect your e-commerce store to enable AI customer support</p>
+
+    <div class="stores-section">
+      <h2 style="margin-bottom: 20px;">Available Platforms</h2>
+      <div class="stores-grid">
+        
+        <!-- Salla -->
+        <div class="store-card">
+          <div class="store-logo">🛒</div>
+          <div class="store-name">Salla</div>
+          <p class="store-desc">Saudi e-commerce platform</p>
+          <button class="btn btn-primary" onclick="connectSalla()">Connect Salla</button>
+        </div>
+
+        <!-- Zid -->
+        <div class="store-card">
+          <div class="store-logo">🏪</div>
+          <div class="store-name">Zid</div>
+          <p class="store-desc">E-commerce for MENA</p>
+          <button class="btn btn-secondary" disabled>Coming Soon</button>
+        </div>
+
+        <!-- Shopify -->
+        <div class="store-card">
+          <div class="store-logo">⚡</div>
+          <div class="store-name">Shopify</div>
+          <p class="store-desc">Global e-commerce</p>
+          <button class="btn btn-secondary" disabled>Coming Soon</button>
+        </div>
+
+        <!-- WooCommerce -->
+        <div class="store-card">
+          <div class="store-logo">🌐</div>
+          <div class="store-name">WooCommerce</div>
+          <p class="store-desc">WordPress integration</p>
+          <button class="btn btn-secondary" disabled>Coming Soon</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="status" class="status"></div>
+  </div>
+
+  <script>
+    function connectSalla() {
+      // OAuth URL for Salla
+      const clientId = "d57bh-4f5-ed26-4a09-Babo-03e9384dfd894";
+      const redirectUri = encodeURIComponent("http://localhost:8000/oauth-salla-callback.html");
+      const scope = encodeURIComponent("read_products read_orders read_customers");
+      
+      const sallaOAuthUrl = `https://accounts.salla.sa/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+      
+      console.log("Redirecting to Salla OAuth:", sallaOAuthUrl);
+      window.location.href = sallaOAuthUrl;
+    }
+
+    // Test message
+    console.log("✓ Dashboard loaded");
+    console.log("Salla OAuth configured");
+  </script>
+</body>
+</html>

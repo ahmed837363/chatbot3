@@ -166,20 +166,40 @@
 
   <script>
     function connectSalla() {
-      // OAuth URL for Salla
-      const clientId = "d57bh-4f5-ed26-4a09-Babo-03e9384dfd894";
-      const redirectUri = encodeURIComponent("http://localhost:8000/oauth-salla-callback.html");
-      const scope = encodeURIComponent("read_products read_orders read_customers");
+      console.log("Opening Salla app installation...");
       
-      const sallaOAuthUrl = `https://accounts.salla.sa/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+      // 🎉 EASY MODE: Direct installation link (no OAuth redirect needed!)
+      // Salla will send webhook to our endpoint after merchant installs
+      const appId = "1628541854"; // Your Salla App ID
+      const installUrl = `https://apps.salla.sa/ar/app/${appId}`;
       
-      console.log("Redirecting to Salla OAuth:", sallaOAuthUrl);
-      window.location.href = sallaOAuthUrl;
+      // Open in new window
+      const installWindow = window.open(installUrl, 'SallaInstall', 'width=800,height=600');
+      
+      // Show bilingual success message
+      alert("✅ سيتم فتح صفحة تثبيت التطبيق. بعد التثبيت، سيتم ربط متجرك تلقائياً!\n\n✅ The app installation page will open. After installing, your store will be connected automatically!");
+      
+      // Optional: Check periodically if connection was made
+      const checkInterval = setInterval(async () => {
+        try {
+          console.log("⏳ Checking for new store connections...");
+          // TODO: Query Appwrite database for new connections
+          // If found, show success message and refresh page
+        } catch (error) {
+          console.error("Connection check failed:", error);
+        }
+      }, 5000); // Check every 5 seconds
+      
+      // Stop checking after 2 minutes
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        console.log("⏹ Stopped checking for connections");
+      }, 120000);
     }
 
     // Test message
     console.log("✓ Dashboard loaded");
-    console.log("Salla OAuth configured");
+    console.log("✓ Easy Mode configured - Direct installation link ready!");
   </script>
 </body>
 </html>

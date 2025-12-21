@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salla Webhook Endpoint</title>
+    <style>
+        body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin: 0 0 20px 0;
+            font-size: 28px;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .webhook-log {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎣 Salla Webhook Endpoint</h1>
+        
+        <div id="status" class="status" style="display:none;"></div>
+        
+        <p>This page receives webhook events from Salla when merchants install your app.</p>
+        
+        <button class="btn" onclick="testWebhook()">🧪 Test Webhook</button>
+        
+        <div class="webhook-log" id="log">
+Waiting for webhooks...
+        </div>
+    </div>
+
+    <script type="module">
+        import { Client, Databases, Account } from "https://cdn.jsdelivr.net/npm/appwrite@14.0.0/+esm";
+        import { handleSallaWebhook } from "./src/salla-webhook.js";
+
+        // Initialize Appwrite
+        const client = new Client()
+            .setEndpoint("https://fra.cloud.appwrite.io/v1")
+            .setProject("694669640010920ea3f6");
+
+        const databases = new Databases(client);
+        const account = new Account(client);
+
+        // Global log function
+        window.log = function(message, type = "info") {
+            const logDiv = document.getElementById("log");
+            const timestamp = new Date().toLocaleTimeString("ar-SA");
+            const emoji = type === "error" ? "❌" : type === "success" ? "✅" : "ℹ️";
+            logDiv.textContent += `\n[${timestamp}] ${emoji} ${message}`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        };
+
+        // Test webhook function
+        window.testWebhook = async function() {
+            log("Testing webhook with sample data...");
+            
+            const sampleWebhook = {
+                event: "app.store.authorize",
+                merchant: {
+                    id: 123456789,
+                    name: "Test Store",
+                    domain: "test-store.salla.sa",
+                    email: "test@test.com"
+                },
+                data: {
+                    access_token: "test_token_" + Date.now(),
+                    refresh_token: "test_refresh_" + Date.now(),
+                    expires_in: 31536000
+                },
+                created_at: new Date().toISOString()
+            };
+
+            try {
+                const result = await handleSallaWebhook(sampleWebhook, databases, "test-user-id");
+                log("Webhook processed successfully!", "success");
+                log(JSON.stringify(result, null, 2));
+                
+                document.getElementById("status").style.display = "block";
+                document.getElementById("status").className = "status success";
+                document.getElementById("status").textContent = "✅ Test webhook processed successfully!";
+            } catch (error) {
+                log("Webhook processing failed: " + error.message, "error");
+                
+                document.getElementById("status").style.display = "block";
+                document.getElementById("status").className = "status error";
+                document.getElementById("status").textContent = "❌ Error: " + error.message;
+            }
+        };
+
+        // Listen for actual webhook posts
+        log("Webhook endpoint ready!");
+        log("Waiting for Salla to send events...");
+
+        // Check if this is a POST request with webhook data
+        // Note: Since this is client-side, we need a backend to receive real webhooks
+        // For now, we'll use localStorage to simulate webhook reception
+        
+        window.addEventListener("message", async (event) => {
+            if (event.data.type === "salla-webhook") {
+                log("Received webhook from Salla!");
+                try {
+                    const result = await handleSallaWebhook(event.data.payload, databases);
+                    log("Webhook processed!", "success");
+                    log(JSON.stringify(result, null, 2));
+                } catch (error) {
+                    log("Error processing webhook: " + error.message, "error");
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر تجريبي - Test Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        /* Banner */
+        .banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .banner h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        /* Products */
+        .products {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .products h2 {
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            font-size: 24px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .buy-btn {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .buy-btn:hover {
+            background: #5568d3;
+        }
+
+        /* Chatbot Widget */
+        .chatbot-widget {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 9999;
+        }
+
+        .chat-bubble {
+            width: 60px;
+            height: 60px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            font-size: 28px;
+        }
+
+        .chat-bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-window.open {
+            display: flex;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .close-chat {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 80%;
+        }
+
+        .bot-message {
+            background: #e9ecef;
+            align-self: flex-start;
+        }
+
+        .user-message {
+            background: #667eea;
+            color: white;
+            align-self: flex-end;
+            margin-right: auto;
+            margin-left: 20%;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .chat-input button {
+            margin-right: 10px;
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10000;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Status Indicator -->
+    <div class="status-indicator">
+        <div class="status-dot"></div>
+        <strong>🤖 Chatbot Active - مساعد الذكاء الاصطناعي نشط</strong>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">🛍️ متجري التجريبي</div>
+        <nav>
+            <a href="#products">المنتجات</a>
+            <a href="#about">من نحن</a>
+            <a href="#contact">اتصل بنا</a>
+        </nav>
+    </header>
+
+    <!-- Banner -->
+    <div class="banner">
+        <h1>مرحباً بك في متجرنا!</h1>
+        <p>تسوق أفضل المنتجات بأفضل الأسعار</p>
+    </div>
+
+    <!-- Products -->
+    <section class="products" id="products">
+        <h2>منتجاتنا</h2>
+        <div class="product-grid">
+            <div class="product-card">
+                <div class="product-image">📱</div>
+                <div class="product-info">
+                    <div class="product-name">هاتف ذكي</div>
+                    <div class="product-price">1,999 ر.س</div>
+                    <button class="buy-btn">أضف للسلة</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-image">💻</div>
+                <div class="product-info">
+                    <div class="product-name">لابتوب</div>
+                    <div class="product-price">3,499 ر.س</div>
+                    <button class="buy-btn">أضف للسلة</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-image">⌚</div>
+                <div class="product-info">
+                    <div class="product-name">ساعة ذكية</div>
+                    <div class="product-price">899 ر.س</div>
+                    <button class="buy-btn">أضف للسلة</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-image">🎧</div>
+                <div class="product-info">
+                    <div class="product-name">سماعات</div>
+                    <div class="product-price">499 ر.س</div>
+                    <button class="buy-btn">أضف للسلة</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-image">📷</div>
+                <div class="product-info">
+                    <div class="product-name">كاميرا</div>
+                    <div class="product-price">2,299 ر.س</div>
+                    <button class="buy-btn">أضف للسلة</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-image">🖥️</div>
+                <div class="product-info">
+                    <div class="product-name">شاشة</div>
+                    <div class="product-price">1,199 ر.س</div>
+                    <button class="buy-btn">أضف للسلة</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget">
+        <div class="chat-bubble" onclick="toggleChat()">
+            💬
+        </div>
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <h3>🤖 مساعد الذكاء الاصطناعي</h3>
+                <button class="close-chat" onclick="toggleChat()">×</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    مرحباً! 👋 أنا مساعدك الذكي. كيف يمكنني مساعدتك اليوم؟
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="userInput" placeholder="اكتب رسالتك..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()">إرسال</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleChat() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.classList.toggle('open');
+            
+            if (chatWindow.classList.contains('open')) {
+                document.getElementById('userInput').focus();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                // Add user message
+                addMessage(message, 'user');
+                input.value = '';
+                
+                // Simulate bot response
+                setTimeout(() => {
+                    const responses = [
+                        'شكراً لتواصلك معنا! كيف يمكنني مساعدتك أكثر؟',
+                        'يمكنني مساعدتك في معرفة تفاصيل المنتجات، الأسعار، والشحن!',
+                        'هل تبحث عن منتج معين؟ يسعدني مساعدتك! 😊',
+                        'لدينا عروض رائعة اليوم! هل تريد معرفة المزيد؟',
+                        'يمكنك التواصل مع فريق الدعم على الرقم: 0500000000'
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addMessage(randomResponse, 'bot');
+                }, 1000);
+            }
+        }
+
+        function addMessage(text, sender) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.textContent = text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Log chatbot initialization
+        console.log('🤖 AI Chatbot initialized!');
+        console.log('✅ Store: متجري التجريبي');
+        console.log('✅ Status: Active');
+        console.log('✅ Ready to assist customers!');
+    </script>
+</body>
+</html>

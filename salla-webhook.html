@@ -140,6 +140,8 @@ Waiting for webhooks...
             };
 
             try {
+                // Pass database ID as part of a config object
+                const config = { databaseId: "6946699d001194236820" };
                 const result = await handleSallaWebhook(sampleWebhook, databases, "test-user-id");
                 log("Webhook processed successfully!", "success");
                 log(JSON.stringify(result, null, 2));

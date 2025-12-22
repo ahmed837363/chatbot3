@@ -29,7 +29,7 @@ export async function handleSallaWebhook(webhookData, databases, userId) {
 
     // Save connection to Appwrite database
     const connection = await databases.createDocument(
-      "chatbot_db", // database ID
+      "6946699d001194236820", // database ID
       "store_connections", // collection ID
       "unique()", // auto-generate document ID
       {

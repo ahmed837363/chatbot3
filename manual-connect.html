@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Store Connection - للاختبار</title>
+    <style>
+        body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .connection-id {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 ربط متجر يدوي</h1>
+        <p class="subtitle">Manual Store Connection - For Testing Only</p>
+
+        <div class="info">
+            <strong>💡 ملاحظة:</strong> هذه الصفحة للاختبار فقط. استخدمها لربط متجر والدك مؤقتاً حتى تنشر التطبيق.<br>
+            <strong>💡 Note:</strong> This is for testing only. Use it to connect your father's store temporarily until you publish the app.
+        </div>
+
+        <form id="connectForm">
+            <div class="form-group">
+                <label>اسم المتجر / Store Name:</label>
+                <input type="text" id="storeName" placeholder="متجر والدي / My Father's Store" required>
+            </div>
+
+            <div class="form-group">
+                <label>رابط المتجر / Store URL:</label>
+                <input type="url" id="storeUrl" placeholder="https://store.salla.sa" required>
+            </div>
+
+            <div class="form-group">
+                <label>معرف التاجر / Merchant ID (اختياري):</label>
+                <input type="text" id="merchantId" placeholder="123456789">
+            </div>
+
+            <div class="form-group">
+                <label>بريد التاجر / Merchant Email (اختياري):</label>
+                <input type="email" id="merchantEmail" placeholder="merchant@example.com">
+            </div>
+
+            <div class="form-group">
+                <label>ملاحظات / Notes (اختياري):</label>
+                <textarea id="notes" rows="3" placeholder="متجر تجريبي للاختبار / Test store for development"></textarea>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">
+                🔗 ربط المتجر الآن / Connect Store Now
+            </button>
+        </form>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <script type="module">
+        import { Client, Databases, Account, ID } from "https://cdn.jsdelivr.net/npm/appwrite@14.0.0/+esm";
+
+        // Initialize Appwrite
+        const client = new Client()
+            .setEndpoint("https://fra.cloud.appwrite.io/v1")
+            .setProject("694669640010920ea3f6");
+
+        const databases = new Databases(client);
+        const account = new Account(client);
+
+        const form = document.getElementById("connectForm");
+        const statusDiv = document.getElementById("status");
+        const submitBtn = document.getElementById("submitBtn");
+
+        // Handle form submission
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = "⏳ جاري الربط... / Connecting...";
+            
+            statusDiv.style.display = "none";
+
+            try {
+                // Get form values
+                const storeName = document.getElementById("storeName").value;
+                const storeUrl = document.getElementById("storeUrl").value;
+                const merchantId = document.getElementById("merchantId").value || "manual_" + Date.now();
+                const merchantEmail = document.getElementById("merchantEmail").value || "unknown@example.com";
+                const notes = document.getElementById("notes").value || "Manually connected for testing";
+
+                console.log("Creating manual store connection...");
+
+                // Try to get current user
+                let userId = "guest";
+                try {
+                    const user = await account.get();
+                    userId = user.$id;
+                    console.log("✓ Logged in as:", user.email);
+                } catch (error) {
+                    console.log("ℹ️ No user logged in, using guest ID");
+                }
+
+                // Create connection in database
+                const connection = await databases.createDocument(
+                    "6946699d001194236820", // database ID
+                    "store_connections", // collection ID
+                    ID.unique(), // auto-generate document ID
+                    {
+                        customerId: userId,
+                        platform: "salla",
+                        accessToken: "manual_test_token_" + Date.now(),
+                        refreshToken: "manual_refresh_token_" + Date.now(),
+                        expiresAt: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000)), // 1 year
+                        storeUrl: storeUrl,
+                        storeName: storeName,
+                        merchantId: merchantId,
+                        connectedAt: new Date().toISOString()
+                    }
+                );
+
+                console.log("✓ Store connected:", connection.$id);
+
+                // Show success
+                statusDiv.className = "status success";
+                statusDiv.style.display = "block";
+                statusDiv.innerHTML = `
+                    <strong>✅ تم ربط المتجر بنجاح!</strong><br>
+                    <strong>✅ Store connected successfully!</strong>
+                    <div class="connection-id">
+                        <strong>Connection ID:</strong><br>
+                        ${connection.$id}
+                    </div>
+                    <p style="margin-top: 15px;">
+                        🎉 الآن يمكنك استخدام هذا المتجر للاختبار!<br>
+                        🎉 Now you can use this store for testing!
+                    </p>
+                `;
+
+                // Reset form
+                form.reset();
+
+            } catch (error) {
+                console.error("❌ Connection error:", error);
+                
+                statusDiv.className = "status error";
+                statusDiv.style.display = "block";
+                statusDiv.innerHTML = `
+                    <strong>❌ فشل الربط / Connection Failed</strong><br>
+                    ${error.message}
+                    <p style="margin-top: 10px; font-size: 12px;">
+                        تحقق من إعدادات Appwrite أو من console للتفاصيل<br>
+                        Check Appwrite settings or console for details
+                    </p>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "🔗 ربط المتجر الآن / Connect Store Now";
+            }
+        });
+
+        console.log("✓ Manual connection page loaded");
+    </script>
+</body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Complete Integration Test</title>
+    <style>
+        body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .test-card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .test-card h2 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 22px;
+        }
+
+        .test-card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .log-box {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            white-space: pre-wrap;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        .final-test {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            text-align: center;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .final-test h2 {
+            color: white;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .final-test .btn {
+            max-width: 400px;
+            margin: 10px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Complete Integration Test - اختبار التكامل الكامل</h1>
+
+        <div class="test-grid">
+            <!-- Step 1: Connect Store -->
+            <div class="test-card">
+                <h2><span class="step-number">1</span> Connect Test Store</h2>
+                <p>Simulate connecting a Salla store to your app.</p>
+                <button class="btn btn-primary" onclick="connectStore()">
+                    🔗 Connect Store
+                </button>
+                <div id="status1" class="status"></div>
+                <div id="log1" class="log-box" style="display:none;"></div>
+            </div>
+
+            <!-- Step 2: Trigger Webhook -->
+            <div class="test-card">
+                <h2><span class="step-number">2</span> Receive Webhook</h2>
+                <p>Simulate Salla sending authorization data via webhook.</p>
+                <button class="btn btn-primary" onclick="triggerWebhook()">
+                    📩 Trigger Webhook
+                </button>
+                <div id="status2" class="status"></div>
+                <div id="log2" class="log-box" style="display:none;"></div>
+            </div>
+
+            <!-- Step 3: Check Database -->
+            <div class="test-card">
+                <h2><span class="step-number">3</span> Verify Database</h2>
+                <p>Check if store connection was saved to Appwrite.</p>
+                <button class="btn btn-info" onclick="checkDatabase()">
+                    🔍 Check Database
+                </button>
+                <div id="status3" class="status"></div>
+                <div id="log3" class="log-box" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- Final Test -->
+        <div class="final-test">
+            <h2>🎯 Final Test: View Store with Widget</h2>
+            <p>Open the test store to see the chatbot widget in action!</p>
+            <button class="btn btn-success" onclick="openTestStore()">
+                🛍️ Open Test Store with Chatbot
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { Client, Databases, Account, ID } from "https://cdn.jsdelivr.net/npm/appwrite@14.0.0/+esm";
+        import { handleSallaWebhook } from "./src/salla-webhook.js";
+
+        // Initialize Appwrite
+        const client = new Client()
+            .setEndpoint("https://fra.cloud.appwrite.io/v1")
+            .setProject("694669640010920ea3f6");
+
+        const databases = new Databases(client);
+        const account = new Account(client);
+
+        let connectionId = null;
+
+        // Logging functions
+        function log(stepNum, message, type = 'info') {
+            const logBox = document.getElementById(`log${stepNum}`);
+            const statusDiv = document.getElementById(`status${stepNum}`);
+            
+            logBox.style.display = 'block';
+            const timestamp = new Date().toLocaleTimeString();
+            logBox.textContent += `[${timestamp}] ${message}\n`;
+            logBox.scrollTop = logBox.scrollHeight;
+
+            if (type === 'success') {
+                statusDiv.className = 'status success';
+                statusDiv.style.display = 'block';
+                statusDiv.textContent = '✅ Success!';
+            } else if (type === 'error') {
+                statusDiv.className = 'status error';
+                statusDiv.style.display = 'block';
+                statusDiv.textContent = '❌ Error: Check logs';
+            }
+        }
+
+        // Step 1: Connect Store
+        window.connectStore = async function() {
+            log(1, '🔗 Starting store connection...');
+            
+            try {
+                // Get current user
+                let userId = 'test-user';
+                try {
+                    const user = await account.get();
+                    userId = user.$id;
+                    log(1, `✓ Logged in as: ${user.email}`);
+                } catch (error) {
+                    log(1, 'ℹ️ No user logged in, using test user ID');
+                }
+
+                // Create test store connection
+                const connection = await databases.createDocument(
+                    "6946699d001194236820",
+                    "store_connections",
+                    ID.unique(),
+                    {
+                        customerId: userId,
+                        platform: "salla",
+                        accessToken: "test_token_" + Date.now(),
+                        refreshToken: "test_refresh_" + Date.now(),
+                        expiresAt: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000)).toISOString(),
+                        storeUrl: "https://test-store.salla.sa",
+                        storeName: "Test Store - متجر تجريبي",
+                        merchantId: "test_merchant_" + Date.now(),
+                        connectedAt: new Date().toISOString()
+                    }
+                );
+
+                connectionId = connection.$id;
+                log(1, `✓ Store connected!`);
+                log(1, `✓ Connection ID: ${connectionId}`);
+                log(1, `✓ Store: ${connection.storeName}`, 'success');
+                
+            } catch (error) {
+                log(1, `❌ Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+
+        // Step 2: Trigger Webhook
+        window.triggerWebhook = async function() {
+            log(2, '📩 Simulating Salla webhook...');
+            
+            try {
+                const webhookData = {
+                    event: "app.store.authorize",
+                    merchant: {
+                        id: Date.now(),
+                        name: "Test Store - متجر تجريبي",
+                        domain: "test-store.salla.sa",
+                        email: "test@test-store.com"
+                    },
+                    data: {
+                        access_token: "webhook_token_" + Date.now(),
+                        refresh_token: "webhook_refresh_" + Date.now(),
+                        expires_in: 31536000
+                    },
+                    created_at: new Date().toISOString()
+                };
+
+                log(2, '📦 Webhook payload:');
+                log(2, JSON.stringify(webhookData, null, 2));
+
+                const result = await handleSallaWebhook(webhookData, databases, 'test-user');
+                
+                log(2, '✓ Webhook processed successfully!');
+                log(2, `✓ Connection ID: ${result.connectionId}`);
+                log(2, `✓ Store: ${result.storeName}`, 'success');
+                
+                connectionId = result.connectionId;
+                
+            } catch (error) {
+                log(2, `❌ Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+
+        // Step 3: Check Database
+        window.checkDatabase = async function() {
+            log(3, '🔍 Checking Appwrite database...');
+            
+            try {
+                const result = await databases.listDocuments(
+                    "6946699d001194236820",
+                    "store_connections"
+                );
+
+                log(3, `✓ Found ${result.total} connection(s)`);
+                
+                if (result.documents.length > 0) {
+                    log(3, '\n📋 Recent connections:');
+                    result.documents.slice(0, 3).forEach((doc, index) => {
+                        log(3, `\n${index + 1}. ${doc.storeName}`);
+                        log(3, `   ID: ${doc.$id}`);
+                        log(3, `   Platform: ${doc.platform}`);
+                        log(3, `   URL: ${doc.storeUrl}`);
+                        log(3, `   Connected: ${new Date(doc.connectedAt).toLocaleString()}`);
+                    });
+                    log(3, '\n✓ Database verification successful!', 'success');
+                } else {
+                    log(3, '⚠️ No connections found. Run Step 1 or 2 first.', 'error');
+                }
+                
+            } catch (error) {
+                log(3, `❌ Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+
+        // Open Test Store
+        window.openTestStore = function() {
+            window.open('test-store.html', 'TestStore', 'width=1200,height=800');
+        };
+
+        console.log('✓ Integration test ready!');
+    </script>
+</body>
+</html>

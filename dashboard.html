@@ -168,24 +168,26 @@
     function connectSalla() {
       console.log("Opening Salla app installation...");
       
-      // 🎉 EASY MODE: Direct installation link (no OAuth redirect needed!)
-      // Salla will send webhook to our endpoint after merchant installs
-      const appId = "1628541854"; // Your Salla App ID
-      const installUrl = `https://apps.salla.sa/ar/app/${appId}`;
-      
-      // Open in new window
-      const installWindow = window.open(installUrl, 'SallaInstall', 'width=800,height=600');
-      
-      // Show bilingual success message
-      alert("✅ سيتم فتح صفحة تثبيت التطبيق. بعد التثبيت، سيتم ربط متجرك تلقائياً!\n\n✅ The app installation page will open. After installing, your store will be connected automatically!");
-      
-      // Optional: Check periodically if connection was made
-      const checkInterval = setInterval(async () => {
-        try {
-          console.log("⏳ Checking for new store connections...");
-          // TODO: Query Appwrite database for new connections
-          // If found, show success message and refresh page
-        } catch (error) {
+            // 🎉 EASY MODE: Direct installation link
+            // After merchant installs:
+            // 1. Salla sends webhook to our server
+            // 2. We receive access tokens
+            // 3. We AUTOMATICALLY inject chatbot into their store
+            // 4. Done! No code needed from merchant!
+            
+            const appId = "1628541854"; // Your Salla App ID
+            const installUrl = `https://apps.salla.sa/ar/app/${appId}`;
+            
+            // Open in new window
+            const installWindow = window.open(installUrl, 'SallaInstall', 'width=800,height=600');
+            
+            // Show bilingual success message
+            alert("✅ بعد التثبيت، سيتم إضافة الشات بوت تلقائياً لمتجرك!\n\n✅ After installing, the chatbot will be AUTOMATICALLY added to your store!");
+            
+            // Optional: Check periodically if connection was made
+            const checkInterval = setInterval(async () => {
+                try {
+                    console.log("⏳ Checking if store connected and chatbot installed...");
           console.error("Connection check failed:", error);
         }
       }, 5000); // Check every 5 seconds

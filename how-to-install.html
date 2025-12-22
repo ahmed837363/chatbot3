@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Add Chatbot to Your Website</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 { color: #667eea; }
+        h2 { color: #764ba2; margin-top: 30px; }
+        .code-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .code-box code {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .demo-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .demo-btn:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 Add AI Chatbot to Your Website</h1>
+    <p>Follow these simple steps to add the chatbot widget to <strong>mayasahstyle.me</strong></p>
+
+    <div class="step">
+        <h2>📦 Step 1: Upload the Widget File</h2>
+        <p>Upload <code>chatbot-widget.js</code> to your website's server (same directory as your HTML files).</p>
+    </div>
+
+    <div class="step">
+        <h2>📝 Step 2: Add This Code to Your Website</h2>
+        <p>Add this <strong>one line</strong> before the closing <code>&lt;/body&gt;</code> tag in your HTML:</p>
+        
+        <div class="code-box">
+            <code>&lt;!-- AI Chatbot Widget --&gt;<br>
+&lt;script src="chatbot-widget.js" data-store-id="mayasahstyle"&gt;&lt;/script&gt;</code>
+        </div>
+
+        <p><strong>OR</strong> if you host it online (like Appwrite Sites):</p>
+        
+        <div class="code-box">
+            <code>&lt;script src="https://chatbot3.appwrite.network/chatbot-widget.js" data-store-id="mayasahstyle"&gt;&lt;/script&gt;</code>
+        </div>
+    </div>
+
+    <div class="step">
+        <h2>✅ Step 3: That's It!</h2>
+        <p>The chatbot will appear on your website as a 💬 bubble in the bottom-left corner.</p>
+        <p>Click it to open the chat window!</p>
+    </div>
+
+    <div class="success-box">
+        <strong>✅ Features:</strong>
+        <ul>
+            <li>Arabic language support (RTL)</li>
+            <li>Beautiful gradient design</li>
+            <li>Mobile responsive</li>
+            <li>Easy to customize colors</li>
+            <li>Works on any HTML website</li>
+        </ul>
+    </div>
+
+    <h2>🎨 Customization</h2>
+    <p>You can customize the widget by editing these values in <code>chatbot-widget.js</code>:</p>
+    
+    <div class="code-box">
+        <code>const config = {<br>
+&nbsp;&nbsp;chatbotColor: '#667eea',  // Change color<br>
+&nbsp;&nbsp;position: 'bottom-left',  // or 'bottom-right'<br>
+&nbsp;&nbsp;welcomeMessage: 'مرحباً!', // Welcome text<br>
+&nbsp;&nbsp;language: 'ar'  // Arabic<br>
+};</code>
+    </div>
+
+    <h2>🧪 Test the Widget</h2>
+    <p>See the widget in action:</p>
+    <button class="demo-btn" onclick="testWidget()">🚀 Open Demo Store</button>
+    <button class="demo-btn" onclick="window.location.href='integration-test.html'">🧪 Full Integration Test</button>
+
+    <hr style="margin: 40px 0;">
+
+    <h2>📤 Next Steps: Deploy to Your Website</h2>
+    <ol>
+        <li><strong>Option 1 (Local):</strong> Copy <code>chatbot-widget.js</code> to your website folder</li>
+        <li><strong>Option 2 (Appwrite):</strong> Deploy to Appwrite Sites for CDN hosting</li>
+        <li>Add the script tag to your <code>index.html</code> or template</li>
+        <li>Visit <code>mayasahstyle.me</code> and see the chatbot!</li>
+    </ol>
+
+    <div class="success-box">
+        <strong>🎯 Pro Tip:</strong> Once deployed, you can connect it to real AI (ChatGPT/Claude) by updating the API call in the <code>sendMessage</code> function!
+    </div>
+
+    <script>
+        function testWidget() {
+            window.open('test-store.html', 'Demo', 'width=1200,height=800');
+        }
+    </script>
+
+    <!-- Load the actual widget on this page for demo -->
+    <script src="chatbot-widget.js" data-store-id="demo"></script>
+</body>
+</html>

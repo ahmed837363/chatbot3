@@ -168,6 +168,20 @@
         <h1>🧪 Complete Integration Test - اختبار التكامل الكامل</h1>
 
         <div class="test-grid">
+            <!-- Step 0: Login -->
+            <div class="test-card">
+                <h2><span class="step-number">0</span> Login First</h2>
+                <p>Create account or login to test</p>
+                <button class="btn btn-primary" onclick="signupUser()" style="margin-bottom: 10px;">
+                    📝 Create New Account
+                </button>
+                <button class="btn btn-info" onclick="loginUser()">
+                    🔐 Login
+                </button>
+                <div id="status0" class="status"></div>
+                <div id="log0" class="log-box" style="display:none;"></div>
+            </div>
+
             <!-- Step 1: Connect Store -->
             <div class="test-card">
                 <h2><span class="step-number">1</span> Connect Test Store</h2>
@@ -225,6 +239,87 @@
         const account = new Account(client);
 
         let connectionId = null;
+
+        // Step 0: Signup
+        window.signupUser = async function() {
+            log(0, '📝 Creating new account...');
+            
+            try {
+                // Generate unique email
+                const timestamp = Date.now();
+                const email = `testuser${timestamp}@test.com`;
+                const password = "test123456";
+                const name = "Test User";
+
+                log(0, `Creating account with: ${email}`);
+                
+                const user = await account.create(
+                    ID.unique(),
+                    email,
+                    password,
+                    name
+                );
+                
+                log(0, '✓ Account created!');
+                log(0, `✓ Email: ${email}`);
+                log(0, `✓ Password: ${password}`);
+                log(0, `✓ User ID: ${user.$id}`);
+                
+                // Auto-login
+                log(0, '\n🔐 Auto-logging in...');
+                const session = await account.createEmailPasswordSession(email, password);
+                
+                log(0, '✓ Login successful!');
+                log(0, `✓ Session created!`, 'success');
+                log(0, '\n💾 Save these credentials:');
+                log(0, `Email: ${email}`);
+                log(0, `Password: ${password}`);
+                
+            } catch (error) {
+                log(0, `❌ Signup Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+
+        // Step 0: Login
+        window.loginUser = async function() {
+            log(0, '🔐 Logging in...');
+            
+            try {
+                // Try to get current session first
+                try {
+                    const user = await account.get();
+                    log(0, `✓ Already logged in as: ${user.email}`);
+                    log(0, `✓ User ID: ${user.$id}`, 'success');
+                    return;
+                } catch (error) {
+                    log(0, 'ℹ️ No active session, logging in...');
+                }
+
+                // Prompt for credentials
+                const email = prompt("Enter email:", "test@example.com");
+                const password = prompt("Enter password:", "test123456");
+
+                if (!email || !password) {
+                    log(0, '❌ Login cancelled', 'error');
+                    return;
+                }
+
+                log(0, `Attempting login with: ${email}`);
+                
+                const session = await account.createEmailPasswordSession(email, password);
+                
+                log(0, '✓ Login successful!');
+                const user = await account.get();
+                log(0, `✓ Logged in as: ${user.email}`);
+                log(0, `✓ User ID: ${user.$id}`, 'success');
+                
+            } catch (error) {
+                log(0, `❌ Login Error: ${error.message}`, 'error');
+                log(0, 'ℹ️ Try creating a new account first!');
+                console.error(error);
+            }
+        };
 
         // Logging functions
         function log(stepNum, message, type = 'info') {

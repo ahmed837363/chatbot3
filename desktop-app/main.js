@@ -1,6 +1,8 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, shell } = require('electron');
 const path = require('path');
 const Store = require('electron-store');
+const http = require('http');
+const { URL } = require('url');
 
 // Initialize persistent storage
 const store = new Store({
@@ -23,6 +25,7 @@ const store = new Store({
 
 let mainWindow;
 let tray = null;
+let oauthServer = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -111,10 +114,75 @@ function createTray() {
   });
 }
 
+// Start OAuth callback server
+function startOAuthServer() {
+  return new Promise((resolve, reject) => {
+    oauthServer = http.createServer((req, res) => {
+      const urlObj = new URL(req.url, 'http://localhost:9000');
+      const code = urlObj.searchParams.get('code');
+      const error = urlObj.searchParams.get('error');
+
+      if (code) {
+        // Success
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(`
+          <html dir="rtl">
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: Arial; text-align: center; padding: 50px; background: #667eea; color: white; }
+              .success { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 10px; }
+              h1 { margin: 0; font-size: 32px; }
+            </style>
+          </head>
+          <body>
+            <div class="success">
+              <h1>✅ تم الاتصال بنجاح!</h1>
+              <p>يمكنك غلق هذه النافذة والعودة للتطبيق</p>
+            </div>
+          </body>
+          </html>
+        `);
+        mainWindow.webContents.send('oauth-callback', { success: true, code });
+        resolve(code);
+      } else if (error) {
+        // Error
+        res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(`
+          <html dir="rtl">
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: Arial; text-align: center; padding: 50px; background: #dc3545; color: white; }
+              .error { background: rgba(0,0,0,0.2); padding: 40px; border-radius: 10px; }
+              h1 { margin: 0; font-size: 32px; }
+            </style>
+          </head>
+          <body>
+            <div class="error">
+              <h1>❌ حدث خطأ</h1>
+              <p>${error}</p>
+              <p>يمكنك غلق هذه النافذة والمحاولة مرة أخرى</p>
+            </div>
+          </body>
+          </html>
+        `);
+        mainWindow.webContents.send('oauth-callback', { success: false, error });
+        reject(error);
+      }
+    });
+
+    oauthServer.listen(9000, 'localhost', () => {
+      console.log('✓ OAuth callback server listening on port 9000');
+    });
+  });
+}
+
 // App ready
 app.whenReady().then(() => {
   createWindow();
   createTray();
+  startOAuthServer().catch(e => console.error('OAuth server error:', e));
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -163,15 +231,22 @@ ipcMain.handle('open-external', (event, url) => {
   shell.openExternal(url);
 });
 
-// Handle OAuth callback
+// Handle OAuth start
 ipcMain.handle('start-oauth', async (event, platform) => {
   const config = store.store;
   
   if (platform === 'salla') {
-    const authUrl = `https://accounts.salla.sa/oauth2/auth?client_id=${config.salla.clientId}&response_type=code&scope=offline_access`;
+    // Using Easy Mode - no redirect needed
+    const authUrl = `https://accounts.salla.sa/oauth2/auth?` +
+      `client_id=${config.salla.clientId}` +
+      `&response_type=code` +
+      `&redirect_uri=http://localhost:9000/callback` +
+      `&scope=offline_access`;
+    
     shell.openExternal(authUrl);
     return { started: true, platform: 'salla' };
   }
   
   return { started: false, error: 'Platform not supported yet' };
 });
+

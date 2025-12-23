@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // OAuth
   startOAuth: (platform) => ipcRenderer.invoke('start-oauth', platform),
+  onOAuthCallback: (callback) => ipcRenderer.on('oauth-callback', (event, data) => callback(data)),
   
   // External links
   openExternal: (url) => ipcRenderer.invoke('open-external', url),

@@ -297,18 +297,26 @@ class ChatbotManager {
             // Show loading state
             this.showNotification('جاري فتح صفحة تسجيل الدخول...', 'info');
 
+            // Listen for OAuth callback
+            window.electronAPI.onOAuthCallback(async (data) => {
+                console.log('OAuth Callback:', data);
+                
+                if (data.success) {
+                    this.showNotification('✅ تم التوصل بنجاح! جاري إضافة متجرك...', 'success');
+                    
+                    // Add test store after successful OAuth
+                    await this.addTestStore();
+                } else {
+                    this.showNotification(`❌ فشل: ${data.error}`, 'error');
+                }
+            });
+
             // Start OAuth via main process
             const result = await window.electronAPI.startOAuth(platform);
             
             if (result.started) {
                 console.log('✓ OAuth started');
                 this.showNotification('تم فتح صفحة سلة. قم بتسجيل الدخول والموافقة على الصلاحيات.', 'success');
-                
-                // For demo: Add a test store after a delay
-                // In production, this would be handled by the webhook
-                setTimeout(() => {
-                    this.addTestStore();
-                }, 5000);
             } else {
                 this.showNotification('حدث خطأ: ' + result.error, 'error');
             }

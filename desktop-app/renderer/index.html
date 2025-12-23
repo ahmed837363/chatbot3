@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src https://fra.cloud.appwrite.io https://*.appwrite.run;">
+    <title>Chatbot Manager - مدير الشات بوت</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">🤖</div>
+                <span class="logo-text">Chatbot Manager</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-page="stores">
+                    <span class="nav-icon">🏪</span>
+                    <span class="nav-text">المتاجر</span>
+                    <span class="nav-badge" id="store-count">0</span>
+                </a>
+                <a href="#" class="nav-item" data-page="connect">
+                    <span class="nav-icon">🔗</span>
+                    <span class="nav-text">ربط متجر</span>
+                </a>
+                <a href="#" class="nav-item" data-page="chatbot">
+                    <span class="nav-icon">💬</span>
+                    <span class="nav-text">إعدادات البوت</span>
+                </a>
+                <a href="#" class="nav-item" data-page="conversations">
+                    <span class="nav-icon">📨</span>
+                    <span class="nav-text">المحادثات</span>
+                </a>
+            </nav>
+
+            <div class="nav-bottom">
+                <a href="#" class="nav-item" data-page="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">الإعدادات</span>
+                </a>
+                <a href="#" class="nav-item" data-page="help">
+                    <span class="nav-icon">❓</span>
+                    <span class="nav-text">المساعدة</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-title">
+                    <h1 id="page-title">Dashboard</h1>
+                    <p id="page-subtitle">مرحباً بك في لوحة التحكم</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="quick-connect">
+                        <span>➕</span> ربط متجر جديد
+                    </button>
+                    <div class="user-menu">
+                        <div class="user-avatar">👤</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                <!-- Dashboard Page -->
+                <div class="page active" id="page-dashboard">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon stores">🏪</div>
+                            <div class="stat-info">
+                                <h3 id="stat-stores">0</h3>
+                                <p>متاجر متصلة</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon conversations">💬</div>
+                            <div class="stat-info">
+                                <h3 id="stat-conversations">0</h3>
+                                <p>محادثات اليوم</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon messages">📨</div>
+                            <div class="stat-info">
+                                <h3 id="stat-messages">0</h3>
+                                <p>رسائل هذا الشهر</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon status">✅</div>
+                            <div class="stat-info">
+                                <h3 id="stat-status">نشط</h3>
+                                <p>حالة النظام</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card recent-stores">
+                            <div class="card-header">
+                                <h2>آخر المتاجر المتصلة</h2>
+                                <a href="#" class="card-action" data-page="stores">عرض الكل</a>
+                            </div>
+                            <div class="card-body">
+                                <div id="recent-stores-list" class="stores-list">
+                                    <div class="empty-state">
+                                        <span class="empty-icon">🏪</span>
+                                        <p>لا توجد متاجر متصلة</p>
+                                        <button class="btn btn-secondary" data-page="connect">ربط متجر الآن</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card quick-actions">
+                            <div class="card-header">
+                                <h2>إجراءات سريعة</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="actions-grid">
+                                    <button class="action-btn" data-page="connect">
+                                        <span class="action-icon">🔗</span>
+                                        <span>ربط متجر</span>
+                                    </button>
+                                    <button class="action-btn" data-page="chatbot">
+                                        <span class="action-icon">🤖</span>
+                                        <span>إعداد البوت</span>
+                                    </button>
+                                    <button class="action-btn" data-page="conversations">
+                                        <span class="action-icon">📨</span>
+                                        <span>المحادثات</span>
+                                    </button>
+                                    <button class="action-btn" data-page="settings">
+                                        <span class="action-icon">⚙️</span>
+                                        <span>الإعدادات</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stores Page -->
+                <div class="page" id="page-stores">
+                    <div class="page-header">
+                        <h2>المتاجر المتصلة</h2>
+                        <button class="btn btn-primary" data-page="connect">
+                            <span>➕</span> ربط متجر جديد
+                        </button>
+                    </div>
+                    <div id="stores-container" class="stores-grid">
+                        <!-- Stores will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Connect Store Page -->
+                <div class="page" id="page-connect">
+                    <div class="page-header">
+                        <h2>ربط متجر جديد</h2>
+                    </div>
+                    <div class="platforms-grid">
+                        <!-- Salla -->
+                        <div class="platform-card available" data-platform="salla">
+                            <div class="platform-logo">
+                                <img src="https://cdn.salla.sa/XrXj/oSiGjvCBOLepPm2dH8BmOnijWVuLF7KIvGPj5kkx.png" alt="Salla" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>'">
+                            </div>
+                            <h3>سلة - Salla</h3>
+                            <p>منصة التجارة الإلكترونية الرائدة في السعودية</p>
+                            <span class="platform-status available">✅ متاح</span>
+                            <button class="btn btn-primary connect-btn" data-platform="salla">
+                                🔗 ربط متجر سلة
+                            </button>
+                        </div>
+
+                        <!-- Shopify - Coming Soon -->
+                        <div class="platform-card coming-soon" data-platform="shopify">
+                            <div class="platform-logo">
+                                <span class="logo-emoji">🛍️</span>
+                            </div>
+                            <h3>Shopify</h3>
+                            <p>منصة التجارة الإلكترونية العالمية</p>
+                            <span class="platform-status coming-soon">⏳ قريباً</span>
+                            <button class="btn btn-disabled" disabled>قريباً</button>
+                        </div>
+
+                        <!-- WooCommerce - Coming Soon -->
+                        <div class="platform-card coming-soon" data-platform="woocommerce">
+                            <div class="platform-logo">
+                                <span class="logo-emoji">🏬</span>
+                            </div>
+                            <h3>WooCommerce</h3>
+                            <p>إضافة التجارة الإلكترونية لـ WordPress</p>
+                            <span class="platform-status coming-soon">⏳ قريباً</span>
+                            <button class="btn btn-disabled" disabled>قريباً</button>
+                        </div>
+
+                        <!-- Zid - Coming Soon -->
+                        <div class="platform-card coming-soon" data-platform="zid">
+                            <div class="platform-logo">
+                                <span class="logo-emoji">🏷️</span>
+                            </div>
+                            <h3>زد - Zid</h3>
+                            <p>منصة تجارة إلكترونية سعودية</p>
+                            <span class="platform-status coming-soon">⏳ قريباً</span>
+                            <button class="btn btn-disabled" disabled>قريباً</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chatbot Settings Page -->
+                <div class="page" id="page-chatbot">
+                    <div class="page-header">
+                        <h2>إعدادات الشات بوت</h2>
+                    </div>
+                    <div class="chatbot-settings">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>🎨 مظهر الويدجت</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>اللون الرئيسي</label>
+                                    <input type="color" id="widget-color" value="#667eea">
+                                </div>
+                                <div class="form-group">
+                                    <label>موضع الويدجت</label>
+                                    <select id="widget-position">
+                                        <option value="bottom-right">أسفل يمين</option>
+                                        <option value="bottom-left">أسفل يسار</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>رسالة الترحيب</label>
+                                    <textarea id="welcome-message">مرحباً! كيف يمكنني مساعدتك اليوم؟</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>🤖 إعدادات الذكاء الاصطناعي</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>نموذج AI</label>
+                                    <select id="ai-model">
+                                        <option value="gpt-4">GPT-4 (موصى به)</option>
+                                        <option value="gpt-3.5">GPT-3.5 Turbo</option>
+                                        <option value="claude">Claude</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>OpenAI API Key</label>
+                                    <input type="password" id="openai-key" placeholder="sk-...">
+                                </div>
+                                <button class="btn btn-primary">💾 حفظ الإعدادات</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conversations Page -->
+                <div class="page" id="page-conversations">
+                    <div class="page-header">
+                        <h2>المحادثات</h2>
+                    </div>
+                    <div class="conversations-container">
+                        <div class="empty-state large">
+                            <span class="empty-icon">📨</span>
+                            <h3>لا توجد محادثات</h3>
+                            <p>ستظهر المحادثات هنا عندما يبدأ العملاء بالتواصل مع الشات بوت</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div class="page" id="page-settings">
+                    <div class="page-header">
+                        <h2>الإعدادات</h2>
+                    </div>
+                    <div class="settings-container">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>🔧 إعدادات التطبيق</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>اللغة</label>
+                                    <select id="app-language">
+                                        <option value="ar">العربية</option>
+                                        <option value="en">English</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>المظهر</label>
+                                    <select id="app-theme">
+                                        <option value="light">فاتح</option>
+                                        <option value="dark">داكن</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>🔗 إعدادات API</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>Appwrite Project ID</label>
+                                    <input type="text" id="appwrite-project" value="694669640010920ea3f6" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Database ID</label>
+                                    <input type="text" id="appwrite-database" value="6946699d001194236820" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Webhook URL</label>
+                                    <input type="text" id="webhook-url" value="https://6948f4cc003d4c022adb.fra.appwrite.run" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>🏪 إعدادات سلة</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>App ID</label>
+                                    <input type="text" id="salla-app-id" value="1628541854" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Client ID</label>
+                                    <input type="text" id="salla-client-id" value="d57bh-4f5-ed26-4a09-Babo-03e9384dfd894" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Page -->
+                <div class="page" id="page-help">
+                    <div class="page-header">
+                        <h2>المساعدة</h2>
+                    </div>
+                    <div class="help-container">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>📖 كيفية الاستخدام</h3>
+                            </div>
+                            <div class="card-body">
+                                <ol class="help-steps">
+                                    <li>
+                                        <strong>ربط متجر سلة:</strong>
+                                        <p>اضغط على "ربط متجر" واختر سلة، ثم قم بتسجيل الدخول لحسابك في سلة</p>
+                                    </li>
+                                    <li>
+                                        <strong>إعداد الشات بوت:</strong>
+                                        <p>اختر ألوان الويدجت ورسالة الترحيب وربط API للذكاء الاصطناعي</p>
+                                    </li>
+                                    <li>
+                                        <strong>تفعيل الويدجت:</strong>
+                                        <p>سيتم تثبيت الويدجت تلقائياً على متجرك بعد الربط</p>
+                                    </li>
+                                    <li>
+                                        <strong>إدارة المحادثات:</strong>
+                                        <p>تابع محادثات العملاء من صفحة المحادثات</p>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>📞 الدعم الفني</h3>
+                            </div>
+                            <div class="card-body">
+                                <p>للمساعدة تواصل معنا عبر:</p>
+                                <div class="support-links">
+                                    <a href="#" class="support-link">📧 support@chatbot.sa</a>
+                                    <a href="#" class="support-link">💬 WhatsApp</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Connection Modal -->
+    <div class="modal" id="connection-modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔗 ربط متجر سلة</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="connection-steps">
+                    <div class="step active" id="step-1">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>تسجيل الدخول</h3>
+                            <p>سيتم فتح صفحة سلة لتسجيل الدخول</p>
+                        </div>
+                    </div>
+                    <div class="step" id="step-2">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>السماح للتطبيق</h3>
+                            <p>وافق على صلاحيات التطبيق</p>
+                        </div>
+                    </div>
+                    <div class="step" id="step-3">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>تثبيت الويدجت</h3>
+                            <p>سيتم تثبيت الشات بوت تلقائياً</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="start-connection">
+                        🚀 بدء الربط
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

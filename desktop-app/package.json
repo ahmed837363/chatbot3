@@ -1,0 +1,45 @@
+{
+  "name": "chatbot-saas-manager",
+  "version": "1.0.0",
+  "description": "Desktop app to manage chatbot integrations for e-commerce stores (Salla, Shopify, WooCommerce)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:all": "electron-builder --win --mac"
+  },
+  "author": "Chatbot SaaS",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "appwrite": "^14.0.0",
+    "electron-store": "^8.1.0"
+  },
+  "build": {
+    "appId": "com.chatbot.saas.manager",
+    "productName": "Chatbot Manager",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns"
+    },
+    "files": [
+      "**/*",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/.bin"
+    ]
+  }
+}

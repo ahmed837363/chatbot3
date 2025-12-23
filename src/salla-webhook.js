@@ -1,7 +1,7 @@
 // Salla Easy Mode Webhook Handler
 // This receives access tokens when merchants install your app
 
-import { Databases } from "https://cdn.jsdelivr.net/npm/appwrite@14.0.0/+esm";
+import { Databases, ID } from "https://cdn.jsdelivr.net/npm/appwrite@14.0.0/+esm";
 
 /**
  * Handle Salla webhook for app.store.authorize event
@@ -31,7 +31,7 @@ export async function handleSallaWebhook(webhookData, databases, userId) {
     const connection = await databases.createDocument(
       "6946699d001194236820", // database ID
       "store_connections", // collection ID
-      "unique()", // auto-generate document ID
+      ID.unique(), // auto-generate document ID
       {
         customerId: userId || "unknown", // Link to user if available
         platform: "salla",

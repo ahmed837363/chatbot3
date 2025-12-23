@@ -234,6 +234,8 @@
         import { Client, Databases, Account, ID } from "https://cdn.jsdelivr.net/npm/appwrite@14.0.0/+esm";
         import { handleSallaWebhook } from "./src/salla-webhook.js";
 
+        console.log("🚀 Integration test loading...");
+
         // Show loading
         document.getElementById('loading').style.display = 'block';
 
@@ -249,6 +251,7 @@
         
         // Hide loading after init
         setTimeout(() => {
+            console.log("✓ Initialization complete");
             document.getElementById('loading').style.display = 'none';
         }, 500);
 

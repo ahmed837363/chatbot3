@@ -4,7 +4,13 @@
 import { Client, Databases } from 'node-appwrite';
 
 export default async ({ req, res, log, error }) => {
-  // Only accept POST requests
+  // Handle GET requests for Salla webhook verification
+  if (req.method === 'GET') {
+    log('✓ Webhook verification GET request');
+    return res.text('Webhook endpoint ready', 200);
+  }
+  
+  // Only accept POST requests for webhooks
   if (req.method !== 'POST') {
     return res.json({ error: 'Method not allowed' }, 405);
   }
@@ -46,15 +52,12 @@ export default async ({ req, res, log, error }) => {
       'store_connections', // collection ID
       'unique()',
       {
-        customerId: 'salla_' + merchant.id,
-        platform: 'salla',
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        expiresAt: new Date(Date.now() + expiresIn * 1000).toISOString(),
-        storeUrl: merchant.domain || `https://salla.sa/shops/${merchant.id}`,
-        storeName: merchant.name || 'Unknown Store',
-        merchantId: String(merchant.id),
-        connectedAt: new Date().toISOString()
+        storeConnectionId: merchant.id,
+        merchantId: merchant.id,
+        createdDate: new Date().toISOString(),
+        connectionStatus: 'active',
+        lastActivityDate: new Date().toISOString(),
+        notes: `Connected from ${merchant.domain || 'Salla'} - ${merchant.name || 'Store'}`
       }
     );
 

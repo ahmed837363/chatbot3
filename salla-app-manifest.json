@@ -1,0 +1,81 @@
+{
+  "name": "Chatbot SaaS",
+  "slug": "chatbot-saas",
+  "version": "1.0.0",
+  "description": "AI-powered chatbot for Salla stores",
+  "icon": "https://raw.githubusercontent.com/ahmed837363/chatbot3/main/assets/icon.svg",
+  "author": {
+    "name": "Chatbot Team",
+    "email": "info@chatbot.sa"
+  },
+  "permissions": [
+    "read:products",
+    "read:orders",
+    "read:customers",
+    "read:store_info",
+    "write:store_settings"
+  ],
+  "webhooks": [
+    {
+      "event": "app:install",
+      "url": "https://6948f4cc003d4c022adb.fra.appwrite.run"
+    },
+    {
+      "event": "app:uninstall",
+      "url": "https://6948f4cc003d4c022adb.fra.appwrite.run"
+    },
+    {
+      "event": "store:authorize",
+      "url": "https://6948f4cc003d4c022adb.fra.appwrite.run"
+    }
+  ],
+  "widget": {
+    "name": "AI Chatbot",
+    "url": "https://raw.githubusercontent.com/ahmed837363/chatbot3/main/chatbot-widget.js",
+    "position": "bottom-left",
+    "settings": {
+      "color": "#667eea",
+      "welcomeMessage": "مرحباً! كيف يمكنني مساعدتك؟",
+      "language": "ar"
+    }
+  },
+  "dashboard": {
+    "url": "https://ahmed837363.github.io/chatbot3/dashboard"
+  },
+  "oauth": {
+    "client_id": "d57bh-4f5-ed26-4a09-Babo-03e9384dfd894",
+    "redirect_uri": "http://localhost:9000/callback",
+    "scopes": ["offline_access"]
+  },
+  "support": {
+    "email": "support@chatbot.sa",
+    "phone": "+966-1-234-5678",
+    "website": "https://chatbot.sa"
+  },
+  "pricing": {
+    "free": true,
+    "plans": [
+      {
+        "name": "Starter",
+        "price": 99,
+        "currency": "SAR",
+        "features": [
+          "Up to 1000 messages/month",
+          "Basic AI responses",
+          "Store analytics"
+        ]
+      },
+      {
+        "name": "Professional",
+        "price": 299,
+        "currency": "SAR",
+        "features": [
+          "Unlimited messages",
+          "Advanced AI with ChatGPT",
+          "Customer analytics",
+          "Custom branding"
+        ]
+      }
+    ]
+  }
+}

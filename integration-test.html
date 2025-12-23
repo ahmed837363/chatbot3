@@ -166,6 +166,10 @@
 <body>
     <div class="container">
         <h1>🧪 Complete Integration Test - اختبار التكامل الكامل</h1>
+        
+        <div id="loading" style="display:none; text-align:center; padding:20px; background:#fff3cd; border-radius:8px; margin-bottom:20px; border:1px solid #ffc107;">
+            <p>⏳ Loading... Initializing app...</p>
+        </div>
 
         <div class="test-grid">
             <!-- Step 0: Login -->
@@ -230,6 +234,9 @@
         import { Client, Databases, Account, ID } from "https://cdn.jsdelivr.net/npm/appwrite@14.0.0/+esm";
         import { handleSallaWebhook } from "./src/salla-webhook.js";
 
+        // Show loading
+        document.getElementById('loading').style.display = 'block';
+
         // Initialize Appwrite
         const client = new Client()
             .setEndpoint("https://fra.cloud.appwrite.io/v1")
@@ -239,6 +246,11 @@
         const account = new Account(client);
 
         let connectionId = null;
+        
+        // Hide loading after init
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+        }, 500);
 
         // Step 0: Signup
         window.signupUser = async function() {

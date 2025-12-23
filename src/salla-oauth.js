@@ -1,5 +1,5 @@
 // Salla OAuth Integration
-import { Databases } from "https://cdn.jsdelivr.net/npm/appwrite@14.0.0/+esm";
+import { Databases, ID } from "https://cdn.jsdelivr.net/npm/appwrite@14.0.0/+esm";
 
 const SALLA_CLIENT_ID = "d57bh-4f5-ed26-4a09-Babo-03e9384dfd894";
 const SALLA_CLIENT_SECRET = "14d1011db4cfafb7589a53cdd9e97158fd4d1b-bcd-b0126276bAb222d8bccc614";
@@ -67,9 +67,9 @@ export async function exchangeCodeForToken(authCode) {
 export async function saveSallaConnection(databases, userId, tokenData) {
   try {
     const doc = await databases.createDocument(
-      "chatbot_db", // database ID
+      "6946699d001194236820", // database ID
       "store_connections", // collection ID
-      "unique()", // auto-generate doc ID
+      ID.unique(), // auto-generate doc ID
       {
         customerId: userId,
         platform: "salla",

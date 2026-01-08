@@ -15,9 +15,10 @@
         appwriteProjectId: '694669640010920ea3f6',
         databaseId: '6946699d001194236820',
         collectionId: 'store_connections',
-        // Cloudflare AI Worker (accessible from anywhere)
-        aiWorkerUrl: 'https://ai-chat-worker.252001168.workers.dev',
-        aiModel: 'llama3-70b-8192', // Groq model
+        // Local ALLaM AI via ngrok tunnel (Saudi dialect AI)
+        aiWorkerUrl: 'https://melanitic-shara-epistemological.ngrok-free.dev/v1/chat/completions',
+        aiModel: 'allam-7b-instruct-preview',
+        useOpenAIFormat: true, // LM Studio uses OpenAI format
         chatbotColor: '#667eea',
         position: 'bottom-left', // or 'bottom-right'
         welcomeMessage: 'هلا والله! كيف أقدر أساعدك اليوم؟ 😊',
@@ -405,15 +406,23 @@ ${offersInfo}
         const systemPrompt = buildSystemPrompt();
 
         try {
-            // Send to Cloudflare Worker
+            // Send to LM Studio (OpenAI format) via ngrok tunnel
             const response = await fetch(config.aiWorkerUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'ngrok-skip-browser-warning': 'true' // Skip ngrok warning page
+                },
                 body: JSON.stringify({
-                    message: message,
-                    storeId: storeId,
-                    systemPrompt: systemPrompt,
-                    conversationHistory: conversationHistory.slice(-10)
+                    model: config.aiModel || 'allam-7b-instruct-preview',
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        ...conversationHistory.slice(-10),
+                        { role: 'user', content: message }
+                    ],
+                    max_tokens: 300,
+                    temperature: 0.3,
+                    stream: false
                 })
             });
 
@@ -422,8 +431,8 @@ ${offersInfo}
             }
 
             const data = await response.json();
-            // Handle both formats: { response: "..." } or { choices: [...] }
-            return data.response || data.choices?.[0]?.message?.content || 'ما قدرت أفهم، جرب مرة ثانية';
+            // LM Studio returns OpenAI format
+            return data.choices?.[0]?.message?.content || 'ما قدرت أفهم، جرب مرة ثانية';
         } catch (error) {
             console.error('AI API Error:', error);
             return getLocalFallback(message);

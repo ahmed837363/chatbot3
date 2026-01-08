@@ -15,10 +15,9 @@
         appwriteProjectId: '694669640010920ea3f6',
         databaseId: '6946699d001194236820',
         collectionId: 'store_connections',
-        // Local ALLaM AI via ngrok tunnel (Saudi dialect AI)
-        aiWorkerUrl: 'https://melanitic-shara-epistemological.ngrok-free.dev/v1/chat/completions',
+        // Local ALLaM AI via Cloudflare Tunnel (permanent URL)
+        aiWorkerUrl: 'https://allam-ai.mayasahstyle.me/v1/chat/completions',
         aiModel: 'allam-7b-instruct-preview',
-        useOpenAIFormat: true, // LM Studio uses OpenAI format
         chatbotColor: '#667eea',
         position: 'bottom-left', // or 'bottom-right'
         welcomeMessage: 'هلا والله! كيف أقدر أساعدك اليوم؟ 😊',

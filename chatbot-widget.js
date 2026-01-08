@@ -15,9 +15,9 @@
         appwriteProjectId: '694669640010920ea3f6',
         databaseId: '6946699d001194236820',
         collectionId: 'store_connections',
-        // Local LM Studio with ALLaM (Saudi AI)
-        aiWorkerUrl: 'http://192.168.1.4:1234/v1/chat/completions',
-        aiModel: 'allam-7b-instruct-preview',
+        // Cloudflare AI Worker (accessible from anywhere)
+        aiWorkerUrl: 'https://ai-chat-worker.252001168.workers.dev',
+        aiModel: 'llama3-70b-8192', // Groq model
         chatbotColor: '#667eea',
         position: 'bottom-left', // or 'bottom-right'
         welcomeMessage: 'هلا والله! كيف أقدر أساعدك اليوم؟ 😊',
@@ -405,28 +405,25 @@ ${offersInfo}
         const systemPrompt = buildSystemPrompt();
 
         try {
+            // Send to Cloudflare Worker
             const response = await fetch(config.aiWorkerUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: config.aiModel || 'allam-7b-instruct-preview',
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        ...conversationHistory.slice(-10),
-                        { role: 'user', content: message }
-                    ],
-                    max_tokens: 300,
-                    temperature: 0.3,
-                    stream: false
+                    message: message,
+                    storeId: storeId,
+                    systemPrompt: systemPrompt,
+                    conversationHistory: conversationHistory.slice(-10)
                 })
             });
 
             if (!response.ok) {
-                throw new Error('API request failed');
+                throw new Error('API request failed: ' + response.status);
             }
 
             const data = await response.json();
-            return data.choices?.[0]?.message?.content || 'ما قدرت أفهم، جرب مرة ثانية';
+            // Handle both formats: { response: "..." } or { choices: [...] }
+            return data.response || data.choices?.[0]?.message?.content || 'ما قدرت أفهم، جرب مرة ثانية';
         } catch (error) {
             console.error('AI API Error:', error);
             return getLocalFallback(message);

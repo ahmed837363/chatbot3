@@ -123,95 +123,85 @@
     function scrapeProductsFromPage() {
         const products = [];
         
-        // Try multiple selectors that Salla stores might use
-        const productSelectors = [
-            '.s-product-card-entry',
-            '[data-product-id]',
-            '.product-card',
-            '.product-item',
-            '.product-block',
-            '.s-product-card',
-            '.product',
-            'article[class*="product"]'
-        ];
-        
-        let productElements = [];
-        for (const selector of productSelectors) {
-            const found = document.querySelectorAll(selector);
-            if (found.length > 0) {
-                productElements = found;
-                console.log('🔍 Found products with selector:', selector, found.length);
-                break;
-            }
+        // Method 1: Try Salla's Twilight SDK (best method!)
+        if (window.salla && window.salla.product) {
+            console.log('🔍 Using Salla Twilight SDK');
+            // Products are already loaded by Salla - check for product cards
         }
         
-        productElements.forEach((el, i) => {
-            if (i >= 50) return; // Limit to 50 products
-            
-            // Try multiple name selectors
-            const nameSelectors = [
-                '.s-product-card-entry__title',
-                '.product-title', 
-                '.product-name', 
-                'h3', 'h4', 'h5', 
-                '.title', 
-                '[class*="title"]', 
-                '[class*="name"]',
-                'a[title]',
-                'a'
-            ];
-            let name = null;
-            for (const sel of nameSelectors) {
-                const nameEl = el.querySelector(sel);
-                if (nameEl) {
-                    name = nameEl.getAttribute('title') || nameEl.textContent?.trim();
-                    if (name && name.length > 2 && name.length < 100) break;
-                }
-            }
-            
-            // Try multiple price selectors
-            const priceSelectors = [
-                '.s-product-card-entry__price',
-                '.product-price', 
-                '.price', 
-                '[data-price]', 
-                '.amount', 
-                '[class*="price"]', 
-                '.s-price',
-                'span[class*="price"]',
-                '.money'
-            ];
-            let price = null;
-            let salePrice = null;
-            for (const sel of priceSelectors) {
-                const priceEl = el.querySelector(sel);
+        // Method 2: Look for Salla's product data in the DOM
+        const sallaProducts = document.querySelectorAll('.s-product-card-entry, .product-entry, [class*="product-card"]');
+        console.log('🔍 Found', sallaProducts.length, 'Salla product elements');
+        
+        if (sallaProducts.length > 0) {
+            sallaProducts.forEach((el, i) => {
+                if (i >= 50) return;
+                
+                // Get product name from various possible locations
+                let name = el.querySelector('.s-product-card-entry__title a')?.textContent?.trim() ||
+                           el.querySelector('[class*="title"] a')?.textContent?.trim() ||
+                           el.querySelector('h3 a, h4 a, h5 a')?.textContent?.trim() ||
+                           el.querySelector('a[title]')?.getAttribute('title') ||
+                           el.querySelector('.product-title, .title, h3, h4')?.textContent?.trim();
+                
+                // Get price - look for the price element
+                let price = 0;
+                let salePrice = null;
+                const priceEl = el.querySelector('.s-product-card-entry__price, [class*="price"], .price');
                 if (priceEl) {
-                    const priceText = priceEl.textContent || priceEl.getAttribute('data-price') || '';
-                    const priceMatches = priceText.match(/[\d,]+\.?\d*/g);
-                    if (priceMatches && priceMatches.length > 0) {
-                        // First price is usually sale price, second is original
-                        price = parseFloat(priceMatches[0].replace(',', ''));
-                        if (priceMatches.length > 1) {
-                            salePrice = price;
-                            price = parseFloat(priceMatches[1].replace(',', ''));
+                    const priceText = priceEl.textContent || '';
+                    const numbers = priceText.match(/[\d,]+\.?\d*/g);
+                    if (numbers && numbers.length > 0) {
+                        // Usually first number is current price
+                        price = parseFloat(numbers[0].replace(/,/g, ''));
+                        if (numbers.length > 1) {
+                            // Second might be original price (if on sale)
+                            const origPrice = parseFloat(numbers[1].replace(/,/g, ''));
+                            if (origPrice > price) {
+                                salePrice = price;
+                                price = origPrice;
+                            }
                         }
-                        break;
                     }
                 }
-            }
-            
-            if (name && name.length > 2) {
-                products.push({ 
-                    name: name.substring(0, 80), 
-                    price: price || 0,
-                    salePrice: salePrice,
-                    currency: 'SAR',
-                    inStock: true 
-                });
-            }
-        });
+                
+                if (name && name.length > 1) {
+                    products.push({
+                        name: name.substring(0, 100),
+                        price: price,
+                        salePrice: salePrice,
+                        currency: 'ر.س',
+                        inStock: true
+                    });
+                    console.log('✅ Product:', name, price);
+                }
+            });
+        }
         
-        console.log('📦 Scraped', products.length, 'products from page');
+        // Method 3: Try to find any product-like elements
+        if (products.length === 0) {
+            console.log('🔍 Trying alternative selectors...');
+            const allLinks = document.querySelectorAll('a[href*="/p/"], a[href*="/product/"]');
+            allLinks.forEach((link, i) => {
+                if (i >= 30) return;
+                const name = link.textContent?.trim() || link.getAttribute('title');
+                if (name && name.length > 3 && name.length < 100) {
+                    // Try to find price near this link
+                    const parent = link.closest('div, article, li');
+                    let price = 0;
+                    if (parent) {
+                        const priceText = parent.textContent || '';
+                        const priceMatch = priceText.match(/(\d+[\d,]*)\s*(ر\.س|ريال|SAR)/);
+                        if (priceMatch) {
+                            price = parseFloat(priceMatch[1].replace(/,/g, ''));
+                        }
+                    }
+                    products.push({ name, price, currency: 'ر.س', inStock: true });
+                }
+            });
+        }
+        
+        console.log('📦 Total scraped:', products.length, 'products');
         return products;
     }
 

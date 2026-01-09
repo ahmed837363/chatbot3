@@ -119,10 +119,116 @@
         loaded: false
     };
 
+    // Scrape products directly from the current page
+    function scrapeProductsFromPage() {
+        const products = [];
+        
+        // Try multiple selectors that Salla stores might use
+        const productSelectors = [
+            '.s-product-card-entry',
+            '[data-product-id]',
+            '.product-card',
+            '.product-item',
+            '.product-block',
+            '.s-product-card',
+            '.product',
+            'article[class*="product"]'
+        ];
+        
+        let productElements = [];
+        for (const selector of productSelectors) {
+            const found = document.querySelectorAll(selector);
+            if (found.length > 0) {
+                productElements = found;
+                console.log('🔍 Found products with selector:', selector, found.length);
+                break;
+            }
+        }
+        
+        productElements.forEach((el, i) => {
+            if (i >= 50) return; // Limit to 50 products
+            
+            // Try multiple name selectors
+            const nameSelectors = [
+                '.s-product-card-entry__title',
+                '.product-title', 
+                '.product-name', 
+                'h3', 'h4', 'h5', 
+                '.title', 
+                '[class*="title"]', 
+                '[class*="name"]',
+                'a[title]',
+                'a'
+            ];
+            let name = null;
+            for (const sel of nameSelectors) {
+                const nameEl = el.querySelector(sel);
+                if (nameEl) {
+                    name = nameEl.getAttribute('title') || nameEl.textContent?.trim();
+                    if (name && name.length > 2 && name.length < 100) break;
+                }
+            }
+            
+            // Try multiple price selectors
+            const priceSelectors = [
+                '.s-product-card-entry__price',
+                '.product-price', 
+                '.price', 
+                '[data-price]', 
+                '.amount', 
+                '[class*="price"]', 
+                '.s-price',
+                'span[class*="price"]',
+                '.money'
+            ];
+            let price = null;
+            let salePrice = null;
+            for (const sel of priceSelectors) {
+                const priceEl = el.querySelector(sel);
+                if (priceEl) {
+                    const priceText = priceEl.textContent || priceEl.getAttribute('data-price') || '';
+                    const priceMatches = priceText.match(/[\d,]+\.?\d*/g);
+                    if (priceMatches && priceMatches.length > 0) {
+                        // First price is usually sale price, second is original
+                        price = parseFloat(priceMatches[0].replace(',', ''));
+                        if (priceMatches.length > 1) {
+                            salePrice = price;
+                            price = parseFloat(priceMatches[1].replace(',', ''));
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            if (name && name.length > 2) {
+                products.push({ 
+                    name: name.substring(0, 80), 
+                    price: price || 0,
+                    salePrice: salePrice,
+                    currency: 'SAR',
+                    inStock: true 
+                });
+            }
+        });
+        
+        console.log('📦 Scraped', products.length, 'products from page');
+        return products;
+    }
+
     // Fetch store data from Salla API (when access token is available)
     async function loadStoreData() {
         try {
-            // Get store data from Appwrite (cached by webhook - no CORS issues!)
+            // First, try to scrape products from the current page
+            const pageProducts = scrapeProductsFromPage();
+            if (pageProducts.length > 0) {
+                storeData.products = pageProducts;
+                storeData.storeName = document.title?.split('|')[0]?.trim() || document.title?.split('-')[0]?.trim() || 'المتجر';
+                storeData.loaded = true;
+                console.log('✅ Loaded', pageProducts.length, 'products from page');
+                return;
+            }
+            
+            // Fallback: Get store data from Appwrite (cached by webhook)
             const storeDoc = await fetchStoreFromAppwrite(storeId);
             
             if (storeDoc) {
@@ -217,17 +323,68 @@
         try {
             // This is a fallback - we'll try to detect products from the page itself
             const products = [];
-            const productElements = document.querySelectorAll('[data-product-id], .product-card, .product-item');
+            
+            // Try multiple selectors that Salla stores might use
+            const productSelectors = [
+                '[data-product-id]',
+                '.product-card',
+                '.product-item',
+                '.product-block',
+                '.s-product-card',
+                '.product',
+                '[class*="product"]',
+                'article[class*="product"]'
+            ];
+            
+            let productElements = [];
+            for (const selector of productSelectors) {
+                const found = document.querySelectorAll(selector);
+                if (found.length > 0) {
+                    productElements = found;
+                    console.log('📦 Found products with selector:', selector, found.length);
+                    break;
+                }
+            }
             
             productElements.forEach((el, i) => {
                 if (i >= 30) return; // Limit to 30 products
-                const name = el.querySelector('.product-title, .product-name, h3, h4')?.textContent?.trim();
-                const priceEl = el.querySelector('.product-price, .price, [data-price]');
-                const price = priceEl?.textContent?.replace(/[^\d.]/g, '') || priceEl?.getAttribute('data-price');
                 
-                if (name && price) {
-                    products.push({ name, price: parseFloat(price), currency: 'SAR' });
+                // Try multiple name selectors
+                const nameSelectors = ['.product-title', '.product-name', 'h3', 'h4', 'h5', '.title', '[class*="title"]', '[class*="name"]', 'a'];
+                let name = null;
+                for (const sel of nameSelectors) {
+                    const nameEl = el.querySelector(sel);
+                    if (nameEl?.textContent?.trim()) {
+                        name = nameEl.textContent.trim();
+                        break;
+                    }
                 }
+                
+                // Try multiple price selectors
+                const priceSelectors = ['.product-price', '.price', '[data-price]', '.amount', '[class*="price"]', '.s-price', 'span[class*="price"]'];
+                let price = null;
+                for (const sel of priceSelectors) {
+                    const priceEl = el.querySelector(sel);
+                    if (priceEl) {
+                        const priceText = priceEl.textContent || priceEl.getAttribute('data-price') || '';
+                        const priceMatch = priceText.match(/[\d,]+\.?\d*/);
+                        if (priceMatch) {
+                            price = parseFloat(priceMatch[0].replace(',', ''));
+                            break;
+                        }
+                    }
+                }
+                
+                if (name && name.length > 2) {
+                    products.push({ 
+                        name, 
+                        price: price || 0, 
+                        currency: 'SAR',
+                        inStock: true 
+                    });
+                    console.log('📦 Found product:', name, price);
+                }
+            });
             });
 
             if (products.length > 0) {

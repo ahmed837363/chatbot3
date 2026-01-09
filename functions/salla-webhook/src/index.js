@@ -1,225 +1,268 @@
 // Appwrite Function: Salla Webhook Handler (Easy Mode)
-// Handles app.store.authorize webhook event to get tokens automatically
+// Version: 2.0 - Clean, tested, working
+// Handles app.store.authorize webhook to get tokens and cache store data
 
 import { Client, Databases, ID, Query } from 'node-appwrite';
 
-// Salla App Configuration - NEW APP
-const SALLA_CLIENT_ID = 'b6b5fbb1-a9e5-4fe3-9257-281d1006f509';
-const SALLA_CLIENT_SECRET = 'd54bf327ea17bcf3419eb5234b19506dfb6180e1746265e11b4beb8fae991ab9';
+// Configuration
+const DATABASE_ID = '6946699d001194236820';
+const COLLECTION_ID = 'store_connections';
 
 export default async ({ req, res, log, error }) => {
+  log('📨 Request received: ' + req.method);
   
-  // ============================================
-  // HANDLE GET REQUESTS (Status Check)
-  // ============================================
+  // CORS headers for all responses
+  const headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  };
+
+  // Handle OPTIONS (CORS preflight)
+  if (req.method === 'OPTIONS') {
+    return res.send('', 200, headers);
+  }
+
+  // Handle GET (status check)
   if (req.method === 'GET') {
-    log('✓ Webhook endpoint ready');
+    log('✅ Status check - endpoint ready');
     return res.send(`
+      <!DOCTYPE html>
       <html>
-      <head><meta charset="utf-8"><title>AI Smart Assistant - Webhook</title></head>
-      <body style="font-family:Arial;text-align:center;padding:50px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;">
-        <h1>✅ AI Smart Assistant - علام</h1>
-        <p>Webhook endpoint is ready to receive Salla events.</p>
-        <p style="opacity:0.7;">Easy Mode enabled - tokens received via webhook</p>
+      <head><meta charset="utf-8"><title>AI Smart Assistant</title></head>
+      <body style="font-family:Arial;text-align:center;padding:50px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;min-height:100vh;margin:0;">
+        <h1>🤖 AI Smart Assistant - علام</h1>
+        <p style="font-size:1.2em;">✅ Webhook endpoint is ready!</p>
+        <p style="opacity:0.7;">Waiting for Salla events...</p>
       </body>
       </html>
     `, 200, { 'Content-Type': 'text/html; charset=utf-8' });
   }
-  
-  // ============================================
-  // HANDLE POST REQUESTS (Webhooks)
-  // ============================================
+
+  // Handle POST (webhooks)
   if (req.method === 'POST') {
     let payload;
+    
+    // Parse body
     try {
-      payload = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+      if (typeof req.body === 'string') {
+        payload = JSON.parse(req.body);
+      } else if (req.body) {
+        payload = req.body;
+      } else {
+        log('⚠️ Empty body received');
+        return res.json({ success: false, error: 'Empty body' }, 400, headers);
+      }
     } catch (e) {
-      log('❌ Invalid JSON payload');
-      return res.json({ success: false, error: 'Invalid JSON' }, 400);
+      log('❌ JSON parse error: ' + e.message);
+      return res.json({ success: false, error: 'Invalid JSON' }, 400, headers);
     }
+
+    const eventType = payload.event || 'unknown';
+    log('📩 Event type: ' + eventType);
+    log('📦 Payload: ' + JSON.stringify(payload).substring(0, 500));
+
+    // Get merchant ID from various possible locations
+    const merchantId = (
+      payload.merchant?.id || 
+      payload.data?.merchant?.id || 
+      payload.data?.store?.id ||
+      'unknown'
+    ).toString();
     
-    const eventType = payload.event;
-    const merchant = payload.merchant || payload.data?.merchant;
-    const merchantId = merchant?.id?.toString();
-    
-    log(`📨 Received webhook: ${eventType}`);
-    log(`🏪 Merchant ID: ${merchantId}`);
-    
+    log('🏪 Merchant ID: ' + merchantId);
+
     // Initialize Appwrite
-    const client = new Client()
-      .setEndpoint('https://fra.cloud.appwrite.io/v1')
-      .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-      .setKey(process.env.APPWRITE_API_KEY);
-    
-    const databases = new Databases(client);
-    const DATABASE_ID = '6946699d001194236820';
-    const COLLECTION_ID = 'store_connections';
-    
-    // ============================================
-    // HANDLE app.store.authorize (Easy Mode Token)
-    // ============================================
-    if (eventType === 'app.store.authorize') {
-      log('🔐 App authorization event received (Easy Mode)');
+    let databases;
+    try {
+      const client = new Client()
+        .setEndpoint('https://fra.cloud.appwrite.io/v1')
+        .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
+        .setKey(process.env.APPWRITE_API_KEY);
       
-      const accessToken = payload.data?.access_token;
-      const refreshToken = payload.data?.refresh_token;
-      const expiresIn = payload.data?.expires_in;
+      databases = new Databases(client);
+      log('✅ Appwrite client initialized');
+    } catch (e) {
+      error('❌ Appwrite init failed: ' + e.message);
+      return res.json({ success: false, error: 'Database connection failed' }, 500, headers);
+    }
+
+    // =============================================
+    // EVENT: app.store.authorize (MAIN EVENT)
+    // =============================================
+    if (eventType === 'app.store.authorize') {
+      log('🔐 Processing app.store.authorize event');
+      
+      // Get access token from payload
+      const accessToken = payload.data?.access_token || payload.access_token;
+      const refreshToken = payload.data?.refresh_token || payload.refresh_token || '';
+      const expiresIn = payload.data?.expires_in || 14400;
       
       if (!accessToken) {
-        log('❌ No access token in payload');
-        return res.json({ success: false, error: 'No access token' }, 400);
+        error('❌ No access token in payload');
+        log('📦 Full payload: ' + JSON.stringify(payload));
+        return res.json({ success: false, error: 'No access token received' }, 400, headers);
       }
       
-      log('✅ Access token received: ' + accessToken.substring(0, 20) + '...');
-      
+      log('✅ Access token received: ' + accessToken.substring(0, 15) + '...');
+
+      // Fetch store info from Salla API
+      let storeName = 'متجر';
+      let products = [];
+      let shipping = [];
+      let coupons = [];
+      let offers = [];
+
       try {
-        // Get store info
-        const storeResponse = await fetch('https://api.salla.dev/admin/v2/store/info', {
+        log('📡 Fetching store info from Salla API...');
+        const storeRes = await fetch('https://api.salla.dev/admin/v2/store/info', {
           headers: { 'Authorization': `Bearer ${accessToken}` }
         });
-        const storeData = await storeResponse.json();
-        const storeName = storeData.data?.name || 'متجر';
-        
-        log('📦 Store name: ' + storeName);
-        
-        // Fetch products
-        let products = [];
-        try {
-          const productsRes = await fetch('https://api.salla.dev/admin/v2/products?per_page=50', {
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-          });
-          const productsData = await productsRes.json();
-          products = (productsData.data || []).map(p => ({
-            id: p.id,
-            name: p.name,
-            price: p.price?.amount || 0,
-            salePrice: p.sale_price?.amount || null,
-            currency: p.price?.currency || 'SAR',
-            inStock: p.quantity === null || p.quantity > 0,
-            image: p.main_image
-          }));
-          log(`✅ Fetched ${products.length} products`);
-        } catch (e) {
-          log('⚠️ Could not fetch products: ' + e.message);
+        const storeData = await storeRes.json();
+        storeName = storeData.data?.name || 'متجر';
+        log('✅ Store name: ' + storeName);
+      } catch (e) {
+        log('⚠️ Could not fetch store info: ' + e.message);
+      }
+
+      // Fetch products
+      try {
+        log('📡 Fetching products...');
+        const productsRes = await fetch('https://api.salla.dev/admin/v2/products?per_page=50', {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        const productsData = await productsRes.json();
+        products = (productsData.data || []).map(p => ({
+          id: p.id,
+          name: p.name,
+          price: p.price?.amount || 0,
+          salePrice: p.sale_price?.amount || null,
+          currency: p.price?.currency || 'SAR',
+          inStock: p.quantity === null || p.quantity > 0
+        }));
+        log('✅ Fetched ' + products.length + ' products');
+      } catch (e) {
+        log('⚠️ Could not fetch products: ' + e.message);
+      }
+
+      // Fetch shipping zones
+      try {
+        log('📡 Fetching shipping zones...');
+        const shippingRes = await fetch('https://api.salla.dev/admin/v2/shipping/zones', {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        const shippingData = await shippingRes.json();
+        shipping = (shippingData.data || []).map(z => ({
+          id: z.id,
+          name: z.name,
+          countries: z.countries || []
+        }));
+        log('✅ Fetched ' + shipping.length + ' shipping zones');
+      } catch (e) {
+        log('⚠️ Could not fetch shipping: ' + e.message);
+      }
+
+      // Fetch coupons
+      try {
+        log('📡 Fetching coupons...');
+        const couponsRes = await fetch('https://api.salla.dev/admin/v2/coupons?status=active', {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        const couponsData = await couponsRes.json();
+        coupons = (couponsData.data || []).map(c => ({
+          id: c.id,
+          code: c.code,
+          type: c.type,
+          discount: c.amount || c.percentage
+        }));
+        log('✅ Fetched ' + coupons.length + ' coupons');
+      } catch (e) {
+        log('⚠️ Could not fetch coupons: ' + e.message);
+      }
+
+      // Fetch special offers
+      try {
+        log('📡 Fetching special offers...');
+        const offersRes = await fetch('https://api.salla.dev/admin/v2/special-offers?status=active', {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        const offersData = await offersRes.json();
+        offers = (offersData.data || []).map(o => ({
+          id: o.id,
+          name: o.name,
+          discount: o.amount || o.percentage
+        }));
+        log('✅ Fetched ' + offers.length + ' offers');
+      } catch (e) {
+        log('⚠️ Could not fetch offers: ' + e.message);
+      }
+
+      // Check if store already exists
+      let existingDoc = null;
+      try {
+        const existing = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+          Query.equal('merchantId', merchantId)
+        ]);
+        if (existing.documents.length > 0) {
+          existingDoc = existing.documents[0];
+          log('📋 Found existing store document: ' + existingDoc.$id);
         }
-        
-        // Fetch shipping
-        let shipping = [];
-        try {
-          const shippingRes = await fetch('https://api.salla.dev/admin/v2/shipping/zones', {
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-          });
-          const shippingData = await shippingRes.json();
-          shipping = (shippingData.data || []).map(z => ({
-            id: z.id,
-            name: z.name,
-            countries: z.countries || [],
-            methods: (z.shipping_methods || []).map(m => ({
-              name: m.name,
-              cost: m.cost?.amount || 0
-            }))
-          }));
-          log(`✅ Fetched ${shipping.length} shipping zones`);
-        } catch (e) {
-          log('⚠️ Could not fetch shipping: ' + e.message);
-        }
-        
-        // Fetch coupons
-        let coupons = [];
-        try {
-          const couponsRes = await fetch('https://api.salla.dev/admin/v2/coupons?status=active', {
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-          });
-          const couponsData = await couponsRes.json();
-          coupons = (couponsData.data || []).map(c => ({
-            id: c.id,
-            code: c.code,
-            type: c.type,
-            discount: c.amount || c.percentage
-          }));
-          log(`✅ Fetched ${coupons.length} active coupons`);
-        } catch (e) {
-          log('⚠️ Could not fetch coupons: ' + e.message);
-        }
-        
-        // Fetch special offers
-        let offers = [];
-        try {
-          const offersRes = await fetch('https://api.salla.dev/admin/v2/special-offers?status=active', {
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-          });
-          const offersData = await offersRes.json();
-          offers = (offersData.data || []).map(o => ({
-            id: o.id,
-            name: o.name,
-            type: o.offer_type,
-            discount: o.amount || o.percentage
-          }));
-          log(`✅ Fetched ${offers.length} special offers`);
-        } catch (e) {
-          log('⚠️ Could not fetch offers: ' + e.message);
-        }
-        
-        // Check if store exists
-        let existingDoc = null;
-        try {
-          const existing = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
-            Query.equal('merchantId', merchantId)
-          ]);
-          if (existing.documents.length > 0) {
-            existingDoc = existing.documents[0];
-          }
-        } catch (e) {
-          log('ℹ️ No existing store found');
-        }
-        
-        const storeDocument = {
-          merchantId: merchantId,
-          storeName: storeName,
-          accessToken: accessToken,
-          refreshToken: refreshToken || '',
-          tokenExpiresAt: new Date(Date.now() + (expiresIn || 14400) * 1000).toISOString(),
-          cachedProducts: JSON.stringify(products),
-          cachedShipping: JSON.stringify(shipping),
-          cachedCoupons: JSON.stringify(coupons),
-          cachedOffers: JSON.stringify(offers),
-          cacheLastUpdated: new Date().toISOString(),
-          installedAt: existingDoc?.installedAt || new Date().toISOString(),
-          isActive: true
-        };
-        
+      } catch (e) {
+        log('ℹ️ No existing store found or query error: ' + e.message);
+      }
+
+      // Prepare document data
+      const storeDocument = {
+        merchantId: merchantId,
+        storeName: storeName,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        tokenExpiresAt: new Date(Date.now() + expiresIn * 1000).toISOString(),
+        cachedProducts: JSON.stringify(products),
+        cachedShipping: JSON.stringify(shipping),
+        cachedCoupons: JSON.stringify(coupons),
+        cachedOffers: JSON.stringify(offers),
+        cacheLastUpdated: new Date().toISOString(),
+        isActive: true
+      };
+
+      // Save to database
+      try {
         if (existingDoc) {
           await databases.updateDocument(DATABASE_ID, COLLECTION_ID, existingDoc.$id, storeDocument);
           log('✅ Updated existing store: ' + merchantId);
         } else {
-          await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), storeDocument);
-          log('✅ Created new store: ' + merchantId);
+          storeDocument.installedAt = new Date().toISOString();
+          const newDoc = await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), storeDocument);
+          log('✅ Created new store: ' + merchantId + ' (doc: ' + newDoc.$id + ')');
         }
-        
-        return res.json({ 
-          success: true, 
-          message: 'Store connected successfully',
-          storeName: storeName,
-          productsCount: products.length
-        });
-        
       } catch (e) {
-        error('❌ Error processing authorization: ' + e.message);
-        return res.json({ success: false, error: e.message }, 500);
+        error('❌ Database save failed: ' + e.message);
+        return res.json({ success: false, error: 'Database save failed: ' + e.message }, 500, headers);
       }
+
+      log('🎉 Store connected successfully!');
+      return res.json({
+        success: true,
+        message: 'Store connected successfully!',
+        storeName: storeName,
+        productsCount: products.length,
+        couponsCount: coupons.length
+      }, 200, headers);
     }
-    
-    // ============================================
-    // HANDLE app.installed
-    // ============================================
+
+    // =============================================
+    // EVENT: app.installed
+    // =============================================
     if (eventType === 'app.installed') {
       log('📱 App installed on store: ' + merchantId);
-      return res.json({ success: true, message: 'App installed - waiting for authorization' });
+      return res.json({ success: true, message: 'App installed - waiting for authorization' }, 200, headers);
     }
-    
-    // ============================================
-    // HANDLE app.uninstalled
-    // ============================================
+
+    // =============================================
+    // EVENT: app.uninstalled
+    // =============================================
     if (eventType === 'app.uninstalled') {
       log('🗑️ App uninstalled from store: ' + merchantId);
       
@@ -227,7 +270,6 @@ export default async ({ req, res, log, error }) => {
         const existing = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
           Query.equal('merchantId', merchantId)
         ]);
-        
         if (existing.documents.length > 0) {
           await databases.updateDocument(DATABASE_ID, COLLECTION_ID, existing.documents[0].$id, {
             isActive: false
@@ -235,27 +277,19 @@ export default async ({ req, res, log, error }) => {
           log('✅ Marked store as inactive');
         }
       } catch (e) {
-        log('⚠️ Could not update store status: ' + e.message);
+        log('⚠️ Could not update store: ' + e.message);
       }
       
-      return res.json({ success: true, message: 'Store marked as inactive' });
+      return res.json({ success: true, message: 'Store marked as inactive' }, 200, headers);
     }
-    
-    // ============================================
-    // HANDLE product.created / product.updated
-    // ============================================
-    if (eventType === 'product.created' || eventType === 'product.updated') {
-      log('📦 Product event - will refresh on next daily sync');
-      return res.json({ success: true, message: 'Product event received' });
-    }
-    
-    // ============================================
-    // HANDLE other events
-    // ============================================
-    log('ℹ️ Unhandled event type: ' + eventType);
-    return res.json({ success: true, message: 'Event received', event: eventType });
+
+    // =============================================
+    // OTHER EVENTS
+    // =============================================
+    log('ℹ️ Unhandled event: ' + eventType);
+    return res.json({ success: true, message: 'Event received', event: eventType }, 200, headers);
   }
-  
+
   // Unknown method
-  return res.json({ error: 'Method not allowed' }, 405);
+  return res.json({ error: 'Method not allowed' }, 405, headers);
 };

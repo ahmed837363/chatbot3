@@ -1,8 +1,9 @@
 {
   "name": "salla-webhook",
   "version": "1.0.0",
-  "description": "Salla webhook handler for automatic chatbot installation",
-  "main": "index.js",
+  "description": "Salla webhook handler for AI Smart Assistant",
+  "main": "src/index.js",
+  "type": "module",
   "dependencies": {
     "node-appwrite": "^11.0.0"
   }

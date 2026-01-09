@@ -46,9 +46,44 @@
     const scriptTag = document.currentScript;
     const detectedLang = scriptTag?.getAttribute('data-lang') || 
                          (navigator.language?.startsWith('ar') ? 'ar' : 'en');
-    const lang = ['ar', 'en'].includes(detectedLang) ? detectedLang : 'ar';
-    const t = texts[lang]; // Current language texts
-    const isRTL = lang === 'ar';
+    let currentLang = ['ar', 'en'].includes(detectedLang) ? detectedLang : 'ar';
+    let t = texts[currentLang]; // Current language texts
+    let isRTL = currentLang === 'ar';
+
+    // Function to switch language
+    function switchLanguage() {
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+        t = texts[currentLang];
+        isRTL = currentLang === 'ar';
+        updateWidgetLanguage();
+        console.log('🌐 Language switched to:', currentLang);
+    }
+
+    // Update widget UI for new language
+    function updateWidgetLanguage() {
+        const header = document.querySelector('#chat-header h3');
+        const status = document.querySelector('#chat-header p');
+        const input = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const messagesDiv = document.getElementById('chat-messages');
+        const inputContainer = document.getElementById('chat-input-container');
+        const langBtn = document.getElementById('lang-switch-btn');
+        
+        if (header) header.textContent = t.assistant;
+        if (status) status.textContent = t.connected;
+        if (input) {
+            input.placeholder = t.placeholder;
+            input.style.direction = isRTL ? 'rtl' : 'ltr';
+        }
+        if (sendBtn) {
+            sendBtn.textContent = t.send;
+            sendBtn.style.marginRight = isRTL ? '10px' : '0';
+            sendBtn.style.marginLeft = isRTL ? '0' : '10px';
+        }
+        if (messagesDiv) messagesDiv.style.direction = isRTL ? 'rtl' : 'ltr';
+        if (inputContainer) inputContainer.style.direction = isRTL ? 'rtl' : 'ltr';
+        if (langBtn) langBtn.textContent = currentLang === 'ar' ? 'EN' : 'عربي';
+    }
 
     // Configuration
     const config = {
@@ -67,6 +102,7 @@
     // Get store ID and custom config from script tag
     const storeId = scriptTag?.getAttribute('data-store-id') || 'demo';
     const customWorkerUrl = scriptTag?.getAttribute('data-ai-url');
+    const supportContact = scriptTag?.getAttribute('data-support') || '';
     if (customWorkerUrl) config.aiWorkerUrl = customWorkerUrl;
 
     // Conversation history for context
@@ -79,6 +115,7 @@
         shipping: [],
         coupons: [],
         offers: [],
+        supportContact: supportContact, // Support phone/email from website
         loaded: false
     };
 
@@ -150,13 +187,13 @@
                 return `${i+1}. ${p.name} - ${priceText} ${stockStatus}`;
             }).join('\n');
         } else {
-            productList = `(منتجات تجريبية)
-1. ساعة سامسونج Galaxy Watch 6 - 1,299 ريال
-2. سماعات آبل AirPods Pro 2 - 899 ريال
-3. عطر مسك الطهارة (100مل) - 149 ريال
-4. طقم قهوة عربية نحاس - 350 ريال
-5. شماغ شتوي فاخر - 189 ريال
-6. تمر سكري القصيم (3 كيلو) - 120 ريال`;
+            productList = `(منتجات تجريبية - لم يتم تحميل بيانات المتجر)
+1. فستان سهرة أسود أنيق - 450 ريال
+2. عباية مطرزة فاخرة - 850 ريال
+3. بلوزة قطن كاجوال - 120 ريال
+4. جاكيت جينز نسائي - 280 ريال
+5. تنورة ميدي بليسيه - 180 ريال
+6. طقم بيجاما حرير - 320 ريال`;
         }
 
         // Shipping section
@@ -212,13 +249,13 @@
                     return `${i+1}. ${p.name} - ${priceText} ${stockStatus}`;
                 }).join('\n');
             } else {
-                productListEn = `(Demo products)
-1. Samsung Galaxy Watch 6 - 1,299 SAR
-2. Apple AirPods Pro 2 - 899 SAR
-3. Musk Al Tahara Perfume (100ml) - 149 SAR
-4. Arabic Coffee Set (Brass) - 350 SAR
-5. Premium Winter Shemagh - 189 SAR
-6. Sukkari Dates 3kg - 120 SAR`;
+                productListEn = `(Demo products - store data not loaded)
+1. Elegant Black Evening Dress - 450 SAR
+2. Luxury Embroidered Abaya - 850 SAR
+3. Casual Cotton Blouse - 120 SAR
+4. Women's Denim Jacket - 280 SAR
+5. Pleated Midi Skirt - 180 SAR
+6. Silk Pajama Set - 320 SAR`;
             }
 
             let shippingInfoEn = '';
@@ -282,6 +319,11 @@ ${offersInfoEn}
 🔄 Returns: Within 14 days of receiving the order
 
 ═══════════════════════════════════
+📞 Customer Support:
+═══════════════════════════════════
+${storeData.supportContact || 'Contact info available on the website'}
+
+═══════════════════════════════════
 Response Rules:
 ═══════════════════════════════════
 - Be friendly and helpful
@@ -289,6 +331,7 @@ Response Rules:
 - If asked about a listed product, provide the price
 - If there's an applicable coupon, suggest it
 - If asked about an unlisted product, say "Sorry, we don't have that product"
+- If asked for support contact, provide the contact info above
 - Never invent products, prices, or coupons not in the lists above`;
         }
 
@@ -320,6 +363,11 @@ ${offersInfo}
 🔄 الاسترجاع: خلال 14 يوم من الاستلام
 
 ═══════════════════════════════════
+📞 التواصل والدعم:
+═══════════════════════════════════
+${storeData.supportContact || 'معلومات التواصل موجودة في الموقع'}
+
+═══════════════════════════════════
 قواعد الرد:
 ═══════════════════════════════════
 - استخدم اللهجة السعودية (وش، الحين، تمام، يعطيك العافية)
@@ -327,6 +375,7 @@ ${offersInfo}
 - إذا سأل عن منتج موجود، أعطه السعر
 - إذا فيه كوبون مناسب، اقترحه على العميل
 - إذا سأل عن منتج مو موجود، قول "للأسف ما عندنا هذا المنتج"
+- إذا سأل عن رقم الدعم أو التواصل، أعطه المعلومات أعلاه
 - لا تخترع منتجات أو أسعار أو كوبونات غير موجودة في القوائم أعلاه`;
     }
 
@@ -374,7 +423,7 @@ ${offersInfo}
                 <div id="chat-header" style="
                     background: linear-gradient(135deg, ${config.chatbotColor} 0%, #764ba2 100%);
                     color: white;
-                    padding: 20px;
+                    padding: 15px 20px;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
@@ -383,19 +432,32 @@ ${offersInfo}
                         <h3 style="margin: 0; font-size: 18px;">${t.assistant}</h3>
                         <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.9;">${t.connected}</p>
                     </div>
-                    <button id="close-chat" style="
-                        background: none;
-                        border: none;
-                        color: white;
-                        font-size: 24px;
-                        cursor: pointer;
-                        padding: 0;
-                        width: 30px;
-                        height: 30px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                    ">×</button>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button id="lang-switch-btn" style="
+                            background: rgba(255,255,255,0.2);
+                            border: 1px solid rgba(255,255,255,0.3);
+                            color: white;
+                            font-size: 12px;
+                            cursor: pointer;
+                            padding: 5px 10px;
+                            border-radius: 15px;
+                            font-weight: 500;
+                            transition: background 0.3s ease;
+                        ">${currentLang === 'ar' ? 'EN' : 'عربي'}</button>
+                        <button id="close-chat" style="
+                            background: none;
+                            border: none;
+                            color: white;
+                            font-size: 24px;
+                            cursor: pointer;
+                            padding: 0;
+                            width: 30px;
+                            height: 30px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        ">×</button>
+                    </div>
                 </div>
 
                 <!-- Messages -->
@@ -458,16 +520,26 @@ ${offersInfo}
 
         // Add event listeners
         const bubble = document.getElementById('chat-bubble');
-        const window = document.getElementById('chat-window');
+        const chatWindow = document.getElementById('chat-window');
         const closeBtn = document.getElementById('close-chat');
         const sendBtn = document.getElementById('send-btn');
         const input = document.getElementById('chat-input');
+        const langBtn = document.getElementById('lang-switch-btn');
 
         bubble.addEventListener('click', toggleChat);
         closeBtn.addEventListener('click', toggleChat);
         sendBtn.addEventListener('click', sendMessage);
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
+        });
+        
+        // Language switch button
+        langBtn.addEventListener('click', switchLanguage);
+        langBtn.addEventListener('mouseenter', () => {
+            langBtn.style.background = 'rgba(255,255,255,0.3)';
+        });
+        langBtn.addEventListener('mouseleave', () => {
+            langBtn.style.background = 'rgba(255,255,255,0.2)';
         });
 
         // Bubble hover effect
@@ -486,19 +558,19 @@ ${offersInfo}
 
         console.log('✅ AI Chatbot Widget loaded!');
         console.log('📍 Store ID:', storeId);
-        console.log('🌐 Language:', lang);
+        console.log('🌐 Language:', currentLang);
     }
 
     function toggleChat() {
-        const window = document.getElementById('chat-window');
+        const chatWindow = document.getElementById('chat-window');
         const bubble = document.getElementById('chat-bubble');
         
-        if (window.style.display === 'none' || !window.style.display) {
-            window.style.display = 'flex';
+        if (chatWindow.style.display === 'none' || !chatWindow.style.display) {
+            chatWindow.style.display = 'flex';
             bubble.style.transform = 'scale(0.9)';
             document.getElementById('chat-input').focus();
         } else {
-            window.style.display = 'none';
+            chatWindow.style.display = 'none';
             bubble.style.transform = 'scale(1)';
         }
     }

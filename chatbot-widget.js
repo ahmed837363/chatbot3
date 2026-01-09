@@ -162,11 +162,13 @@
 
     async function fetchStoreFromAppwrite(storeId) {
         try {
-            // Build the query with proper encoding
-            const query = encodeURIComponent(`equal("merchantId","${storeId}")`);
+            // Build the query - merchantId is now INTEGER
+            const merchantIdInt = parseInt(storeId) || 0;
+            const query = encodeURIComponent(`equal("merchantId",${merchantIdInt})`);
             const url = `${config.appwriteEndpoint}/databases/${config.databaseId}/collections/${config.collectionId}/documents?queries[]=${query}`;
             
             console.log('🔍 Fetching store data from Appwrite...');
+            console.log('🏪 Store ID:', storeId, '→ Int:', merchantIdInt);
             
             const response = await fetch(url, { 
                 method: 'GET',
@@ -182,6 +184,26 @@
             }
             const data = await response.json();
             console.log('📦 Appwrite response:', data);
+            
+            // Parse data from 'notes' field (where we store the JSON)
+            if (data.documents?.[0]?.notes) {
+                try {
+                    const cachedData = JSON.parse(data.documents[0].notes);
+                    console.log('📦 Cached data:', cachedData);
+                    return {
+                        storeName: cachedData.store || cachedData.storeName || 'متجر',
+                        accessToken: cachedData.token || cachedData.accessToken,
+                        // Products might not be cached in notes due to size limit
+                        cachedProducts: '[]',
+                        cachedShipping: '[]',
+                        cachedCoupons: '[]',
+                        cachedOffers: '[]'
+                    };
+                } catch (e) {
+                    console.log('⚠️ Could not parse notes:', e.message);
+                }
+            }
+            
             return data.documents?.[0];
         } catch (e) {
             console.log('⚠️ Could not fetch from Appwrite (CORS):', e.message);

@@ -1,11 +1,11 @@
 // Salla OAuth Integration
 import { Databases, ID } from "https://cdn.jsdelivr.net/npm/appwrite@14.0.0/+esm";
 
-const SALLA_CLIENT_ID = "d57bh-4f5-ed26-4a09-Babo-03e9384dfd894";
-const SALLA_CLIENT_SECRET = "14d1011db4cfafb7589a53cdd9e97158fd4d1b-bcd-b0126276bAb222d8bccc614";
-const SALLA_OAUTH_URL = "https://accounts.salla.sa/oauth/authorize";
-const SALLA_TOKEN_URL = "https://accounts.salla.sa/oauth/token";
-const REDIRECT_URI = "http://localhost:8000/oauth/salla/callback";
+const SALLA_CLIENT_ID = "a528b4f5-ed26-4a09-8aba-036938afa894";
+const SALLA_CLIENT_SECRET = "148151133bbcfab7589a35da9e69158ff4a18cbdc0212627165b22226bbc6614";
+const SALLA_OAUTH_URL = "https://accounts.salla.sa/oauth2/auth";
+const SALLA_TOKEN_URL = "https://accounts.salla.sa/oauth2/token";
+const REDIRECT_URI = "https://6948f4cc003d4c022adb.fra.appwrite.run/";
 
 /**
  * Generate OAuth URL for merchant to click
@@ -16,7 +16,7 @@ export function generateSallaOAuthUrl() {
     client_id: SALLA_CLIENT_ID,
     redirect_uri: REDIRECT_URI,
     response_type: "code",
-    scope: "read_products read_orders read_customers"
+    scope: "offline_access"
   });
 
   return `${SALLA_OAUTH_URL}?${params.toString()}`;

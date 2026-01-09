@@ -1,0 +1,432 @@
+SHOPIFY INTEGRATION - IMPLEMENTATION CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+Track your progress as you implement the Shopify integration!
+
+═══════════════════════════════════════════════════════════════════════════════
+PHASE 1: SETUP & CONFIGURATION (Do This First!)
+═══════════════════════════════════════════════════════════════════════════════
+
+Shopify Partner Account:
+  ☐ Go to https://partners.shopify.com
+  ☐ Create Shopify Partner account (free)
+  ☐ Verify email
+  ☐ Complete profile
+
+Create Shopify App:
+  ☐ Log in to Shopify Partners dashboard
+  ☐ Click "Create an app"
+  ☐ Choose "Create app manually"
+  ☐ Fill in app details
+  ☐ Save app
+
+Get Credentials:
+  ☐ Go to app → Configuration
+  ☐ Copy Client ID (API Key)
+  ☐ Copy Client Secret (API Secret Password)
+  ☐ Save these somewhere safe!
+
+Configure App Settings:
+  ☐ Set Redirect URI: http://localhost:9000/oauth/shopify/callback
+  ☐ Set App URL: https://your-domain.com
+  ☐ Enable API Scopes (check all of these):
+    ☐ write_products
+    ☐ read_products
+    ☐ read_orders
+    ☐ write_settings
+    ☐ write_themes
+    ☐ read_themes
+    ☐ write_theme_asset_modifications
+    ☐ read_theme_asset_modifications
+  ☐ Save changes
+
+Create .env File:
+  ☐ Copy .env.example to .env
+  ☐ Fill in SHOPIFY_CLIENT_ID
+  ☐ Fill in SHOPIFY_CLIENT_SECRET
+  ☐ Fill in REDIRECT_URI
+  ☐ Fill in CHATBOT_WIDGET_URL
+  ☐ Save .env file
+
+Add to .gitignore:
+  ☐ Add ".env" to .gitignore
+  ☐ Add ".env.local" to .gitignore
+  ☐ Commit .gitignore change
+
+═══════════════════════════════════════════════════════════════════════════════
+PHASE 2: INSTALL DEPENDENCIES & START SERVER
+═══════════════════════════════════════════════════════════════════════════════
+
+Install Backend Dependencies:
+  ☐ Open terminal
+  ☐ Navigate to project root
+  ☐ Run: npm install express cors dotenv axios
+  ☐ Wait for installation to complete
+  ☐ Verify: npm list (should show packages)
+
+Start OAuth Server:
+  ☐ Run: node shopify-oauth-server.js
+  ☐ Look for message: "✓ OAuth callback server listening on port 9000"
+  ☐ Note any errors
+
+Test Server is Running:
+  ☐ Open browser: http://localhost:9000/health
+  ☐ Should return: { status: 'ok', service: 'shopify-oauth' }
+  ☐ Server is working! ✓
+
+═══════════════════════════════════════════════════════════════════════════════
+PHASE 3: TEST LOCAL INTEGRATION
+═══════════════════════════════════════════════════════════════════════════════
+
+Test Connect Page:
+  ☐ Open: http://localhost:9000/shopify-connect.html
+  ☐ Page loads correctly
+  ☐ All buttons visible
+  ☐ Form inputs work
+  ☐ Error messages visible
+
+Test Validation:
+  ☐ Click "Connect" without entering store name
+  ☐ Should show: "Please enter your store name"
+  ☐ Type: "invalid_store#123"
+  ☐ Should show: "Store name can only contain lowercase letters, numbers, and hyphens"
+  ☐ Validation is working! ✓
+
+Test Test Mode:
+  ☐ Click "Try Test Mode" button
+  ☐ Should show: Loading spinner
+  ☐ After 2 seconds: Success message
+  ☐ Test mode is working! ✓
+
+Test with Real Store:
+  ☐ Create development store in Shopify Partners (or use real store)
+  ☐ Enter store name: "yourstore" (for yourstore.myshopify.com)
+  ☐ Click "Connect with Shopify"
+  ☐ Page should redirect to Shopify
+  ☐ Log in to Shopify (if needed)
+  ☐ Review permissions
+  ☐ Click "Authorize"
+  ☐ Should redirect back to success page
+  ☐ Check server logs for any errors
+  ☐ OAuth flow works! ✓
+
+Verify Widget Installation:
+  ☐ Check Shopify store admin panel
+  ☐ Go to: Online Store → Themes → Edit code
+  ☐ Look for: snippets/chatbot-widget.liquid
+  ☐ Should contain: <script src="...chatbot-widget.js"></script>
+  ☐ Widget is installed! ✓
+
+═══════════════════════════════════════════════════════════════════════════════
+PHASE 4: CUSTOMIZATION
+═══════════════════════════════════════════════════════════════════════════════
+
+Customize UI:
+  ☐ Open: shopify-connect.html
+  ☐ Change colors:
+    ☐ Find: #667eea (primary purple)
+    ☐ Replace with: your color code
+    ☐ Find: #764ba2 (secondary purple)
+    ☐ Replace with: your color code
+  ☐ Change logo:
+    ☐ Find: <div class="logo">🤖</div>
+    ☐ Replace emoji or add image
+  ☐ Change text:
+    ☐ Update <h1> heading
+    ☐ Update .subtitle description
+    ☐ Update feature list items
+    ☐ Update FAQ items
+  ☐ Test in browser: looks good! ✓
+
+Customize Features:
+  ☐ Edit: shopify-oauth-server.js
+  ☐ Review: API_SCOPES array
+  ☐ Add/remove permissions as needed
+  ☐ Review: CHATBOT_WIDGET_URL
+  ☐ Update to your widget URL
+  ☐ Test again to verify changes
+
+═══════════════════════════════════════════════════════════════════════════════
+PHASE 5: DATABASE INTEGRATION
+═══════════════════════════════════════════════════════════════════════════════
+
+Choose Database:
+  ☐ Appwrite (recommended)
+  ☐ MongoDB
+  ☐ PostgreSQL
+  ☐ Firebase
+  ☐ Other: _____________
+
+Set Up Database:
+  ☐ Create/configure database
+  ☐ Create "stores" collection/table
+  ☐ Add fields: platform, shop, accessToken, email, url, timestamp
+  ☐ Note connection details
+
+Update OAuth Server:
+  ☐ Edit: shopify-oauth-server.js
+  ☐ Find: saveStoreConnection() function
+  ☐ Replace with: your database code
+  ☐ Add: environment variables for database
+  ☐ Test: connection works
+
+Store Connections:
+  ☐ Install a chatbot
+  ☐ Check database
+  ☐ Store connection should be saved
+  ☐ Data includes: shop, email, accessToken, timestamp
+  ☐ Database integration works! ✓
+
+═══════════════════════════════════════════════════════════════════════════════
+PHASE 6: PRODUCTION DEPLOYMENT
+═══════════════════════════════════════════════════════════════════════════════
+
+Choose Hosting:
+  ☐ Vercel (serverless)
+  ☐ Heroku
+  ☐ AWS
+  ☐ DigitalOcean
+  ☐ Your own server
+  ☐ Other: _____________
+
+Set Up Production Domain:
+  ☐ Get production domain: https://your-domain.com
+  ☐ Point domain to hosting
+  ☐ Set up SSL/HTTPS
+  ☐ Test: domain is accessible
+
+Update Configuration:
+  ☐ Update Shopify App Settings:
+    ☐ Redirect URI: https://your-domain.com/oauth/shopify/callback
+    ☐ App URL: https://your-domain.com
+  ☐ Update .env variables:
+    ☐ REDIRECT_URI: https://your-domain.com/oauth/shopify/callback
+    ☐ CHATBOT_WIDGET_URL: https://your-domain.com/chatbot-widget.js
+  ☐ Update shopify-connect.html:
+    ☐ Change: API_BASE = "https://your-domain.com"
+  ☐ Update database connection strings
+
+Deploy Backend:
+  ☐ Push code to hosting platform
+  ☐ Set environment variables on hosting
+  ☐ Deploy OAuth server
+  ☐ Verify: Server is running
+  ☐ Check: Logs for errors
+
+Deploy Frontend:
+  ☐ Push code to hosting platform
+  ☐ Update shopify-connect.html
+  ☐ Verify: Page is accessible
+  ☐ Test: Page loads correctly
+
+Test Production:
+  ☐ Visit: https://your-domain.com/shopify-connect.html
+  ☐ Enter store name
+  ☐ Click "Connect"
+  ☐ Should redirect to Shopify
+  ☐ Complete authorization
+  ☐ Should show success
+  ☐ Production works! ✓
+
+═══════════════════════════════════════════════════════════════════════════════
+PHASE 7: MONITORING & MAINTENANCE
+═══════════════════════════════════════════════════════════════════════════════
+
+Set Up Monitoring:
+  ☐ Use error tracking: Sentry, LogRocket, or similar
+  ☐ Monitor server logs
+  ☐ Set up alerts for errors
+  ☐ Track successful installations
+  ☐ Monitor API rate limits
+
+Set Up Analytics:
+  ☐ Track: Number of installs
+  ☐ Track: Installation success rate
+  ☐ Track: Error rates
+  ☐ Track: User behavior
+
+Regular Maintenance:
+  ☐ Check error logs daily
+  ☐ Review Shopify API status
+  ☐ Update dependencies monthly
+  ☐ Review and rotate secrets quarterly
+  ☐ Back up database regularly
+
+═══════════════════════════════════════════════════════════════════════════════
+PHASE 8: ADDITIONAL FEATURES (Optional)
+═══════════════════════════════════════════════════════════════════════════════
+
+Add User Dashboard:
+  ☐ Create dashboard page
+  ☐ Show connected stores
+  ☐ Show usage statistics
+  ☐ Allow store disconnection
+  ☐ Show widget settings
+
+Add Billing:
+  ☐ Set up payment processor
+  ☐ Create pricing plans
+  ☐ Implement billing in Shopify app
+  ☐ Send invoices
+
+Add Support:
+  ☐ Create help center
+  ☐ Add FAQ page
+  ☐ Set up support email
+  ☐ Create documentation
+
+Add Advanced Features:
+  ☐ Custom widget appearance settings
+  ☐ Analytics dashboard
+  ☐ Customer conversation history
+  ☐ Chatbot training interface
+  ☐ Multiple language support
+
+═══════════════════════════════════════════════════════════════════════════════
+PHASE 9: TESTING & QUALITY ASSURANCE
+═══════════════════════════════════════════════════════════════════════════════
+
+Functional Testing:
+  ☐ Test OAuth flow (happy path)
+  ☐ Test OAuth flow (error scenarios)
+  ☐ Test store name validation
+  ☐ Test duplicate installations
+  ☐ Test uninstallation
+  ☐ Test with different Shopify stores
+
+Security Testing:
+  ☐ Test HMAC verification
+  ☐ Test state parameter validation
+  ☐ Test CSRF protection
+  ☐ Test input validation
+  ☐ Test rate limiting
+  ☐ Test token storage
+
+Performance Testing:
+  ☐ Load test: 100 concurrent installations
+  ☐ Load test: 1000 concurrent installations
+  ☐ Monitor: API response times
+  ☐ Monitor: Database performance
+  ☐ Check: Error rates under load
+
+Compatibility Testing:
+  ☐ Test on: Chrome
+  ☐ Test on: Firefox
+  ☐ Test on: Safari
+  ☐ Test on: Edge
+  ☐ Test on: Mobile browsers
+  ☐ Test on: Different screen sizes
+
+═══════════════════════════════════════════════════════════════════════════════
+PHASE 10: LAUNCH CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+Pre-Launch:
+  ☐ All tests passing
+  ☐ Documentation complete
+  ☐ Marketing materials ready
+  ☐ Support team trained
+  ☐ Monitoring set up
+  ☐ Backups configured
+  ☐ Disaster recovery plan ready
+
+Launch Day:
+  ☐ Announce on social media
+  ☐ Email existing customers
+  ☐ Post to forums/communities
+  ☐ Monitor error logs closely
+  ☐ Be ready for support requests
+  ☐ Check server capacity
+
+Post-Launch:
+  ☐ Gather feedback from users
+  ☐ Monitor metrics
+  ☐ Fix bugs immediately
+  ☐ Plan next features
+  ☐ Scale infrastructure if needed
+  ☐ Celebrate success! 🎉
+
+═══════════════════════════════════════════════════════════════════════════════
+TROUBLESHOOTING CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+If "Invalid redirect URI":
+  ☐ Check Shopify app settings exactly match
+  ☐ Check for trailing slashes
+  ☐ Check http:// vs https://
+  ☐ Restart server after changing settings
+
+If "Client ID not found":
+  ☐ Verify .env file exists
+  ☐ Check environment variables are set
+  ☐ Verify credentials are correct
+  ☐ Restart server after updating
+
+If Chatbot not appearing:
+  ☐ Check theme permissions were granted
+  ☐ Verify widget URL is correct
+  ☐ Check browser console for errors
+  ☐ Clear Shopify theme cache
+  ☐ Check theme edit code section
+
+If OAuth callback fails:
+  ☐ Check server logs
+  ☐ Verify port 9000 is available
+  ☐ Check firewall rules
+  ☐ Verify Shopify app settings
+
+If Database save fails:
+  ☐ Check database connection
+  ☐ Verify database schema
+  ☐ Check environment variables
+  ☐ Review error logs
+
+═══════════════════════════════════════════════════════════════════════════════
+FINAL VERIFICATION
+═══════════════════════════════════════════════════════════════════════════════
+
+Everything Working:
+  ☐ OAuth server running
+  ☐ Connect page loads
+  ☐ OAuth flow completes
+  ☐ Widget installs on store
+  ☐ Store connection saved
+  ☐ No errors in logs
+  ☐ Responds quickly
+  ☐ Works on mobile
+  ☐ HTTPS working (production)
+
+Documentation Complete:
+  ☐ SHOPIFY_SETUP.md read
+  ☐ SHOPIFY_README.md understood
+  ☐ Code commented and clear
+  ☐ Setup guide created for customers
+  ☐ Troubleshooting documented
+
+Ready to Launch:
+  ☐ All checklist items completed
+  ☐ Tested with real stores
+  ☐ Monitoring set up
+  ☐ Support team ready
+  ☐ Marketing plan ready
+
+═══════════════════════════════════════════════════════════════════════════════
+🎉 INTEGRATION COMPLETE!
+═══════════════════════════════════════════════════════════════════════════════
+
+When all items are checked, you're ready to launch!
+
+Your Shopify integration is:
+  ✅ Fully functional
+  ✅ Production ready
+  ✅ Secure
+  ✅ Documented
+  ✅ Tested
+
+Time to grow your business! 🚀
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Track your progress using this checklist!
+
+Good luck! 🎯

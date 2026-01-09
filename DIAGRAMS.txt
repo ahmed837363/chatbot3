@@ -1,0 +1,445 @@
+SHOPIFY INTEGRATION - VISUAL GUIDES & DIAGRAMS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. COMPLETE FLOW DIAGRAM
+───────────────────────────────────────────────────────────────────────────────
+
+START
+  │
+  ├─ Customer visits your app
+  │
+  ├─ Clicks "Connect with Shopify"
+  │       ↓
+  │   shopify-connect.html
+  │   (Beautiful UI page)
+  │
+  ├─ Enters store name
+  │   (e.g., "mystore")
+  │
+  ├─ Clicks "Connect"
+  │       ↓
+  │   JavaScript validates input
+  │   Calls: /oauth/shopify/auth-url
+  │
+  ├─ Receives OAuth URL
+  │   (from shopify-oauth-server.js)
+  │
+  ├─ Redirected to Shopify
+  │   https://mystore.myshopify.com/admin/oauth/authorize
+  │       ↓
+  │   Customer logs in (if needed)
+  │
+  ├─ Reviews permissions
+  │   (Read products, orders, etc.)
+  │
+  ├─ Clicks "Authorize" button
+  │       ↓
+  │   Shopify redirects back with:
+  │   - code (authorization code)
+  │   - shop (store name)
+  │   - hmac (signature)
+  │
+  ├─ Backend receives callback
+  │   POST /oauth/shopify/callback
+  │       ↓
+  │   shopify-oauth-server.js processes
+  │
+  ├─ Validates HMAC signature
+  │   (Security check) ✓
+  │
+  ├─ Exchanges code for token
+  │   Authorization Code → Access Token
+  │
+  ├─ Fetches shop information
+  │   GraphQL API query
+  │   Returns: name, email, domain
+  │
+  ├─ Gets main theme
+  │   (Active store theme)
+  │
+  ├─ Creates/Updates theme asset
+  │   Adds chatbot widget script:
+  │   snippets/chatbot-widget.liquid
+  │
+  ├─ Saves to database
+  │   Store connection record created
+  │
+  ├─ Redirects customer
+  │   Back to success page
+  │   /shopify-connect.html?success=true
+  │
+  ├─ Shows success message
+  │   "✓ Your chatbot has been installed!"
+  │
+  ├─ Chatbot appears on store
+  │   Widget loads on customer's site
+  │   Ready to chat! 💬
+  │
+  └─ END ✅
+
+
+2. ARCHITECTURE DIAGRAM
+───────────────────────────────────────────────────────────────────────────────
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│                        CUSTOMER'S BROWSER                                │
+│                                                                           │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │  shopify-connect.html                                              │ │
+│  │  ─────────────────────────────────────────────────────────────────  │ │
+│  │  - Form: Enter store name                                          │ │
+│  │  - Button: "Connect with Shopify"                                  │ │
+│  │  - Features list                                                   │ │
+│  │  - Error/Success messages                                          │ │
+│  │  - Test mode button                                                │ │
+│  │                                                                     │ │
+│  │  JavaScript:                                                        │ │
+│  │  1. Validates store name                                           │ │
+│  │  2. Calls: POST /oauth/shopify/auth-url                            │ │
+│  │  3. Receives: authUrl                                              │ │
+│  │  4. Redirects: window.location.href = authUrl                      │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────┘
+                                  ↕
+                        (HTTPS Connection)
+                                  ↕
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    SHOPIFY'S AUTHORIZATION SERVER                        │
+│                                                                          │
+│  GET /admin/oauth/authorize?                                            │
+│    client_id={SHOPIFY_CLIENT_ID}                                        │
+│    &redirect_uri={REDIRECT_URI}                                         │
+│    &scope=write_products,read_products,...                              │
+│    &state={random_state}                                                │
+│                                                                          │
+│  Shopify handles:                                                        │
+│  1. Customer login                                                       │
+│  2. Permissions review                                                   │
+│  3. Authorization                                                        │
+│  4. Redirects back with authorization code                              │
+│                                                                          │
+│  GET {REDIRECT_URI}?code={CODE}&shop={SHOP}&hmac={HMAC}                │
+└──────────────────────────────────────────────────────────────────────────┘
+                                  ↕
+                        (HTTPS Connection)
+                                  ↕
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    YOUR BACKEND SERVER                                   │
+│                                                                          │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ shopify-oauth-server.js (Node.js + Express)                       │ │
+│  │ ─────────────────────────────────────────────────────────────────  │ │
+│  │                                                                     │ │
+│  │ Endpoint 1: POST /oauth/shopify/auth-url                          │ │
+│  │  └─ Input: shopStore (e.g., "mystore.myshopify.com")              │ │
+│  │  └─ Process: Build OAuth URL with client credentials              │ │
+│  │  └─ Output: { authUrl: "https://...", shop: "..." }               │ │
+│  │                                                                     │ │
+│  │ Endpoint 2: GET /oauth/shopify/callback                           │ │
+│  │  └─ Input: code, shop, hmac, state (from Shopify)                 │ │
+│  │  ├─ Validate: HMAC signature                                      │ │
+│  │  ├─ Validate: State parameter                                     │ │
+│  │  ├─ Exchange: code → access_token                                 │ │
+│  │  │   POST to: {shop}/admin/oauth/access_token                     │ │
+│  │  ├─ Fetch: Shop info (GraphQL query)                              │ │
+│  │  │   POST to: {shop}/admin/api/2024-01/graphql.json               │ │
+│  │  ├─ Install: Chatbot widget to theme                              │ │
+│  │  │   PUT to: {shop}/admin/api/2024-01/themes/{id}/assets.json     │ │
+│  │  ├─ Save: Store connection to database                            │ │
+│  │  └─ Redirect: Back to success page                                │ │
+│  │                                                                     │ │
+│  │ Endpoint 3: POST /webhooks/shopify/uninstalled                    │ │
+│  │  └─ Handle: App uninstallation                                    │ │
+│  │  └─ Action: Remove store connection from database                 │ │
+│  │                                                                     │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                                                          │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ Environment Variables (.env)                                       │ │
+│  │ ─────────────────────────────────────────────────────────────────  │ │
+│  │ SHOPIFY_CLIENT_ID        (from Shopify Partners)                  │ │
+│  │ SHOPIFY_CLIENT_SECRET    (from Shopify Partners)                  │ │
+│  │ REDIRECT_URI             (callback URL)                            │ │
+│  │ CHATBOT_WIDGET_URL       (widget script location)                 │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+                                  ↕
+                    (Shopify REST/GraphQL API)
+                                  ↕
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    SHOPIFY'S API SERVER                                  │
+│                                                                          │
+│  Processes:                                                              │
+│  1. Token exchange requests                                              │
+│  2. GraphQL queries for shop info                                        │
+│  3. Theme asset uploads                                                  │
+│  4. Access token validation                                              │
+│                                                                          │
+│  Returns:                                                                │
+│  - Access tokens (valid for 1 year)                                      │
+│  - Shop information (name, email, domain)                                │
+│  - Theme details (ID, role, name)                                        │
+│  - Asset confirmation                                                    │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+                                  ↕
+                    (Widget is installed)
+                                  ↕
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    CUSTOMER'S SHOPIFY STORE                              │
+│                                                                          │
+│  In theme code:                                                          │
+│  <script src="https://your-domain.com/chatbot-widget.js"></script>      │
+│                                                                          │
+│  Widget loads and:                                                       │
+│  ✓ Initializes AI chatbot                                                │
+│  ✓ Loads customer service module                                         │
+│  ✓ Starts listening for customer messages                                │
+│  ✓ Connects to your backend                                              │
+│  ✓ Ready to respond to customers 24/7                                    │
+│                                                                          │
+│  Chatbot appears:                                                        │
+│  📍 Bottom left corner (default)                                         │
+│  📍 Position customizable                                                │
+│  📍 Works on all pages                                                   │
+│  📍 Mobile friendly                                                      │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+
+3. DATA FLOW DIAGRAM
+───────────────────────────────────────────────────────────────────────────────
+
+Request → Process → Response
+
+CLIENT SIDE:
+═══════════
+
+User Input
+    │
+    ├─ Store name: "mystore"
+    │
+    ├─ Validate
+    │   └─ Format: [a-z0-9-]+
+    │
+    └─ API Request
+        └─ POST /oauth/shopify/auth-url
+            └─ Body: { shopStore: "mystore.myshopify.com" }
+
+
+SERVER SIDE:
+═════════════
+
+Request Received
+    │
+    ├─ Parse store name
+    │
+    ├─ Generate state (random)
+    │   └─ Store in memory/cache
+    │
+    ├─ Build OAuth URL
+    │   └─ client_id: {SHOPIFY_CLIENT_ID}
+    │   └─ redirect_uri: {REDIRECT_URI}
+    │   └─ scope: [permissions]
+    │   └─ state: {random_state}
+    │
+    └─ Return Response
+        └─ { authUrl: "https://...", shop: "..." }
+
+
+SHOPIFY SIDE:
+══════════════
+
+Customer Authorization
+    │
+    ├─ Verify client_id
+    │
+    ├─ Show authorization page
+    │
+    ├─ Customer approves
+    │
+    ├─ Generate authorization code
+    │   └─ Valid for 10 minutes
+    │
+    └─ Redirect to REDIRECT_URI
+        └─ With: code, shop, hmac, state
+
+
+BACKEND CALLBACK:
+═════════════════
+
+Callback Received
+    │
+    ├─ Extract parameters
+    │   └─ code, shop, hmac, state
+    │
+    ├─ Verify HMAC
+    │   └─ Using SHOPIFY_CLIENT_SECRET
+    │   └─ Prevents spoofing
+    │
+    ├─ Verify state
+    │   └─ Lookup in stored states
+    │   └─ Prevents CSRF attacks
+    │
+    ├─ Exchange code for token
+    │   └─ POST to {shop}/admin/oauth/access_token
+    │   └─ Send: client_id, client_secret, code
+    │   └─ Receive: access_token, scope
+    │
+    ├─ Fetch shop info
+    │   └─ POST GraphQL query
+    │   └─ Query: shop { id, name, email, primaryDomain }
+    │   └─ Response: Shop details
+    │
+    ├─ Get themes
+    │   └─ GET {shop}/admin/api/2024-01/themes.json
+    │   └─ Find: theme with role="main"
+    │   └─ Response: Theme ID
+    │
+    ├─ Install widget
+    │   └─ PUT {shop}/admin/api/.../assets.json
+    │   └─ Key: snippets/chatbot-widget.liquid
+    │   └─ Value: <script src="..."></script>
+    │   └─ Response: Confirmation
+    │
+    ├─ Save to database
+    │   └─ Store: shop, email, url, token, timestamp
+    │   └─ Response: Record ID
+    │
+    └─ Redirect to success
+        └─ Redirect: /shopify-connect.html?success=true
+
+
+4. SECURITY FLOW
+───────────────────────────────────────────────────────────────────────────────
+
+┌─ HMAC Verification ────────────────────────────────────────────────┐
+│                                                                    │
+│ What: Shopify sends HMAC signature with callback                 │
+│ Why: Proves request came from Shopify                            │
+│                                                                    │
+│ How:                                                               │
+│ 1. Shopify creates message: "shop=mystore&code=abc123..."        │
+│ 2. Signs with secret: HMAC-SHA256(message, CLIENT_SECRET)        │
+│ 3. Sends both message and signature                              │
+│ 4. We verify: Our HMAC matches Shopify's HMAC                    │
+│                                                                    │
+│ If match: ✓ Request is legitimate                                │
+│ If no match: ✗ Reject (possible attack)                          │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+
+┌─ State Parameter ──────────────────────────────────────────────────┐
+│                                                                    │
+│ What: Random string we generate                                   │
+│ Why: Prevents CSRF attacks                                        │
+│                                                                    │
+│ How:                                                               │
+│ 1. Generate random state: "abc123def456..."                      │
+│ 2. Store in memory: states[state] = { shop, time }               │
+│ 3. Send to Shopify: oauth_url?state=abc123def456                 │
+│ 4. Shopify returns: callback?code=...&state=abc123def456         │
+│ 5. Verify: Is this state in our stored states?                   │
+│                                                                    │
+│ If found: ✓ Same user/session                                    │
+│ If not: ✗ Reject (possible attack)                               │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+
+┌─ Access Token Management ──────────────────────────────────────────┐
+│                                                                    │
+│ Shopify Access Token:                                             │
+│ ✓ Valid for ~1 year                                               │
+│ ✓ Only used for authenticated API calls                           │
+│ ✓ Stored securely in database (encrypted)                         │
+│ ✓ Never sent to frontend                                          │
+│ ✓ Used only from backend server                                   │
+│                                                                    │
+│ Protection:                                                        │
+│ • Store in database, not memory                                   │
+│ • Use HTTPS only                                                  │
+│ • Rotate periodically                                             │
+│ • Revoke on app uninstall                                         │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+
+
+5. API CALLS SEQUENCE
+───────────────────────────────────────────────────────────────────────────────
+
+1. Generate Auth URL
+   ├─ Your Backend ← Client
+   │  └─ POST /oauth/shopify/auth-url
+   │     ├─ Input: shopStore
+   │     └─ Output: authUrl
+
+2. Authorize at Shopify
+   ├─ Browser → Shopify
+   │  └─ GET {authUrl}
+   │     ├─ User logs in
+   │     ├─ Reviews permissions
+   │     └─ Clicks approve
+
+3. Shopify Callback
+   ├─ Shopify → Your Backend
+   │  └─ GET /oauth/shopify/callback
+   │     ├─ Query: code, shop, hmac, state
+   │     └─ Purpose: Authorization code provided
+
+4. Exchange Code for Token
+   ├─ Your Backend → Shopify
+   │  └─ POST /admin/oauth/access_token
+   │     ├─ Body: client_id, client_secret, code
+   │     └─ Response: access_token, scope
+
+5. Fetch Shop Info
+   ├─ Your Backend → Shopify
+   │  └─ POST /admin/api/2024-01/graphql.json
+   │     ├─ Header: X-Shopify-Access-Token
+   │     ├─ Body: GraphQL query
+   │     └─ Response: shop name, email, domain
+
+6. Get Themes
+   ├─ Your Backend → Shopify
+   │  └─ GET /admin/api/2024-01/themes.json
+   │     ├─ Header: X-Shopify-Access-Token
+   │     └─ Response: Theme list
+
+7. Install Widget
+   ├─ Your Backend → Shopify
+   │  └─ PUT /admin/api/2024-01/themes/{id}/assets.json
+   │     ├─ Header: X-Shopify-Access-Token
+   │     ├─ Body: asset (script snippet)
+   │     └─ Response: Confirmation
+
+8. Save Connection
+   ├─ Your Backend → Your Database
+   │  └─ INSERT store_connections
+   │     ├─ Data: shop, token, timestamp, etc
+   │     └─ Response: Record saved
+
+9. Redirect Customer
+   ├─ Your Backend → Browser
+   │  └─ Redirect /shopify-connect.html?success=true
+   │     └─ User sees: "✓ Connected!"
+
+10. Load Widget
+    ├─ Customer's Store → Widget Server
+    │  └─ GET /chatbot-widget.js
+    │     ├─ Response: JavaScript widget
+    │     └─ Widget initializes on page
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+DIAGRAMS COMPLETE!
+
+Use these to understand:
+1. Customer's journey
+2. Technical architecture
+3. Data flow
+4. Security mechanisms
+5. API call sequence
+
+All working together to provide seamless Shopify integration! 🚀

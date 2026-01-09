@@ -1,0 +1,9 @@
+{
+  "name": "image-relay",
+  "version": "1.0.0",
+  "description": "Image generation relay for Appwrite",
+  "main": "src/main.js",
+  "dependencies": {
+    "form-data": "^4.0.0"
+  }
+}

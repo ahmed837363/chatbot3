@@ -43,8 +43,8 @@
     "url": "https://ahmed837363.github.io/chatbot3/dashboard"
   },
   "oauth": {
-    "client_id": "d57bh-4f5-ed26-4a09-Babo-03e9384dfd894",
-    "redirect_uri": "http://localhost:9000/callback",
+    "client_id": "a528b4f5-ed26-4a09-8aba-036938afa894",
+    "redirect_uri": "https://6948f4cc003d4c022adb.fra.appwrite.run/",
     "scopes": ["offline_access"]
   },
   "support": {

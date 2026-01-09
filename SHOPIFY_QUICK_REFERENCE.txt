@@ -1,0 +1,251 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    SHOPIFY INTEGRATION - QUICK REFERENCE                    ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+🎯 GOAL: Customers click "Connect" and chatbot auto-installs on their store
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 SETUP CHECKLIST (In Order)
+
+  [ ] 1. Go to https://partners.shopify.com
+  [ ] 2. Create Shopify Partner account (free)
+  [ ] 3. Create a "custom app"
+  [ ] 4. Get Client ID & Client Secret
+  [ ] 5. Create .env file with credentials
+  [ ] 6. Run: npm install express cors dotenv axios
+  [ ] 7. Start OAuth server: node shopify-oauth-server.js
+  [ ] 8. Test at: http://localhost:9000/shopify-connect.html
+  [ ] 9. Deploy to production
+  [ ] 10. Update Shopify app with production domain
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 NEW FILES CREATED
+
+  ✅ shopify-oauth.js              → OAuth functions (frontend)
+  ✅ shopify-oauth-server.js       → OAuth server (backend)
+  ✅ shopify-connect.html          → Beautiful "Connect" UI
+  ✅ shopify-app-manifest.json     → Shopify app config
+  ✅ SHOPIFY_SETUP.md              → Detailed setup guide
+  ✅ SHOPIFY_README.md             → Quick start guide
+  ✅ .env.example                  → Environment variables template
+  ✅ desktop-app/main.js           → Updated with handlers
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔧 ENVIRONMENT VARIABLES
+
+Create .env file with:
+
+  SHOPIFY_CLIENT_ID=your_id_here
+  SHOPIFY_CLIENT_SECRET=your_secret_here
+  REDIRECT_URI=http://localhost:9000/oauth/shopify/callback
+  CHATBOT_WIDGET_URL=https://your-domain.com/chatbot-widget.js
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 QUICK START (5 Minutes)
+
+  1. Create .env file
+     
+     SHOPIFY_CLIENT_ID=sk_live_xxxxx
+     SHOPIFY_CLIENT_SECRET=shpss_xxxxx
+     REDIRECT_URI=http://localhost:9000/oauth/shopify/callback
+     CHATBOT_WIDGET_URL=https://your-domain.com/chatbot-widget.js
+
+  2. Install dependencies
+     
+     npm install express cors dotenv axios
+
+  3. Start OAuth server
+     
+     node shopify-oauth-server.js
+
+  4. Test in browser
+     
+     http://localhost:9000/shopify-connect.html
+     
+     Enter: mystore
+     Click: "Connect with Shopify"
+
+  5. You're done! 🎉
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🌐 HOW IT WORKS (Flow Diagram)
+
+  Customer                Shopify              Your Server
+     │                       │                       │
+     ├─ Clicks Connect ─────>│                       │
+     │                       │                       │
+     ├─ Logs in + Approves ──>│                       │
+     │                       │                       │
+     │                   Authorization Code          │
+     │<───────────────────────────────────────────────┤
+     │                       │                       │
+     │                       │  Exchange Code for    │
+     │                       │  Access Token         │
+     │                       │<──────────────────────┤
+     │                       │                       │
+     │                       │  Install Widget       │
+     │                       │<──────────────────────┤
+     │                       │                       │
+     │  Success! ✅          │                       │
+     │<───────────────────────────────────────────────┤
+     │                       │                       │
+  Chatbot appears on store ✨
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔐 SHOPIFY APP SETTINGS (Must Match)
+
+Go to: https://partners.shopify.com → Your App → Configuration
+
+  ✓ Redirect URI
+    http://localhost:9000/oauth/shopify/callback
+    (Change to your domain for production)
+
+  ✓ API Scopes (Enable these)
+    • write_products
+    • read_products
+    • read_orders
+    • write_settings
+    • write_themes
+    • read_themes
+    • write_theme_asset_modifications
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🧪 TESTING
+
+Test Mode (No Authentication):
+  Click: "Try Test Mode" button
+  Result: Simulates successful installation
+
+Real Store (Requires Auth):
+  Store name: mystore
+  Redirects: to Shopify login
+  Result: Actual installation on store
+
+Development Store:
+  Create free store in Shopify Partners
+  Use: dev-12345678.myshopify.com
+  Pre-authorized for testing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎨 CUSTOMIZING THE CONNECT PAGE
+
+File: shopify-connect.html
+
+  Colors:
+    Primary: #667eea (purple)
+    Secondary: #764ba2 (dark purple)
+    Change in <style> section
+
+  Logo:
+    Replace 🤖 emoji with your image
+    Update: <div class="logo">
+
+  Text:
+    Change heading, subtitle, features
+    Update: <h1>, .subtitle, .feature divs
+
+  Button:
+    Change text and behavior
+    Update: class="connect-btn" onclick
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 WHAT GETS SAVED
+
+Store Connection Data:
+  • Shop name (mystore)
+  • Shop email
+  • Shop domain (mystore.myshopify.com)
+  • Access token (for API calls)
+  • Connection timestamp
+  • Widget installation status
+
+⚠️  Never log or expose access tokens!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚨 COMMON ISSUES & FIXES
+
+Issue: "Invalid redirect URI"
+Fix:   Make sure URI in Shopify matches exactly
+       Check for trailing slashes and http/https
+
+Issue: "Client ID not found"
+Fix:   Verify .env file exists
+       Check environment variables are set
+       Restart app after changing .env
+
+Issue: Chatbot not appearing
+Fix:   Check theme permissions were granted
+       Verify widget URL is accessible
+       Clear theme cache (Shopify admin)
+
+Issue: CORS errors
+Fix:   Check API_BASE in shopify-connect.html
+       Update to match your server URL
+       Add domain to CORS whitelist
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 IMPORTANT FILES
+
+Core OAuth:
+  • src/shopify-oauth.js         (Frontend functions)
+  • shopify-oauth-server.js      (Backend server)
+
+UI:
+  • shopify-connect.html         (Connect button page)
+
+Configuration:
+  • shopify-app-manifest.json    (Shopify settings)
+  • .env                         (Credentials)
+
+Documentation:
+  • SHOPIFY_SETUP.md             (Detailed guide)
+  • SHOPIFY_README.md            (Quick start)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ FEATURES INCLUDED
+
+  ✅ OAuth 2.0 flow
+  ✅ HMAC signature verification
+  ✅ Auto-install chatbot widget
+  ✅ Responsive design
+  ✅ Error handling
+  ✅ Loading states
+  ✅ Test mode
+  ✅ Webhook support
+  ✅ HTTPS ready
+  ✅ Production deployment ready
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 NEXT STEPS
+
+  1. Read: SHOPIFY_SETUP.md (for detailed guide)
+  2. Create: .env file with your credentials
+  3. Install: npm dependencies
+  4. Run: node shopify-oauth-server.js
+  5. Test: http://localhost:9000/shopify-connect.html
+  6. Deploy: Update domain and go live!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❓ QUESTIONS?
+
+  See: SHOPIFY_SETUP.md         (Detailed setup)
+       SHOPIFY_README.md        (Full documentation)
+       shopify-oauth-server.js  (Code comments)
+
+Happy integrating! 🚀
+
+Generated: December 25, 2025

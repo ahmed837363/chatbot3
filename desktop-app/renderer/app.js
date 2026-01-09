@@ -88,11 +88,16 @@ class ChatbotManager {
             el.addEventListener('click', () => this.closeModal());
         });
 
-        // Connect buttons for platforms
+        // Connect buttons for platforms - go directly to OAuth
         document.querySelectorAll('.connect-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const platform = btn.dataset.platform;
-                this.showConnectionModal(platform);
+                if (platform === 'salla') {
+                    // Go directly to OAuth, no modal needed
+                    this.startOAuthFlow('salla');
+                } else {
+                    this.showConnectionModal(platform);
+                }
             });
         });
 
@@ -301,15 +306,20 @@ class ChatbotManager {
             window.electronAPI.onOAuthCallback(async (data) => {
                 console.log('OAuth Callback:', data);
                 
-                if (data.success) {
-                    this.showNotification('✅ تم التوصل بنجاح! جاري إضافة متجرك...', 'success');
+                if (data.success && data.store) {
+                    // Real store connected!
+                    this.showNotification(`✅ تم ربط متجر "${data.store.name}" بنجاح!`, 'success');
                     
-                    // Add test store after successful OAuth
-                    await this.addTestStore();
+                    // Reload stores from storage
+                    await this.loadStores();
+                    this.updateDashboard();
+                    this.navigateTo('stores');
+                } else if (data.success) {
+                    this.showNotification('✅ تم الاتصال بنجاح!', 'success');
+                    await this.loadStores();
+                    this.updateDashboard();
                 } else {
-                    this.showNotification(`ملاحظة: ${data.error}. جاري إضافة متجر تجريبي...`, 'info');
-                    // Fallback: add test store anyway
-                    await this.addTestStore();
+                    this.showNotification(`❌ فشل الاتصال: ${data.error}`, 'error');
                 }
             });
 
@@ -318,15 +328,8 @@ class ChatbotManager {
             
             if (result.started) {
                 console.log('✓ OAuth started');
-                this.showNotification('تم فتح صفحة سلة. قم بتسجيل الدخول والموافقة على الصلاحيات.', 'success');
-                
-                // Fallback: Add test store after 10 seconds if no callback
-                setTimeout(async () => {
-                    if (this.stores.length === 0) {
-                        console.log('No stores added, using fallback test store');
-                        await this.addTestStore();
-                    }
-                }, 10000);
+                // Show installation guide with refresh button
+                this.showInstallationGuide();
             } else {
                 this.showNotification('حدث خطأ: ' + result.error, 'error');
             }
@@ -353,6 +356,213 @@ class ChatbotManager {
         this.updateDashboard();
         
         this.showNotification('تم ربط المتجر بنجاح! 🎉', 'success');
+    }
+
+    showInstallationPrompt() {
+        // Use the new installation guide instead
+        this.showInstallationGuide();
+    }
+
+    showInstallationGuide() {
+        // Remove any existing guide
+        document.querySelector('.installation-guide')?.remove();
+        
+        const guide = document.createElement('div');
+        guide.className = 'installation-guide';
+        guide.innerHTML = `
+            <div class="guide-content">
+                <button class="guide-close" id="close-guide-btn">&times;</button>
+                <div class="guide-header">
+                    <div class="guide-icon">📱</div>
+                    <h2>كيفية ربط متجر سلة</h2>
+                </div>
+                <div class="guide-steps">
+                    <div class="guide-step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <h4>تثبيت التطبيق</h4>
+                            <p>من لوحة تحكم سلة، اذهب إلى "متجر التطبيقات" وابحث عن تطبيقك</p>
+                            <p class="step-alt">أو من لوحة الشركاء → التطبيقات → اختبار التطبيق</p>
+                        </div>
+                    </div>
+                    <div class="guide-step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <h4>الموافقة على الصلاحيات</h4>
+                            <p>اضغط "تثبيت" ووافق على صلاحيات التطبيق</p>
+                        </div>
+                    </div>
+                    <div class="guide-step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <h4>تحديث القائمة</h4>
+                            <p>بعد التثبيت، اضغط الزر أدناه لرؤية متجرك</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="guide-actions">
+                    <button class="btn btn-primary btn-large" id="refresh-stores-btn">
+                        🔄 تحديث قائمة المتاجر
+                    </button>
+                </div>
+                <div class="guide-note">
+                    <strong>💡 ملاحظة:</strong> بعد تثبيت التطبيق على متجرك، سيظهر الشات بوت تلقائياً للزوار
+                </div>
+            </div>
+        `;
+        
+        // Add styles
+        if (!document.getElementById('guide-styles')) {
+            const style = document.createElement('style');
+            style.id = 'guide-styles';
+            style.textContent = `
+                .installation-guide {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,0,0,0.7);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    animation: fadeIn 0.3s ease;
+                }
+                .guide-content {
+                    background: white;
+                    border-radius: 20px;
+                    padding: 40px;
+                    max-width: 500px;
+                    width: 90%;
+                    position: relative;
+                    animation: slideUp 0.4s ease;
+                    text-align: right;
+                }
+                .guide-close {
+                    position: absolute;
+                    top: 15px;
+                    left: 15px;
+                    background: none;
+                    border: none;
+                    font-size: 28px;
+                    cursor: pointer;
+                    color: #999;
+                }
+                .guide-close:hover { color: #333; }
+                .guide-header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                }
+                .guide-icon {
+                    font-size: 50px;
+                    margin-bottom: 10px;
+                }
+                .guide-header h2 {
+                    margin: 0;
+                    color: #333;
+                    font-size: 24px;
+                }
+                .guide-steps {
+                    margin-bottom: 25px;
+                }
+                .guide-step {
+                    display: flex;
+                    gap: 15px;
+                    margin-bottom: 20px;
+                    align-items: flex-start;
+                }
+                .step-number {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    flex-shrink: 0;
+                }
+                .step-content h4 {
+                    margin: 0 0 5px 0;
+                    color: #333;
+                    font-size: 16px;
+                }
+                .step-content p {
+                    margin: 0;
+                    color: #666;
+                    font-size: 14px;
+                    line-height: 1.5;
+                }
+                .step-alt {
+                    color: #999 !important;
+                    font-size: 12px !important;
+                    margin-top: 5px !important;
+                }
+                .guide-actions {
+                    text-align: center;
+                    margin: 25px 0;
+                }
+                .btn-large {
+                    padding: 15px 40px !important;
+                    font-size: 18px !important;
+                }
+                .guide-note {
+                    background: #f0f7ff;
+                    padding: 15px;
+                    border-radius: 10px;
+                    font-size: 13px;
+                    color: #555;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes slideUp {
+                    from { opacity: 0; transform: translateY(30px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(guide);
+        
+        // Refresh button handler
+        document.getElementById('refresh-stores-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('refresh-stores-btn');
+            btn.innerHTML = '⏳ جاري التحديث...';
+            btn.disabled = true;
+            
+            const previousCount = this.stores.length;
+            await this.loadStores();
+            this.updateDashboard();
+            
+            if (this.stores.length > previousCount) {
+                guide.remove();
+                this.showNotification(`✅ تم العثور على ${this.stores.length - previousCount} متجر جديد!`, 'success');
+                this.navigateTo('stores');
+            } else if (this.stores.length > 0) {
+                guide.remove();
+                this.showNotification(`لديك ${this.stores.length} متجر متصل`, 'info');
+                this.navigateTo('stores');
+            } else {
+                btn.innerHTML = '🔄 تحديث قائمة المتاجر';
+                btn.disabled = false;
+                this.showNotification('لم يتم العثور على متاجر جديدة. تأكد من إكمال التثبيت في سلة.', 'info');
+            }
+        });
+        
+        // Close button handler
+        document.getElementById('close-guide-btn').addEventListener('click', () => {
+            guide.remove();
+        });
+        
+        // Close on backdrop click
+        guide.addEventListener('click', (e) => {
+            if (e.target === guide) guide.remove();
+        });
     }
 
     async viewStore(storeId) {
@@ -431,7 +641,7 @@ class ChatbotManager {
 
         // Auto remove after 5 seconds
         setTimeout(() => {
-            notification.remove();
+            if (notification.parentElement) notification.remove();
         }, 5000);
     }
 }

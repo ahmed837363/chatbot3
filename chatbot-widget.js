@@ -1,13 +1,54 @@
 /**
  * AI Chatbot Widget - Production Ready
  * Embed this on any website to add AI chat support
+ * Supports: Arabic (Saudi dialect) and English
  * 
  * Usage:
- * <script src="https://your-cdn/chatbot-widget.js" data-store-id="YOUR_STORE_ID"></script>
+ * <script src="https://your-cdn/chatbot-widget.js" data-store-id="YOUR_STORE_ID" data-lang="ar"></script>
  */
 
 (function() {
     'use strict';
+
+    // Bilingual text configuration
+    const texts = {
+        ar: {
+            welcome: 'هلا والله! كيف أقدر أساعدك اليوم؟ 😊',
+            placeholder: 'اكتب رسالتك...',
+            send: 'إرسال',
+            assistant: '🤖 مساعد ذكي',
+            connected: 'متصل',
+            error: 'عذراً، حصل خطأ. جرب مرة ثانية 📞',
+            greeting: 'هلا والله! وش أقدر أساعدك فيه؟ 😊',
+            askPrice: 'أبشر! قول لي اسم المنتج وأعطيك السعر 🏷️',
+            shipping: 'الشحن يوصل خلال ٢-٥ أيام عادة 🚚',
+            thanks: 'العفو! يسعدني أخدمك 😊',
+            askMore: 'أبشر! وش تبي تعرف بالضبط؟',
+            notUnderstood: 'ما قدرت أفهم، جرب مرة ثانية'
+        },
+        en: {
+            welcome: 'Hello! How can I help you today? 😊',
+            placeholder: 'Type your message...',
+            send: 'Send',
+            assistant: '🤖 AI Assistant',
+            connected: 'Online',
+            error: 'Sorry, an error occurred. Please try again 📞',
+            greeting: 'Hello! How can I help you? 😊',
+            askPrice: 'Sure! Tell me the product name and I\'ll give you the price 🏷️',
+            shipping: 'Shipping takes 2-5 days usually 🚚',
+            thanks: 'You\'re welcome! Happy to help 😊',
+            askMore: 'Sure! What would you like to know?',
+            notUnderstood: 'I didn\'t understand, please try again'
+        }
+    };
+
+    // Detect language from script tag or browser
+    const scriptTag = document.currentScript;
+    const detectedLang = scriptTag?.getAttribute('data-lang') || 
+                         (navigator.language?.startsWith('ar') ? 'ar' : 'en');
+    const lang = ['ar', 'en'].includes(detectedLang) ? detectedLang : 'ar';
+    const t = texts[lang]; // Current language texts
+    const isRTL = lang === 'ar';
 
     // Configuration
     const config = {
@@ -20,13 +61,10 @@
         aiModel: 'allam-7b-instruct-preview',
         chatbotColor: '#667eea',
         position: 'bottom-left', // or 'bottom-right'
-        welcomeMessage: 'هلا والله! كيف أقدر أساعدك اليوم؟ 😊',
-        placeholder: 'اكتب رسالتك...',
-        language: 'ar' // Arabic
+        language: lang
     };
 
     // Get store ID and custom config from script tag
-    const scriptTag = document.currentScript;
     const storeId = scriptTag?.getAttribute('data-store-id') || 'demo';
     const customWorkerUrl = scriptTag?.getAttribute('data-ai-url');
     if (customWorkerUrl) config.aiWorkerUrl = customWorkerUrl;
@@ -161,6 +199,100 @@
             offersInfo = '- لا يوجد عروض خاصة حالياً';
         }
 
+        // English system prompt
+        if (!isRTL) {
+            let productListEn = '';
+            if (storeData.products.length > 0) {
+                productListEn = storeData.products.slice(0, 30).map((p, i) => {
+                    let priceText = `${p.price} SAR`;
+                    if (p.salePrice && p.salePrice < p.price) {
+                        priceText = `${p.salePrice} SAR (was ${p.price})`;
+                    }
+                    const stockStatus = p.inStock !== false ? '✓' : '(out of stock)';
+                    return `${i+1}. ${p.name} - ${priceText} ${stockStatus}`;
+                }).join('\n');
+            } else {
+                productListEn = `(Demo products)
+1. Samsung Galaxy Watch 6 - 1,299 SAR
+2. Apple AirPods Pro 2 - 899 SAR
+3. Musk Al Tahara Perfume (100ml) - 149 SAR
+4. Arabic Coffee Set (Brass) - 350 SAR
+5. Premium Winter Shemagh - 189 SAR
+6. Sukkari Dates 3kg - 120 SAR`;
+            }
+
+            let shippingInfoEn = '';
+            if (storeData.shipping.length > 0) {
+                shippingInfoEn = storeData.shipping.map(s => {
+                    let text = `- ${s.name}`;
+                    if (s.methods && s.methods.length > 0) {
+                        text += ': ' + s.methods.map(m => `${m.name} (${m.cost} SAR)`).join(', ');
+                    }
+                    return text;
+                }).join('\n');
+            } else {
+                shippingInfoEn = `- Within Saudi Arabia: 25 SAR (free over 200 SAR) - 2-5 days`;
+            }
+
+            let couponsInfoEn = '';
+            if (storeData.coupons.length > 0) {
+                couponsInfoEn = storeData.coupons.map(c => {
+                    const discountText = c.type === 'percentage' ? `${c.discount}% off` : `${c.discount} SAR off`;
+                    return `- Code "${c.code}": ${discountText}`;
+                }).join('\n');
+            } else {
+                couponsInfoEn = '- No active coupons currently';
+            }
+
+            let offersInfoEn = '';
+            if (storeData.offers.length > 0) {
+                offersInfoEn = storeData.offers.map(o => {
+                    let text = `- ${o.name}`;
+                    if (o.discount) text += ` (${o.discount}% off)`;
+                    return text;
+                }).join('\n');
+            } else {
+                offersInfoEn = '- No special offers currently';
+            }
+
+            return `You are ALLaM, a friendly AI assistant for "${storeData.storeName}". Respond in English.
+
+═══════════════════════════════════
+📦 Available Products:
+═══════════════════════════════════
+${productListEn}
+
+═══════════════════════════════════
+🚚 Shipping & Delivery:
+═══════════════════════════════════
+${shippingInfoEn}
+
+═══════════════════════════════════
+🏷️ Active Discount Codes:
+═══════════════════════════════════
+${couponsInfoEn}
+
+═══════════════════════════════════
+🎉 Special Offers:
+═══════════════════════════════════
+${offersInfoEn}
+
+═══════════════════════════════════
+💳 Payment Methods: Mada, Visa, Mastercard, Apple Pay, Tabby
+🔄 Returns: Within 14 days of receiving the order
+
+═══════════════════════════════════
+Response Rules:
+═══════════════════════════════════
+- Be friendly and helpful
+- Keep responses brief and clear
+- If asked about a listed product, provide the price
+- If there's an applicable coupon, suggest it
+- If asked about an unlisted product, say "Sorry, we don't have that product"
+- Never invent products, prices, or coupons not in the lists above`;
+        }
+
+        // Arabic system prompt (default)
         return `أنت علام، مساعد ذكي لـ "${storeData.storeName}". تتحدث باللهجة السعودية.
 
 ═══════════════════════════════════
@@ -248,8 +380,8 @@ ${offersInfo}
                     align-items: center;
                 ">
                     <div>
-                        <h3 style="margin: 0; font-size: 18px;">🤖 مساعد ذكي</h3>
-                        <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.9;">متصل</p>
+                        <h3 style="margin: 0; font-size: 18px;">${t.assistant}</h3>
+                        <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.9;">${t.connected}</p>
                     </div>
                     <button id="close-chat" style="
                         background: none;
@@ -272,7 +404,7 @@ ${offersInfo}
                     padding: 20px;
                     overflow-y: auto;
                     background: #f8f9fa;
-                    direction: rtl;
+                    direction: ${isRTL ? 'rtl' : 'ltr'};
                 "></div>
 
                 <!-- Input -->
@@ -281,19 +413,19 @@ ${offersInfo}
                     padding: 15px;
                     border-top: 1px solid #e0e0e0;
                     background: white;
-                    direction: rtl;
+                    direction: ${isRTL ? 'rtl' : 'ltr'};
                 ">
-                    <input type="text" id="chat-input" placeholder="${config.placeholder}" style="
+                    <input type="text" id="chat-input" placeholder="${t.placeholder}" style="
                         flex: 1;
                         padding: 12px;
                         border: 2px solid #e0e0e0;
                         border-radius: 8px;
                         font-size: 14px;
                         outline: none;
-                        direction: rtl;
+                        direction: ${isRTL ? 'rtl' : 'ltr'};
                     ">
                     <button id="send-btn" style="
-                        margin-right: 10px;
+                        ${isRTL ? 'margin-right: 10px;' : 'margin-left: 10px;'}
                         padding: 12px 20px;
                         background: ${config.chatbotColor};
                         color: white;
@@ -302,7 +434,7 @@ ${offersInfo}
                         cursor: pointer;
                         font-weight: 500;
                         transition: background 0.3s ease;
-                    ">إرسال</button>
+                    ">${t.send}</button>
                 </div>
             </div>
         </div>
@@ -349,11 +481,12 @@ ${offersInfo}
         // Load store data from Salla API (if available)
         loadStoreData();
 
-        // Send welcome message
-        addMessage(config.welcomeMessage, 'bot');
+        // Send welcome message (use translated version)
+        addMessage(t.welcome, 'bot');
 
         console.log('✅ AI Chatbot Widget loaded!');
         console.log('📍 Store ID:', storeId);
+        console.log('🌐 Language:', lang);
     }
 
     function toggleChat() {
@@ -395,7 +528,7 @@ ${offersInfo}
                 hideTypingIndicator();
                 console.error('AI Error:', error);
                 // Fallback response
-                const fallback = 'عذراً، حصل خطأ. جرب مرة ثانية أو تواصل مع الدعم 📞';
+                const fallback = t.error;
                 addMessage(fallback, 'bot');
             });
     }
@@ -405,12 +538,11 @@ ${offersInfo}
         const systemPrompt = buildSystemPrompt();
 
         try {
-            // Send to LM Studio (OpenAI format) via ngrok tunnel
+            // Send to LM Studio (OpenAI format) via Cloudflare tunnel
             const response = await fetch(config.aiWorkerUrl, {
                 method: 'POST',
                 headers: { 
-                    'Content-Type': 'application/json',
-                    'ngrok-skip-browser-warning': 'true' // Skip ngrok warning page
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     model: config.aiModel || 'allam-7b-instruct-preview',
@@ -431,7 +563,7 @@ ${offersInfo}
 
             const data = await response.json();
             // LM Studio returns OpenAI format
-            return data.choices?.[0]?.message?.content || 'ما قدرت أفهم، جرب مرة ثانية';
+            return data.choices?.[0]?.message?.content || t.notUnderstood;
         } catch (error) {
             console.error('AI API Error:', error);
             return getLocalFallback(message);
@@ -441,6 +573,24 @@ ${offersInfo}
     function getLocalFallback(message) {
         const lower = message.toLowerCase();
         
+        // English patterns
+        if (!isRTL) {
+            if (lower.includes('hi') || lower.includes('hello') || lower.includes('hey')) {
+                return 'Hello! How can I help you today? 😊';
+            }
+            if (lower.includes('price') || lower.includes('cost') || lower.includes('how much')) {
+                return 'Sure! Tell me the product name and I\'ll give you the price 🏷️';
+            }
+            if (lower.includes('ship') || lower.includes('delivery') || lower.includes('deliver')) {
+                return 'Shipping usually takes 2-5 days 🚚';
+            }
+            if (lower.includes('thank')) {
+                return 'You\'re welcome! Happy to help 😊';
+            }
+            return 'Sure! What exactly would you like to know?';
+        }
+        
+        // Arabic patterns (default)
         if (lower.includes('هلا') || lower.includes('السلام') || lower.includes('مرحبا')) {
             return 'هلا والله! وش أقدر أساعدك فيه؟ 😊';
         }

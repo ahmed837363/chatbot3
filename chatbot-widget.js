@@ -162,13 +162,64 @@
 
     async function fetchStoreFromAppwrite(storeId) {
         try {
+            // Try fetching with mode: 'cors' and proper headers
             const response = await fetch(
-                `${config.appwriteEndpoint}/databases/${config.databaseId}/collections/${config.collectionId}/documents?queries[]=equal("merchantId",${storeId})`,
-                { headers: { 'X-Appwrite-Project': config.appwriteProjectId } }
+                `${config.appwriteEndpoint}/databases/${config.databaseId}/collections/${config.collectionId}/documents?queries[]=equal("merchantId","${storeId}")`,
+                { 
+                    method: 'GET',
+                    headers: { 
+                        'X-Appwrite-Project': config.appwriteProjectId,
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'cors'
+                }
             );
+            if (!response.ok) {
+                console.log('⚠️ Appwrite response not OK:', response.status);
+                return null;
+            }
             const data = await response.json();
+            console.log('📦 Appwrite response:', data);
             return data.documents?.[0];
         } catch (e) {
+            console.log('⚠️ Could not fetch from Appwrite (CORS):', e.message);
+            // Try alternative: fetch products directly from Salla public API
+            return await fetchFromSallaPublic(storeId);
+        }
+    }
+
+    // Fallback: Try to get basic store info from Salla's public pages
+    async function fetchFromSallaPublic(storeId) {
+        try {
+            // This is a fallback - we'll try to detect products from the page itself
+            const products = [];
+            const productElements = document.querySelectorAll('[data-product-id], .product-card, .product-item');
+            
+            productElements.forEach((el, i) => {
+                if (i >= 30) return; // Limit to 30 products
+                const name = el.querySelector('.product-title, .product-name, h3, h4')?.textContent?.trim();
+                const priceEl = el.querySelector('.product-price, .price, [data-price]');
+                const price = priceEl?.textContent?.replace(/[^\d.]/g, '') || priceEl?.getAttribute('data-price');
+                
+                if (name && price) {
+                    products.push({ name, price: parseFloat(price), currency: 'SAR' });
+                }
+            });
+
+            if (products.length > 0) {
+                console.log('📦 Found', products.length, 'products from page');
+                return {
+                    storeName: document.title?.split('|')[0]?.trim() || 'المتجر',
+                    cachedProducts: JSON.stringify(products),
+                    cachedShipping: '[]',
+                    cachedCoupons: '[]',
+                    cachedOffers: '[]'
+                };
+            }
+            
+            return null;
+        } catch (e) {
+            console.log('⚠️ Could not extract products from page:', e.message);
             return null;
         }
     }

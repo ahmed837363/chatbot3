@@ -162,18 +162,20 @@
 
     async function fetchStoreFromAppwrite(storeId) {
         try {
-            // Try fetching with mode: 'cors' and proper headers
-            const response = await fetch(
-                `${config.appwriteEndpoint}/databases/${config.databaseId}/collections/${config.collectionId}/documents?queries[]=equal("merchantId","${storeId}")`,
-                { 
-                    method: 'GET',
-                    headers: { 
-                        'X-Appwrite-Project': config.appwriteProjectId,
-                        'Content-Type': 'application/json'
-                    },
-                    mode: 'cors'
+            // Build the query with proper encoding
+            const query = encodeURIComponent(`equal("merchantId","${storeId}")`);
+            const url = `${config.appwriteEndpoint}/databases/${config.databaseId}/collections/${config.collectionId}/documents?queries[]=${query}`;
+            
+            console.log('🔍 Fetching store data from Appwrite...');
+            
+            const response = await fetch(url, { 
+                method: 'GET',
+                headers: { 
+                    'X-Appwrite-Project': config.appwriteProjectId,
+                    'Content-Type': 'application/json'
                 }
-            );
+            });
+            
             if (!response.ok) {
                 console.log('⚠️ Appwrite response not OK:', response.status);
                 return null;

@@ -375,7 +375,6 @@
                     console.log('📦 Found product:', name, price);
                 }
             });
-            });
 
             if (products.length > 0) {
                 console.log('📦 Found', products.length, 'products from page');

@@ -1235,10 +1235,6 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
             productAsked: searchTerm,
             matchingProducts: matchingProducts
         };
-    } 
-            productAsked: productAsked,
-            matchingProducts: matchingProducts
-        };
     }
 
     async function callAI(message) {

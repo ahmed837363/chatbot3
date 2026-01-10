@@ -272,7 +272,8 @@
             
             if (data.documents && data.documents.length > 0) {
                 return data.documents.map(doc => ({
-                    name: doc.name || doc.nameAr || 'منتج',
+                    name: doc.name || 'منتج',
+                    nameEn: doc.nameEn || '', // English name (optional)
                     price: doc.price || 0,
                     salePrice: doc.salePrice || null,
                     currency: doc.currency || 'SAR',

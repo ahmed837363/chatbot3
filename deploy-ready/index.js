@@ -7,7 +7,7 @@ const { Client, Databases, ID, Query } = require('node-appwrite');
 const DATABASE_ID = '6946699d001194236820';
 const COLLECTION_ID = 'store_connections';
 const PRODUCTS_COLLECTION_ID = 'products'; // NEW: Products collection
-const WIDGET_URL = 'https://cdn.jsdelivr.net/gh/ahmed837363/chatbot3@v2.1/chatbot-widget.js';
+const WIDGET_URL = 'https://cdn.jsdelivr.net/gh/ahmed837363/chatbot3@v2.2/chatbot-widget.js';
 
 module.exports = async ({ req, res, log, error }) => {
   log('📨 Request received: ' + req.method);
@@ -190,17 +190,34 @@ module.exports = async ({ req, res, log, error }) => {
         let savedCount = 0;
         for (const p of rawProducts) {
           try {
-            await databases.createDocument(DATABASE_ID, PRODUCTS_COLLECTION_ID, ID.unique(), {
+            // Build product document - only include nameEn if it exists and is different
+            const productDoc = {
               storeId: merchantIdInt,
               name: (p.name || 'منتج').substring(0, 200),
-              nameAr: (p.name || '').substring(0, 200),
-              price: parseFloat(p.price?.amount || p.price || 0),
-              salePrice: parseFloat(p.sale_price?.amount || p.sale_price || 0),
+              price: parseFloat(p.price?.amount || p.price || 0) || 0,
               currency: p.price?.currency || 'SAR',
-              description: (p.description || '').substring(0, 1000),
-              inStock: p.quantity === undefined ? true : p.quantity > 0,
-              imageUrl: (p.image?.url || p.thumbnail || '').substring(0, 500)
-            });
+              inStock: p.quantity === undefined ? true : p.quantity > 0
+            };
+            
+            // Add optional fields only if they have values
+            if (p.name_en && p.name_en.trim()) {
+              productDoc.nameEn = p.name_en.substring(0, 200);
+            }
+            
+            const salePrice = parseFloat(p.sale_price?.amount || p.sale_price || 0);
+            if (salePrice > 0) {
+              productDoc.salePrice = salePrice;
+            }
+            
+            if (p.description && p.description.trim()) {
+              productDoc.description = p.description.substring(0, 1000);
+            }
+            
+            if (p.image?.url || p.thumbnail) {
+              productDoc.imageUrl = (p.image?.url || p.thumbnail || '').substring(0, 500);
+            }
+            
+            await databases.createDocument(DATABASE_ID, PRODUCTS_COLLECTION_ID, ID.unique(), productDoc);
             savedCount++;
           } catch (e) {
             log('⚠️ Save product error: ' + e.message);

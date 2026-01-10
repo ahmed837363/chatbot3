@@ -1149,90 +1149,111 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
             });
     }
 
-    // ===== DYNAMIC PRODUCT VERIFICATION ALGORITHM =====
-    // Works with ANY store - learns from scraped products
+    // ===== STRICT PRODUCT VERIFICATION ALGORITHM =====
+    // Checks ALL products before responding - prevents AI hallucination
     function verifyProductQuestion(message) {
         const msg = message.toLowerCase();
         
-        // Check if message is asking about a product (universal patterns)
-        const askingPatterns = [
-            // Arabic patterns
-            /عندكم|عندك|فيه|يوجد|متوفر|موجود/,
-            /كم سعر|بكم|سعر/,
-            /أبي|ابي|أبغى|ابغى|اريد|أريد/,
-            // English patterns
-            /do you have|have any|got any/i,
-            /how much|price of|cost of/i,
-            /i want|looking for|need/i
+        // Log all available products for debugging
+        console.log('📦 All products in store:', storeData.products.map(p => p.name));
+        
+        // Common product keywords to detect (what user might ask for)
+        const productKeywords = [
+            // Arabic
+            'جاكيت', 'جاكيتات', 'شنطة', 'شنط', 'حذاء', 'أحذية', 'احذية',
+            'حقيبة', 'حقائب', 'ساعة', 'ساعات', 'نظارة', 'نظارات',
+            'قميص', 'قمصان', 'بنطلون', 'بنطال', 'بناطيل',
+            'تنورة', 'تنانير', 'بلوزة', 'بلايز', 'فستان', 'فساتين',
+            'عباية', 'عبايات', 'طرحة', 'طرح', 'شال', 'شيلة',
+            'جوال', 'جوالات', 'لابتوب', 'كمبيوتر', 'تلفزيون',
+            'خاتم', 'خواتم', 'سلسلة', 'اسوارة', 'قلادة',
+            // English
+            'jacket', 'bag', 'shoe', 'shoes', 'watch', 'dress', 'blouse',
+            'pants', 'shirt', 'skirt', 'phone', 'laptop', 'ring', 'necklace'
         ];
         
-        const isAskingAboutProduct = askingPatterns.some(p => p.test(msg));
+        // Find which keyword user is asking about
+        let askedKeyword = null;
+        for (const keyword of productKeywords) {
+            if (msg.includes(keyword)) {
+                askedKeyword = keyword;
+                break;
+            }
+        }
         
-        if (!isAskingAboutProduct) {
+        // If no known keyword found, let AI handle it
+        if (!askedKeyword) {
+            console.log('🔍 No product keyword detected, letting AI handle');
             return { verified: true, productAsked: null };
         }
         
-        // Extract the main noun from the question (what they're looking for)
-        // Remove common question words to find the product keyword
-        let searchTerm = msg
-            .replace(/عندكم|عندك|فيه|يوجد|متوفر|موجود|كم سعر|بكم|سعر|أبي|ابي|أبغى|ابغى|اريد|أريد/g, '')
-            .replace(/do you have|have any|got any|how much|price of|cost of|i want|looking for|need|the|a|an/gi, '')
-            .replace(/[؟?!.,]/g, '')
-            .trim();
+        console.log('🔍 User asking about:', askedKeyword);
         
-        console.log('🔍 Search term extracted:', searchTerm);
+        // NOW CHECK: Does this keyword exist in ANY of our actual products?
+        const allProductText = storeData.products.map(p => p.name.toLowerCase()).join(' ');
         
-        if (!searchTerm || searchTerm.length < 2) {
-            return { verified: true, productAsked: null };
-        }
+        // Check if the keyword appears in any product name
+        const keywordInProducts = allProductText.includes(askedKeyword);
         
-        // Get all product names from store (dynamically - works for ANY store)
-        const productNames = storeData.products.map(p => p.name.toLowerCase());
+        // Also check for partial matches (e.g., "فساتين" should match "فستان")
+        const keywordVariants = {
+            'فساتين': 'فستان', 'فستان': 'فستان',
+            'بلايز': 'بلوزة', 'بلوزة': 'بلوزة',
+            'جاكيتات': 'جاكيت', 'جاكيت': 'جاكيت',
+            'شنط': 'شنطة', 'شنطة': 'شنطة',
+            'أحذية': 'حذاء', 'احذية': 'حذاء', 'حذاء': 'حذاء',
+            'عبايات': 'عباية', 'عباية': 'عباية',
+            'dresses': 'dress', 'dress': 'dress',
+            'blouses': 'blouse', 'blouse': 'blouse',
+            'jackets': 'jacket', 'jacket': 'jacket',
+            'bags': 'bag', 'bag': 'bag',
+            'shoes': 'shoe', 'shoe': 'shoe'
+        };
         
-        // Check if the search term matches ANY product in the store
-        const matchingProducts = storeData.products.filter(p => {
-            const pName = p.name.toLowerCase();
-            // Check if product name contains search term OR search term contains product name
-            return pName.includes(searchTerm) || 
-                   searchTerm.includes(pName) ||
-                   // Also check first word of each
-                   pName.split(' ')[0].includes(searchTerm) ||
-                   searchTerm.includes(pName.split(' ')[0]);
-        });
+        const normalizedKeyword = keywordVariants[askedKeyword] || askedKeyword;
+        const hasProduct = allProductText.includes(normalizedKeyword) || allProductText.includes(askedKeyword);
         
-        const hasProduct = matchingProducts.length > 0;
+        console.log('🔍 Checking if "' + askedKeyword + '" exists in products...');
+        console.log('🔍 All product names:', allProductText.substring(0, 200));
+        console.log('🔍 Result:', hasProduct ? '✅ FOUND' : '❌ NOT FOUND');
         
-        console.log('🔍 Product check:', searchTerm, '→', hasProduct ? `✅ FOUND (${matchingProducts.length})` : '❌ NOT FOUND');
-        DEBUG_LOG.add('PRODUCT_CHECK', {
+        DEBUG_LOG.add('PRODUCT_VERIFICATION', {
             userMessage: message,
-            searchTerm: searchTerm,
-            found: hasProduct,
-            matchCount: matchingProducts.length,
-            availableProducts: storeData.products.slice(0, 10).map(p => p.name)
+            askedKeyword: askedKeyword,
+            normalizedKeyword: normalizedKeyword,
+            foundInProducts: hasProduct,
+            allProductNames: storeData.products.map(p => p.name),
+            productCount: storeData.products.length
         });
         
         if (!hasProduct) {
-            // Product doesn't exist - return response with what we DO have
-            // Get unique product types from this specific store
-            const availableTypes = [...new Set(storeData.products.map(p => {
-                // Get first meaningful word from product name
-                const words = p.name.split(' ');
-                return words[0];
-            }))].slice(0, 5).join('، ');
+            // PRODUCT DOES NOT EXIST - Return immediate response
+            const availableTypes = [...new Set(storeData.products.map(p => p.name.split(' ')[0]))]
+                .slice(0, 5)
+                .join('، ');
+            
+            console.log('🚫 Product NOT found, returning "we dont have it"');
             
             return {
                 verified: false,
-                productAsked: searchTerm,
+                productAsked: askedKeyword,
                 response: isRTL 
-                    ? `للأسف ما عندنا ${searchTerm} حالياً 😔\nبس عندنا: ${availableTypes}\nتبي تشوف شي منهم؟`
-                    : `Sorry, we don't have ${searchTerm} right now 😔\nBut we have: ${availableTypes}\nWould you like to see any of these?`
+                    ? `للأسف ما عندنا ${askedKeyword} حالياً 😔\nبس عندنا: ${availableTypes}\nتبي تشوف شي منهم؟`
+                    : `Sorry, we don't have ${askedKeyword} right now 😔\nBut we have: ${availableTypes}\nWould you like to see any of these?`
             };
         }
         
-        // Product exists! Return matching products for AI to use
+        // Product EXISTS - find matching products for AI
+        const matchingProducts = storeData.products.filter(p => 
+            p.name.toLowerCase().includes(normalizedKeyword) || 
+            p.name.toLowerCase().includes(askedKeyword)
+        );
+        
+        console.log('✅ Product FOUND, passing to AI with', matchingProducts.length, 'matches');
+        
         return { 
             verified: true, 
-            productAsked: searchTerm,
+            productAsked: askedKeyword,
             matchingProducts: matchingProducts
         };
     }

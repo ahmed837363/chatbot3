@@ -1159,17 +1159,31 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
         
         // Common product keywords to detect (what user might ask for)
         const productKeywords = [
-            // Arabic
-            'جاكيت', 'جاكيتات', 'شنطة', 'شنط', 'حذاء', 'أحذية', 'احذية',
-            'حقيبة', 'حقائب', 'ساعة', 'ساعات', 'نظارة', 'نظارات',
-            'قميص', 'قمصان', 'بنطلون', 'بنطال', 'بناطيل',
-            'تنورة', 'تنانير', 'بلوزة', 'بلايز', 'فستان', 'فساتين',
-            'عباية', 'عبايات', 'طرحة', 'طرح', 'شال', 'شيلة',
-            'جوال', 'جوالات', 'لابتوب', 'كمبيوتر', 'تلفزيون',
-            'خاتم', 'خواتم', 'سلسلة', 'اسوارة', 'قلادة',
+            // Arabic - Clothing
+            'جاكيت', 'جاكيتات', 'فستان', 'فساتين', 'بلوزة', 'بلوزات', 'بلايز',
+            'عباية', 'عبايات', 'تنورة', 'تنانير', 'بنطلون', 'بنطال', 'بناطيل',
+            'قميص', 'قمصان', 'شورت', 'بيجاما',
+            // Arabic - Accessories
+            'شنطة', 'شنط', 'حقيبة', 'حقائب', 'ساعة', 'ساعات', 'نظارة', 'نظارات',
+            'خاتم', 'خواتم', 'سلسلة', 'سلاسل', 'اسوارة', 'أساور', 'قلادة', 'اقراط', 'أقراط',
+            'بروش', 'حزام', 'احزمة',
+            // Arabic - Shoes
+            'حذاء', 'أحذية', 'احذية', 'صندل', 'كعب', 'رياضي',
+            // Arabic - Head covers
+            'طرحة', 'طرح', 'شال', 'شيلة', 'شيلات', 'حجاب',
+            // Arabic - Beauty
+            'عطر', 'عطور', 'بخور', 'مكياج', 'روج', 'كريم', 'سيروم', 'ماسك', 'غسول',
+            'هايلايتر', 'باليت', 'فرش', 'طلاء',
+            // Arabic - Electronics (usually NOT in fashion stores)
+            'جوال', 'جوالات', 'لابتوب', 'كمبيوتر', 'تلفزيون', 'سماعة', 'سماعات',
+            // Arabic - Other
+            'أثاث', 'سيارة', 'دراجة', 'كتاب', 'لعبة',
             // English
-            'jacket', 'bag', 'shoe', 'shoes', 'watch', 'dress', 'blouse',
-            'pants', 'shirt', 'skirt', 'phone', 'laptop', 'ring', 'necklace'
+            'jacket', 'dress', 'blouse', 'abaya', 'skirt', 'pants', 'shirt',
+            'bag', 'shoe', 'shoes', 'watch', 'ring', 'necklace', 'bracelet',
+            'perfume', 'makeup', 'cream', 'serum',
+            'phone', 'laptop', 'tv', 'headphone',
+            'furniture', 'car', 'book', 'toy'
         ];
         
         // Find which keyword user is asking about
@@ -1197,17 +1211,40 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
         
         // Also check for partial matches (e.g., "فساتين" should match "فستان")
         const keywordVariants = {
+            // Arabic - Clothing plurals to singular
             'فساتين': 'فستان', 'فستان': 'فستان',
-            'بلايز': 'بلوزة', 'بلوزة': 'بلوزة',
+            'بلوزات': 'بلوزة', 'بلايز': 'بلوزة', 'بلوزة': 'بلوزة',
             'جاكيتات': 'جاكيت', 'جاكيت': 'جاكيت',
-            'شنط': 'شنطة', 'شنطة': 'شنطة',
-            'أحذية': 'حذاء', 'احذية': 'حذاء', 'حذاء': 'حذاء',
             'عبايات': 'عباية', 'عباية': 'عباية',
+            'تنانير': 'تنورة', 'تنورة': 'تنورة',
+            'بناطيل': 'بنطلون', 'بنطال': 'بنطلون', 'بنطلون': 'بنطلون',
+            'قمصان': 'قميص', 'قميص': 'قميص',
+            // Arabic - Bags
+            'شنط': 'حقيبة', 'شنطة': 'حقيبة', 'حقائب': 'حقيبة', 'حقيبة': 'حقيبة',
+            // Arabic - Shoes
+            'أحذية': 'حذاء', 'احذية': 'حذاء', 'حذاء': 'حذاء',
+            // Arabic - Watches
+            'ساعات': 'ساعة', 'ساعة': 'ساعة',
+            // Arabic - Accessories
+            'خواتم': 'خاتم', 'خاتم': 'خاتم',
+            'سلاسل': 'سلسلة', 'سلسلة': 'سلسلة',
+            'أساور': 'اسوارة', 'اسوارة': 'اسوارة',
+            'أقراط': 'اقراط', 'اقراط': 'اقراط',
+            'نظارات': 'نظارة', 'نظارة': 'نظارة',
+            // Arabic - Head covers
+            'شيلات': 'شيلة', 'شيلة': 'شيلة',
+            'طرح': 'طرحة', 'طرحة': 'طرحة',
+            // Arabic - Perfume
+            'عطور': 'عطر', 'عطر': 'عطر',
+            // English plurals
             'dresses': 'dress', 'dress': 'dress',
             'blouses': 'blouse', 'blouse': 'blouse',
             'jackets': 'jacket', 'jacket': 'jacket',
             'bags': 'bag', 'bag': 'bag',
-            'shoes': 'shoe', 'shoe': 'shoe'
+            'shoes': 'shoe', 'shoe': 'shoe',
+            'watches': 'watch', 'watch': 'watch',
+            'rings': 'ring', 'ring': 'ring',
+            'perfumes': 'perfume', 'perfume': 'perfume'
         };
         
         const normalizedKeyword = keywordVariants[askedKeyword] || askedKeyword;

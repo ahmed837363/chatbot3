@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر الاختبار | Test Store - 50 Products</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 1.2em; }
+        .stats {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 30px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 15px;
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .s-product-card-entry {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .s-product-card-entry:hover {
+            transform: translateY(-5px);
+        }
+        .product-image {
+            height: 150px;
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+        }
+        .product-info {
+            padding: 15px;
+        }
+        .s-product-card-entry__title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            color: #333;
+        }
+        .s-product-card-entry__price {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.85em;
+            margin-right: 8px;
+        }
+        .category-tag {
+            background: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            color: #666;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        .test-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+        }
+        .test-section h3 { color: #667eea; margin-bottom: 15px; }
+        .test-questions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .test-q {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+        .test-q.yes { border-left: 4px solid #4CAF50; }
+        .test-q.no { border-left: 4px solid #f44336; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🏪 متجر الاختبار الشامل</h1>
+    <p>50 منتج متنوع لاختبار الذكاء الاصطناعي</p>
+    <div class="stats">
+        <strong>50 منتج</strong> | 10 فئات مختلفة
+    </div>
+</div>
+
+<!-- Test Questions Section -->
+<div class="test-section">
+    <h3>🧪 أسئلة الاختبار - Test Questions</h3>
+    <div class="test-questions">
+        <div class="test-q yes">✅ عندكم فساتين؟ (نعم - 5 منتجات)</div>
+        <div class="test-q no">❌ عندكم تلفزيون؟ (لا)</div>
+        <div class="test-q yes">✅ عندكم ساعات؟ (نعم - 3 منتجات)</div>
+        <div class="test-q no">❌ عندكم أثاث؟ (لا)</div>
+        <div class="test-q yes">✅ عندكم عطور؟ (نعم - 4 منتجات)</div>
+        <div class="test-q no">❌ عندكم سيارات؟ (لا)</div>
+        <div class="test-q yes">✅ كم سعر الجاكيت؟ (نعم - 3 منتجات)</div>
+        <div class="test-q no">❌ عندكم لابتوب؟ (لا)</div>
+    </div>
+</div>
+
+<div class="products-grid">
+    
+    <!-- ===== فساتين (5) ===== -->
+    <div class="s-product-card-entry" data-product-id="1" data-category="فساتين">
+        <div class="product-image">👗</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">فستان سهرة أسود</div>
+            <div class="s-product-card-entry__price">
+                <span class="original-price">٥٩٩</span>
+                ٣٩٩ ريال
+            </div>
+            <span class="category-tag">فساتين</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="2" data-category="فساتين">
+        <div class="product-image">👗</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">فستان زفاف أبيض</div>
+            <div class="s-product-card-entry__price">٢٤٩٩ ريال</div>
+            <span class="category-tag">فساتين</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="3" data-category="فساتين">
+        <div class="product-image">👗</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">فستان كاجوال قصير</div>
+            <div class="s-product-card-entry__price">١٧٩ ريال</div>
+            <span class="category-tag">فساتين</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="4" data-category="فساتين">
+        <div class="product-image">👗</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">فستان صيفي مشجر</div>
+            <div class="s-product-card-entry__price">١٤٩ ريال</div>
+            <span class="category-tag">فساتين</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="5" data-category="فساتين">
+        <div class="product-image">👗</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">فستان سواريه ذهبي</div>
+            <div class="s-product-card-entry__price">
+                <span class="original-price">٨٩٩</span>
+                ٦٤٩ ريال
+            </div>
+            <span class="category-tag">فساتين</span>
+        </div>
+    </div>
+
+    <!-- ===== بلوزات (5) ===== -->
+    <div class="s-product-card-entry" data-product-id="6" data-category="بلوزات">
+        <div class="product-image">👚</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">بلوزة قطن بيضاء</div>
+            <div class="s-product-card-entry__price">٨٩ ريال</div>
+            <span class="category-tag">بلوزات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="7" data-category="بلوزات">
+        <div class="product-image">👚</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">بلوزة حرير زهرية</div>
+            <div class="s-product-card-entry__price">١٤٩ ريال</div>
+            <span class="category-tag">بلوزات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="8" data-category="بلوزات">
+        <div class="product-image">👚</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">بلوزة شيفون سوداء</div>
+            <div class="s-product-card-entry__price">١١٩ ريال</div>
+            <span class="category-tag">بلوزات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="9" data-category="بلوزات">
+        <div class="product-image">👚</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">بلوزة كم طويل</div>
+            <div class="s-product-card-entry__price">٩٩ ريال</div>
+            <span class="category-tag">بلوزات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="10" data-category="بلوزات">
+        <div class="product-image">👚</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">بلوزة مطرزة</div>
+            <div class="s-product-card-entry__price">١٧٩ ريال</div>
+            <span class="category-tag">بلوزات</span>
+        </div>
+    </div>
+
+    <!-- ===== عبايات (5) ===== -->
+    <div class="s-product-card-entry" data-product-id="11" data-category="عبايات">
+        <div class="product-image">🧕</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">عباية سوداء كلاسيك</div>
+            <div class="s-product-card-entry__price">٣٤٩ ريال</div>
+            <span class="category-tag">عبايات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="12" data-category="عبايات">
+        <div class="product-image">🧕</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">عباية مطرزة فاخرة</div>
+            <div class="s-product-card-entry__price">٥٩٩ ريال</div>
+            <span class="category-tag">عبايات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="13" data-category="عبايات">
+        <div class="product-image">🧕</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">عباية قماش كريب</div>
+            <div class="s-product-card-entry__price">٢٩٩ ريال</div>
+            <span class="category-tag">عبايات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="14" data-category="عبايات">
+        <div class="product-image">🧕</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">عباية ملونة عصرية</div>
+            <div class="s-product-card-entry__price">٣٩٩ ريال</div>
+            <span class="category-tag">عبايات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="15" data-category="عبايات">
+        <div class="product-image">🧕</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">عباية كتان صيفية</div>
+            <div class="s-product-card-entry__price">٢٤٩ ريال</div>
+            <span class="category-tag">عبايات</span>
+        </div>
+    </div>
+
+    <!-- ===== جاكيتات (3) ===== -->
+    <div class="s-product-card-entry" data-product-id="16" data-category="جاكيتات">
+        <div class="product-image">🧥</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">جاكيت جينز أزرق</div>
+            <div class="s-product-card-entry__price">٢٤٩ ريال</div>
+            <span class="category-tag">جاكيتات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="17" data-category="جاكيتات">
+        <div class="product-image">🧥</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">جاكيت جلد أسود</div>
+            <div class="s-product-card-entry__price">٤٩٩ ريال</div>
+            <span class="category-tag">جاكيتات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="18" data-category="جاكيتات">
+        <div class="product-image">🧥</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">جاكيت صوف شتوي</div>
+            <div class="s-product-card-entry__price">٣٤٩ ريال</div>
+            <span class="category-tag">جاكيتات</span>
+        </div>
+    </div>
+
+    <!-- ===== ساعات (3) ===== -->
+    <div class="s-product-card-entry" data-product-id="19" data-category="ساعات">
+        <div class="product-image">⌚</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">ساعة يد ذهبية</div>
+            <div class="s-product-card-entry__price">٧٩٩ ريال</div>
+            <span class="category-tag">ساعات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="20" data-category="ساعات">
+        <div class="product-image">⌚</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">ساعة رياضية سوداء</div>
+            <div class="s-product-card-entry__price">٣٩٩ ريال</div>
+            <span class="category-tag">ساعات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="21" data-category="ساعات">
+        <div class="product-image">⌚</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">ساعة كلاسيكية فضية</div>
+            <div class="s-product-card-entry__price">٥٤٩ ريال</div>
+            <span class="category-tag">ساعات</span>
+        </div>
+    </div>
+
+    <!-- ===== عطور (4) ===== -->
+    <div class="s-product-card-entry" data-product-id="22" data-category="عطور">
+        <div class="product-image">🧴</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">عطر ورد طائفي</div>
+            <div class="s-product-card-entry__price">٢٩٩ ريال</div>
+            <span class="category-tag">عطور</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="23" data-category="عطور">
+        <div class="product-image">🧴</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">عطر عود ملكي</div>
+            <div class="s-product-card-entry__price">٤٤٩ ريال</div>
+            <span class="category-tag">عطور</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="24" data-category="عطور">
+        <div class="product-image">🧴</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">عطر مسك أبيض</div>
+            <div class="s-product-card-entry__price">١٩٩ ريال</div>
+            <span class="category-tag">عطور</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="25" data-category="عطور">
+        <div class="product-image">🧴</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">عطر فانيلا فرنسي</div>
+            <div class="s-product-card-entry__price">٣٤٩ ريال</div>
+            <span class="category-tag">عطور</span>
+        </div>
+    </div>
+
+    <!-- ===== حقائب (5) ===== -->
+    <div class="s-product-card-entry" data-product-id="26" data-category="حقائب">
+        <div class="product-image">👜</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">حقيبة يد جلد</div>
+            <div class="s-product-card-entry__price">٣٩٩ ريال</div>
+            <span class="category-tag">حقائب</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="27" data-category="حقائب">
+        <div class="product-image">👜</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">حقيبة كتف صغيرة</div>
+            <div class="s-product-card-entry__price">١٩٩ ريال</div>
+            <span class="category-tag">حقائب</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="28" data-category="حقائب">
+        <div class="product-image">👜</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">حقيبة سفر كبيرة</div>
+            <div class="s-product-card-entry__price">٤٩٩ ريال</div>
+            <span class="category-tag">حقائب</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="29" data-category="حقائب">
+        <div class="product-image">👜</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">حقيبة ظهر رياضية</div>
+            <div class="s-product-card-entry__price">١٤٩ ريال</div>
+            <span class="category-tag">حقائب</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="30" data-category="حقائب">
+        <div class="product-image">👜</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">حقيبة كلاتش سواريه</div>
+            <div class="s-product-card-entry__price">٢٤٩ ريال</div>
+            <span class="category-tag">حقائب</span>
+        </div>
+    </div>
+
+    <!-- ===== اكسسوارات (5) ===== -->
+    <div class="s-product-card-entry" data-product-id="31" data-category="اكسسوارات">
+        <div class="product-image">💍</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">خاتم فضة منقوش</div>
+            <div class="s-product-card-entry__price">١٢٩ ريال</div>
+            <span class="category-tag">اكسسوارات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="32" data-category="اكسسوارات">
+        <div class="product-image">📿</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">سلسلة ذهب ناعمة</div>
+            <div class="s-product-card-entry__price">٣٩٩ ريال</div>
+            <span class="category-tag">اكسسوارات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="33" data-category="اكسسوارات">
+        <div class="product-image">👂</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">أقراط لؤلؤ طبيعي</div>
+            <div class="s-product-card-entry__price">٢٤٩ ريال</div>
+            <span class="category-tag">اكسسوارات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="34" data-category="اكسسوارات">
+        <div class="product-image">💎</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">اسوارة كريستال</div>
+            <div class="s-product-card-entry__price">١٧٩ ريال</div>
+            <span class="category-tag">اكسسوارات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="35" data-category="اكسسوارات">
+        <div class="product-image">🎀</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">بروش فراشة</div>
+            <div class="s-product-card-entry__price">٨٩ ريال</div>
+            <span class="category-tag">اكسسوارات</span>
+        </div>
+    </div>
+
+    <!-- ===== شيلات وطرح (5) ===== -->
+    <div class="s-product-card-entry" data-product-id="36" data-category="شيلات">
+        <div class="product-image">🧣</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">شيلة قطن سادة</div>
+            <div class="s-product-card-entry__price">٤٩ ريال</div>
+            <span class="category-tag">شيلات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="37" data-category="شيلات">
+        <div class="product-image">🧣</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">شيلة حرير مطبوعة</div>
+            <div class="s-product-card-entry__price">٧٩ ريال</div>
+            <span class="category-tag">شيلات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="38" data-category="شيلات">
+        <div class="product-image">🧣</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">طرحة شيفون</div>
+            <div class="s-product-card-entry__price">٥٩ ريال</div>
+            <span class="category-tag">شيلات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="39" data-category="شيلات">
+        <div class="product-image">🧣</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">شال صوف شتوي</div>
+            <div class="s-product-card-entry__price">٩٩ ريال</div>
+            <span class="category-tag">شيلات</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="40" data-category="شيلات">
+        <div class="product-image">🧣</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">طرحة دانتيل</div>
+            <div class="s-product-card-entry__price">٦٩ ريال</div>
+            <span class="category-tag">شيلات</span>
+        </div>
+    </div>
+
+    <!-- ===== مكياج (5) ===== -->
+    <div class="s-product-card-entry" data-product-id="41" data-category="مكياج">
+        <div class="product-image">💄</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">روج أحمر مات</div>
+            <div class="s-product-card-entry__price">٦٩ ريال</div>
+            <span class="category-tag">مكياج</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="42" data-category="مكياج">
+        <div class="product-image">🎨</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">باليت ظلال عيون</div>
+            <div class="s-product-card-entry__price">١٤٩ ريال</div>
+            <span class="category-tag">مكياج</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="43" data-category="مكياج">
+        <div class="product-image">✨</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">هايلايتر ذهبي</div>
+            <div class="s-product-card-entry__price">٨٩ ريال</div>
+            <span class="category-tag">مكياج</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="44" data-category="مكياج">
+        <div class="product-image">🖌️</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">فرش مكياج طقم</div>
+            <div class="s-product-card-entry__price">١٩٩ ريال</div>
+            <span class="category-tag">مكياج</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="45" data-category="مكياج">
+        <div class="product-image">💅</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">طلاء أظافر جل</div>
+            <div class="s-product-card-entry__price">٣٩ ريال</div>
+            <span class="category-tag">مكياج</span>
+        </div>
+    </div>
+
+    <!-- ===== عناية بالبشرة (5) ===== -->
+    <div class="s-product-card-entry" data-product-id="46" data-category="عناية">
+        <div class="product-image">🧴</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">كريم مرطب للوجه</div>
+            <div class="s-product-card-entry__price">١٢٩ ريال</div>
+            <span class="category-tag">عناية</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="47" data-category="عناية">
+        <div class="product-image">🧼</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">غسول وجه منظف</div>
+            <div class="s-product-card-entry__price">٧٩ ريال</div>
+            <span class="category-tag">عناية</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="48" data-category="عناية">
+        <div class="product-image">☀️</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">واقي شمس SPF50</div>
+            <div class="s-product-card-entry__price">٩٩ ريال</div>
+            <span class="category-tag">عناية</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="49" data-category="عناية">
+        <div class="product-image">💧</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">سيروم فيتامين سي</div>
+            <div class="s-product-card-entry__price">١٧٩ ريال</div>
+            <span class="category-tag">عناية</span>
+        </div>
+    </div>
+    
+    <div class="s-product-card-entry" data-product-id="50" data-category="عناية">
+        <div class="product-image">🌸</div>
+        <div class="product-info">
+            <div class="s-product-card-entry__title">ماسك وجه بالذهب</div>
+            <div class="s-product-card-entry__price">٤٩ ريال</div>
+            <span class="category-tag">عناية</span>
+        </div>
+    </div>
+
+</div>
+
+<!-- Chatbot Widget -->
+<script src="https://cdn.jsdelivr.net/gh/ahmed837363/chatbot3@v3.4/chatbot-widget.js" 
+        data-store-id="50products" 
+        data-lang="ar">
+</script>
+
+<script>
+// Log all products found for verification
+setTimeout(() => {
+    console.log('='.repeat(50));
+    console.log('🧪 TEST STORE - 50 PRODUCTS');
+    console.log('='.repeat(50));
+    console.log('Products should include:');
+    console.log('✅ فستان (5), بلوزة (5), عباية (5), جاكيت (3)');
+    console.log('✅ ساعة (3), عطر (4), حقيبة (5), اكسسوارات (5)');
+    console.log('✅ شيلة/طرحة (5), مكياج (5), عناية (5)');
+    console.log('');
+    console.log('❌ Should NOT have: حذاء, تلفزيون, لابتوب, سيارة, أثاث');
+    console.log('='.repeat(50));
+}, 2000);
+</script>
+
+</body>
+</html>

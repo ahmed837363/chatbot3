@@ -7,7 +7,7 @@ const { Client, Databases, ID, Query } = require('node-appwrite');
 const DATABASE_ID = '6946699d001194236820';
 const COLLECTION_ID = 'store_connections';
 const PRODUCTS_COLLECTION_ID = 'products'; // NEW: Products collection
-const WIDGET_URL = 'https://cdn.jsdelivr.net/gh/ahmed837363/chatbot3@v2.2/chatbot-widget.js';
+const WIDGET_URL = 'https://cdn.jsdelivr.net/gh/ahmed837363/chatbot3@v2.3/chatbot-widget.js';
 
 module.exports = async ({ req, res, log, error }) => {
   log('📨 Request received: ' + req.method);

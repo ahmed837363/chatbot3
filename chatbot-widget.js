@@ -96,7 +96,7 @@
         aiModel: 'allam-7b-instruct-preview',
         chatbotColor: '#667eea',
         position: 'bottom-left', // or 'bottom-right'
-        language: lang
+        language: currentLang
     };
 
     // Get store ID and custom config from script tag

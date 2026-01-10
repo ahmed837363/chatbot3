@@ -204,26 +204,62 @@
             productElements.forEach((el, i) => {
                 if (i >= 50) return;
                 
-                // Get product name - try multiple selectors
+                // Get product name - try multiple selectors (Salla-specific first)
                 let name = null;
                 const nameSelectors = [
+                    // Salla Twilight theme specific
                     '.s-product-card-entry__title a',
+                    '.s-product-card-entry__title span',
                     '.s-product-card-entry__title',
+                    '.s-product-card__title a',
+                    '.s-product-card__title',
+                    // Check data attributes
+                    '[data-product-name]',
+                    '[data-name]',
+                    // Generic
                     '.product-title a',
                     '.product-title',
                     '.product-name',
-                    '[class*="title"] a',
-                    '[class*="name"]',
+                    '[class*="product"][class*="title"] a',
+                    '[class*="product"][class*="name"]',
                     'h2 a', 'h3 a', 'h4 a',
                     'h2', 'h3', 'h4',
                     'a[href*="/p/"]'
                 ];
+                
                 for (const sel of nameSelectors) {
                     const nameEl = el.querySelector(sel);
                     if (nameEl) {
-                        name = nameEl.textContent?.trim() || nameEl.getAttribute('title');
-                        if (name && name.length > 1 && name.length < 150) break;
+                        // Try data attribute first
+                        name = nameEl.getAttribute('data-product-name') || 
+                               nameEl.getAttribute('data-name') ||
+                               nameEl.getAttribute('title') ||
+                               nameEl.textContent?.trim();
+                        // Clean the name
+                        if (name) {
+                            name = name.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+                        }
+                        if (name && name.length > 1 && name.length < 150) {
+                            console.log('📝 Found name with selector:', sel, '→', name);
+                            break;
+                        }
                         name = null;
+                    }
+                }
+                
+                // Fallback: Try to get name from any link to product page
+                if (!name) {
+                    const productLink = el.querySelector('a[href*="/p/"], a[href*="/product/"]');
+                    if (productLink) {
+                        name = productLink.getAttribute('title') || productLink.textContent?.trim();
+                        if (name) {
+                            name = name.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+                        }
+                        if (name && name.length > 1 && name.length < 150) {
+                            console.log('📝 Found name from link:', name);
+                        } else {
+                            name = null;
+                        }
                     }
                 }
                 
@@ -575,6 +611,12 @@
 
     // Build dynamic system prompt with real store data
     function buildSystemPrompt() {
+        // Debug: Log what products we have
+        console.log('🤖 Building prompt with', storeData.products.length, 'products');
+        if (storeData.products.length > 0) {
+            console.log('📋 First 5 products:', storeData.products.slice(0, 5).map(p => `${p.name}: ${p.price}`));
+        }
+        
         // Products section
         let productList = '';
         if (storeData.products.length > 0) {

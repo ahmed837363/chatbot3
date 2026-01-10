@@ -1,7 +1,7 @@
 /**
- * AI Chatbot Widget - Production Ready
+ * AI Chatbot Widget - Production Ready v2.1
  * Embed this on any website to add AI chat support
- * Supports: Arabic (Saudi dialect) and English
+ * Supports: Arabic (Saudi dialect) and English with live language switching
  * 
  * Usage:
  * <script src="https://your-cdn/chatbot-widget.js" data-store-id="YOUR_STORE_ID" data-lang="ar"></script>
@@ -9,6 +9,8 @@
 
 (function() {
     'use strict';
+    
+    console.log('🤖 AI Chatbot Widget v2.1 loading...');
 
     // Bilingual text configuration
     const texts = {

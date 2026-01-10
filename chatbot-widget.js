@@ -709,10 +709,13 @@
             console.log('📋 First 5 products:', storeData.products.slice(0, 5).map(p => `${p.name}: ${p.price}`));
         }
         
-        // Products section
+        // Products section - include ALL products (up to 50)
         let productList = '';
+        console.log('📦 Products available for prompt:', storeData.products.length);
+        console.log('📋 Product names:', storeData.products.map(p => p.name));
+        
         if (storeData.products.length > 0) {
-            productList = storeData.products.slice(0, 30).map((p, i) => {
+            productList = storeData.products.slice(0, 50).map((p, i) => {
                 let priceText = `${p.price} ${p.currency || 'ريال'}`;
                 if (p.salePrice && p.salePrice < p.price) {
                     priceText = `${p.salePrice} ريال (بدل ${p.price})`;
@@ -774,7 +777,7 @@
         if (!isRTL) {
             let productListEn = '';
             if (storeData.products.length > 0) {
-                productListEn = storeData.products.slice(0, 30).map((p, i) => {
+                productListEn = storeData.products.slice(0, 50).map((p, i) => {
                     let priceText = `${p.price} SAR`;
                     if (p.salePrice && p.salePrice < p.price) {
                         priceText = `${p.salePrice} SAR (was ${p.price})`;
@@ -1094,6 +1097,9 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
             if (freshProducts.length > 0) {
                 storeData.products = freshProducts;
                 console.log('🔄 Refreshed products:', freshProducts.length);
+                console.log('📋 Product names:', freshProducts.map(p => p.name).join(' | '));
+            } else {
+                console.log('⚠️ NO PRODUCTS FOUND! Check scraping selectors');
             }
         });
 
@@ -1308,12 +1314,14 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
         
         console.log('🤖 Calling AI with', storeData.products.length, 'products in context');
         console.log('📝 User message:', message);
+        console.log('📦 Full system prompt length:', systemPrompt.length);
+        console.log('📋 Products in prompt:', storeData.products.map(p => p.name).join(', '));
         
         // Log the full request
         DEBUG_LOG.add('AI_REQUEST', {
             userMessage: message,
             productsInContext: storeData.products.length,
-            productsList: storeData.products.slice(0, 30).map(p => `${p.name}: ${p.price} ${p.currency}`),
+            productsList: storeData.products.slice(0, 50).map(p => `${p.name}: ${p.price} ${p.currency}`),
             systemPromptPreview: systemPrompt.substring(0, 500) + '...'
         });
 

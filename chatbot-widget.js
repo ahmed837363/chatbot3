@@ -1149,9 +1149,150 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
             });
     }
 
+    // ===== PRODUCT VERIFICATION ALGORITHM =====
+    // Pre-check if user is asking about a product and verify it exists
+    function verifyProductQuestion(message) {
+        const msg = message.toLowerCase();
+        
+        // Product keywords in Arabic and English
+        const productKeywords = {
+            // Arabic clothing items
+            'جاكيت': 'جاكيت',
+            'جاكيتات': 'جاكيت',
+            'شنطة': 'شنطة',
+            'شنط': 'شنطة',
+            'حذاء': 'حذاء',
+            'أحذية': 'حذاء',
+            'احذية': 'حذاء',
+            'حقيبة': 'حقيبة',
+            'حقائب': 'حقيبة',
+            'ساعة': 'ساعة',
+            'ساعات': 'ساعة',
+            'نظارة': 'نظارة',
+            'نظارات': 'نظارة',
+            'قميص': 'قميص',
+            'قمصان': 'قميص',
+            'بنطلون': 'بنطلون',
+            'بنطال': 'بنطلون',
+            'بناطيل': 'بنطلون',
+            'تنورة': 'تنورة',
+            'تنانير': 'تنورة',
+            'بلوزة': 'بلوزة',
+            'بلايز': 'بلوزة',
+            'فستان': 'فستان',
+            'فساتين': 'فستان',
+            'عباية': 'عباية',
+            'عبايات': 'عباية',
+            'طرحة': 'طرحة',
+            'طرح': 'طرحة',
+            'شال': 'شال',
+            'شيلة': 'شيلة',
+            // English
+            'jacket': 'jacket',
+            'jackets': 'jacket',
+            'bag': 'bag',
+            'bags': 'bag',
+            'shoe': 'shoe',
+            'shoes': 'shoe',
+            'watch': 'watch',
+            'watches': 'watch',
+            'dress': 'dress',
+            'dresses': 'dress',
+            'blouse': 'blouse',
+            'blouses': 'blouse',
+            'pants': 'pants',
+            'shirt': 'shirt',
+            'skirt': 'skirt',
+            'abaya': 'abaya'
+        };
+        
+        // Check if message is asking about a product
+        const askingPatterns = [
+            /عندكم|عندك|فيه|يوجد|متوفر|موجود/,  // Arabic "do you have"
+            /كم سعر|بكم|سعر/,  // Arabic "how much"
+            /أبي|ابي|أبغى|ابغى|اريد|أريد/,  // Arabic "I want"
+            /do you have|have any|got any/i,  // English
+            /how much|price of|cost of/i,  // English
+            /i want|looking for|need/i  // English
+        ];
+        
+        const isAskingAboutProduct = askingPatterns.some(p => p.test(msg));
+        
+        if (!isAskingAboutProduct) {
+            return { verified: true, productAsked: null };  // Not a product question, proceed to AI
+        }
+        
+        // Find which product they're asking about
+        let productAsked = null;
+        for (const [keyword, normalized] of Object.entries(productKeywords)) {
+            if (msg.includes(keyword)) {
+                productAsked = normalized;
+                break;
+            }
+        }
+        
+        if (!productAsked) {
+            return { verified: true, productAsked: null };  // Can't identify product, let AI handle
+        }
+        
+        // Check if this product exists in our scraped products
+        const productNames = storeData.products.map(p => p.name.toLowerCase());
+        const hasProduct = productNames.some(name => 
+            name.includes(productAsked) || productAsked.includes(name.split(' ')[0])
+        );
+        
+        console.log('🔍 Product check:', productAsked, '→', hasProduct ? '✅ FOUND' : '❌ NOT FOUND');
+        DEBUG_LOG.add('PRODUCT_CHECK', {
+            userMessage: message,
+            productAsked: productAsked,
+            found: hasProduct,
+            availableProducts: storeData.products.map(p => p.name)
+        });
+        
+        if (!hasProduct) {
+            // Product doesn't exist - return pre-written response
+            const availableTypes = [...new Set(storeData.products.map(p => p.name.split(' ')[0]))].slice(0, 5).join('، ');
+            return {
+                verified: false,
+                productAsked: productAsked,
+                response: isRTL 
+                    ? `للأسف ما عندنا ${productAsked} حالياً 😔\nبس عندنا: ${availableTypes}\nتبي تشوف شي منهم؟`
+                    : `Sorry, we don't have ${productAsked} right now 😔\nBut we have: ${availableTypes}\nWould you like to see any of these?`
+            };
+        }
+        
+        // Product exists, find matching products
+        const matchingProducts = storeData.products.filter(p => 
+            p.name.toLowerCase().includes(productAsked)
+        );
+        
+        return { 
+            verified: true, 
+            productAsked: productAsked,
+            matchingProducts: matchingProducts
+        };
+    }
+
     async function callAI(message) {
+        // ===== PRE-CHECK: Verify product exists before asking AI =====
+        const verification = verifyProductQuestion(message);
+        
+        if (!verification.verified) {
+            // Product doesn't exist - return immediate response without calling AI
+            console.log('🚫 Product not found, returning pre-written response');
+            return verification.response;
+        }
+        
         // Use dynamic system prompt with real or demo store data
-        const systemPrompt = buildSystemPrompt();
+        let systemPrompt = buildSystemPrompt();
+        
+        // If asking about a specific product that exists, add hint to prompt
+        if (verification.matchingProducts && verification.matchingProducts.length > 0) {
+            const productHint = verification.matchingProducts.map(p => 
+                `${p.name}: ${p.salePrice || p.price} ريال${p.salePrice ? ` (بدل ${p.price})` : ''}`
+            ).join('\n');
+            systemPrompt += `\n\n⚠️ العميل يسأل عن ${verification.productAsked}. هذه المنتجات المطابقة:\n${productHint}`;
+        }
         
         console.log('🤖 Calling AI with', storeData.products.length, 'products in context');
         console.log('📝 User message:', message);

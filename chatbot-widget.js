@@ -772,9 +772,10 @@ Response Rules:
 - Keep responses brief and clear
 - If asked about a listed product, provide the price
 - If there's an applicable coupon, suggest it
-- If asked about an unlisted product, say "Sorry, we don't have that product"
+- If asked about an unlisted product, say "Sorry, that product is not available" without adding any links
 - If asked for support contact, provide the contact info above
-- Never invent products, prices, or coupons not in the lists above`;
+- NEVER invent products, prices, links or coupons not in the lists above
+- Do NOT add any URLs or links - products are on the same page`;
         }
 
         // Arabic system prompt (default)
@@ -810,15 +811,16 @@ ${offersInfo}
 ${storeData.supportContact || 'معلومات التواصل موجودة في الموقع'}
 
 ═══════════════════════════════════
-قواعد الرد:
+قواعد الرد (مهم جداً):
 ═══════════════════════════════════
 - استخدم اللهجة السعودية (وش، الحين، تمام، يعطيك العافية)
 - كن مختصر وودود
-- إذا سأل عن منتج موجود، أعطه السعر
+- إذا سأل عن منتج موجود في القائمة أعلاه، أعطه الاسم والسعر بالضبط
 - إذا فيه كوبون مناسب، اقترحه على العميل
-- إذا سأل عن منتج مو موجود، قول "للأسف ما عندنا هذا المنتج"
+- إذا سأل عن منتج مو موجود في القائمة، قول "للأسف هذا المنتج مو متوفر عندنا حالياً" بدون إضافة روابط
 - إذا سأل عن رقم الدعم أو التواصل، أعطه المعلومات أعلاه
-- لا تخترع منتجات أو أسعار أو كوبونات غير موجودة في القوائم أعلاه`;
+- ممنوع تخترع منتجات أو أسعار أو روابط - استخدم فقط البيانات الموجودة أعلاه
+- لا تضيف روابط أو URLs - المنتجات موجودة في نفس الصفحة`;
     }
 
     // Create widget HTML
@@ -1060,6 +1062,9 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
     async function callAI(message) {
         // Use dynamic system prompt with real or demo store data
         const systemPrompt = buildSystemPrompt();
+        
+        console.log('🤖 Calling AI with', storeData.products.length, 'products in context');
+        console.log('📝 User message:', message);
 
         try {
             // Send to LM Studio (OpenAI format) via Cloudflare tunnel
@@ -1086,6 +1091,7 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
             }
 
             const data = await response.json();
+            console.log('✅ AI Response received:', data.choices?.[0]?.message?.content?.substring(0, 100));
             // LM Studio returns OpenAI format
             return data.choices?.[0]?.message?.content || t.notUnderstood;
         } catch (error) {

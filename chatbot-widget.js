@@ -93,6 +93,7 @@
         appwriteProjectId: '694669640010920ea3f6',
         databaseId: '6946699d001194236820',
         collectionId: 'store_connections',
+        productsCollectionId: 'products', // NEW: Products collection
         // Local ALLaM AI via Cloudflare Tunnel (permanent URL)
         aiWorkerUrl: 'https://allam-ai.mayasahstyle.me/v1/chat/completions',
         aiModel: 'allam-7b-instruct-preview',
@@ -226,35 +227,65 @@
             if (storeDoc) {
                 storeData.storeName = storeDoc.storeName || 'متجر';
                 
-                // Parse cached data from Appwrite
-                try {
-                    storeData.products = storeDoc.cachedProducts ? JSON.parse(storeDoc.cachedProducts) : [];
-                } catch (e) { storeData.products = []; }
-                
-                try {
-                    storeData.shipping = storeDoc.cachedShipping ? JSON.parse(storeDoc.cachedShipping) : [];
-                } catch (e) { storeData.shipping = []; }
-                
-                try {
-                    storeData.coupons = storeDoc.cachedCoupons ? JSON.parse(storeDoc.cachedCoupons) : [];
-                } catch (e) { storeData.coupons = []; }
-                
-                try {
-                    storeData.offers = storeDoc.cachedOffers ? JSON.parse(storeDoc.cachedOffers) : [];
-                } catch (e) { storeData.offers = []; }
+                // Fetch products from products collection
+                const productsFromDB = await fetchProductsFromAppwrite(storeId);
+                if (productsFromDB.length > 0) {
+                    storeData.products = productsFromDB;
+                    console.log('✅ Loaded', productsFromDB.length, 'products from Appwrite database');
+                }
                 
                 storeData.loaded = true;
                 
-                console.log('✅ Store data loaded from cache:');
+                console.log('✅ Store data loaded from Appwrite:');
                 console.log('   - Store:', storeData.storeName);
                 console.log('   - Products:', storeData.products.length);
-                console.log('   - Shipping zones:', storeData.shipping.length);
-                console.log('   - Coupons:', storeData.coupons.length);
-                console.log('   - Offers:', storeData.offers.length);
-                console.log('   - Last updated:', storeDoc.cacheLastUpdated || 'Unknown');
             }
         } catch (error) {
             console.log('ℹ️ Using demo mode - no store data loaded:', error.message);
+        }
+    }
+
+    // NEW: Fetch products from Appwrite products collection
+    async function fetchProductsFromAppwrite(storeId) {
+        try {
+            const storeIdInt = parseInt(storeId) || 0;
+            const query = encodeURIComponent(`equal("storeId",${storeIdInt})`);
+            const url = `${config.appwriteEndpoint}/databases/${config.databaseId}/collections/${config.productsCollectionId}/documents?queries[]=${query}&queries[]=${encodeURIComponent('limit(50)')}`;
+            
+            console.log('🔍 Fetching products from Appwrite...');
+            
+            const response = await fetch(url, { 
+                method: 'GET',
+                headers: { 
+                    'X-Appwrite-Project': config.appwriteProjectId,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                console.log('⚠️ Products fetch failed:', response.status);
+                return [];
+            }
+            
+            const data = await response.json();
+            console.log('📦 Products from DB:', data.total);
+            
+            if (data.documents && data.documents.length > 0) {
+                return data.documents.map(doc => ({
+                    name: doc.name || doc.nameAr || 'منتج',
+                    price: doc.price || 0,
+                    salePrice: doc.salePrice || null,
+                    currency: doc.currency || 'SAR',
+                    description: doc.description || '',
+                    inStock: doc.inStock !== false,
+                    imageUrl: doc.imageUrl || ''
+                }));
+            }
+            
+            return [];
+        } catch (e) {
+            console.log('⚠️ Products fetch error:', e.message);
+            return [];
         }
     }
 

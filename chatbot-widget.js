@@ -1296,25 +1296,8 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
     }
 
     async function callAI(message) {
-        // ===== PRE-CHECK: Verify product exists before asking AI =====
-        const verification = verifyProductQuestion(message);
-        
-        if (!verification.verified) {
-            // Product doesn't exist - return immediate response without calling AI
-            console.log('🚫 Product not found, returning pre-written response');
-            return verification.response;
-        }
-        
-        // Use dynamic system prompt with real or demo store data
-        let systemPrompt = buildSystemPrompt();
-        
-        // If asking about a specific product that exists, add hint to prompt
-        if (verification.matchingProducts && verification.matchingProducts.length > 0) {
-            const productHint = verification.matchingProducts.map(p => 
-                `${p.name}: ${p.salePrice || p.price} ريال${p.salePrice ? ` (بدل ${p.price})` : ''}`
-            ).join('\n');
-            systemPrompt += `\n\n⚠️ العميل يسأل عن ${verification.productAsked}. هذه المنتجات المطابقة:\n${productHint}`;
-        }
+        // Direct AI call - no pre-check algorithm, let AI handle everything
+        const systemPrompt = buildSystemPrompt();
         
         console.log('🤖 Calling AI with', storeData.products.length, 'products in context');
         console.log('📝 User message:', message);

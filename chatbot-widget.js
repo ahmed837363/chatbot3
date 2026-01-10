@@ -122,48 +122,146 @@
         loaded: false
     };
 
-    // Scrape products directly from the current page
+    // Scrape products directly from the current page - REAL TIME
     function scrapeProductsFromPage() {
         const products = [];
+        console.log('🔍 Scraping products from page...');
         
-        // Method 1: Try Salla's Twilight SDK (best method!)
-        if (window.salla && window.salla.product) {
-            console.log('🔍 Using Salla Twilight SDK');
-            // Products are already loaded by Salla - check for product cards
+        // Method 1: Use Salla's Twilight global data (most reliable!)
+        if (window.Salla || window.salla) {
+            const sallaObj = window.Salla || window.salla;
+            console.log('🔍 Found Salla object:', Object.keys(sallaObj));
+            
+            // Try to get products from Salla's data
+            if (sallaObj.products || sallaObj.product) {
+                const prods = sallaObj.products || [sallaObj.product];
+                prods.forEach(p => {
+                    if (p && p.name) {
+                        products.push({
+                            name: p.name,
+                            price: p.price?.amount || p.price || 0,
+                            salePrice: p.sale_price?.amount || p.sale_price || null,
+                            currency: p.price?.currency || 'SAR',
+                            inStock: p.quantity > 0 || p.status === 'sale'
+                        });
+                    }
+                });
+            }
         }
         
-        // Method 2: Look for Salla's product data in the DOM
-        const sallaProducts = document.querySelectorAll('.s-product-card-entry, .product-entry, [class*="product-card"]');
-        console.log('🔍 Found', sallaProducts.length, 'Salla product elements');
+        // Method 2: Look for Salla's JSON data in page scripts
+        if (products.length === 0) {
+            const scripts = document.querySelectorAll('script[type="application/json"], script[type="application/ld+json"]');
+            scripts.forEach(script => {
+                try {
+                    const data = JSON.parse(script.textContent);
+                    if (data['@type'] === 'Product' || data.product) {
+                        const p = data.product || data;
+                        products.push({
+                            name: p.name,
+                            price: parseFloat(p.offers?.price || p.price || 0),
+                            currency: p.offers?.priceCurrency || 'SAR',
+                            inStock: p.offers?.availability?.includes('InStock') !== false
+                        });
+                    }
+                    if (data.products && Array.isArray(data.products)) {
+                        data.products.forEach(p => {
+                            products.push({
+                                name: p.name,
+                                price: parseFloat(p.price?.amount || p.price || 0),
+                                currency: 'SAR',
+                                inStock: true
+                            });
+                        });
+                    }
+                } catch (e) { /* ignore parse errors */ }
+            });
+        }
         
-        if (sallaProducts.length > 0) {
-            sallaProducts.forEach((el, i) => {
+        // Method 3: Scrape from DOM - Salla product cards
+        if (products.length === 0) {
+            // Common Salla selectors
+            const selectors = [
+                '.s-product-card-entry',
+                '.s-product-card',
+                '[data-product-id]',
+                '.product-block',
+                '.product-card',
+                'article[class*="product"]',
+                '.products-list .product',
+                '[class*="ProductCard"]'
+            ];
+            
+            let productElements = [];
+            for (const sel of selectors) {
+                productElements = document.querySelectorAll(sel);
+                if (productElements.length > 0) {
+                    console.log('🔍 Found products with:', sel, productElements.length);
+                    break;
+                }
+            }
+            
+            productElements.forEach((el, i) => {
                 if (i >= 50) return;
                 
-                // Get product name from various possible locations
-                let name = el.querySelector('.s-product-card-entry__title a')?.textContent?.trim() ||
-                           el.querySelector('[class*="title"] a')?.textContent?.trim() ||
-                           el.querySelector('h3 a, h4 a, h5 a')?.textContent?.trim() ||
-                           el.querySelector('a[title]')?.getAttribute('title') ||
-                           el.querySelector('.product-title, .title, h3, h4')?.textContent?.trim();
+                // Get product name - try multiple selectors
+                let name = null;
+                const nameSelectors = [
+                    '.s-product-card-entry__title a',
+                    '.s-product-card-entry__title',
+                    '.product-title a',
+                    '.product-title',
+                    '.product-name',
+                    '[class*="title"] a',
+                    '[class*="name"]',
+                    'h2 a', 'h3 a', 'h4 a',
+                    'h2', 'h3', 'h4',
+                    'a[href*="/p/"]'
+                ];
+                for (const sel of nameSelectors) {
+                    const nameEl = el.querySelector(sel);
+                    if (nameEl) {
+                        name = nameEl.textContent?.trim() || nameEl.getAttribute('title');
+                        if (name && name.length > 1 && name.length < 150) break;
+                        name = null;
+                    }
+                }
                 
-                // Get price - look for the price element
+                // Get price - look for price elements
                 let price = 0;
                 let salePrice = null;
-                const priceEl = el.querySelector('.s-product-card-entry__price, [class*="price"], .price');
-                if (priceEl) {
-                    const priceText = priceEl.textContent || '';
-                    const numbers = priceText.match(/[\d,]+\.?\d*/g);
-                    if (numbers && numbers.length > 0) {
-                        // Usually first number is current price
-                        price = parseFloat(numbers[0].replace(/,/g, ''));
-                        if (numbers.length > 1) {
-                            // Second might be original price (if on sale)
-                            const origPrice = parseFloat(numbers[1].replace(/,/g, ''));
-                            if (origPrice > price) {
-                                salePrice = price;
-                                price = origPrice;
+                const priceSelectors = [
+                    '.s-product-card-entry__price',
+                    '.product-price',
+                    '.price',
+                    '[class*="price"]',
+                    '.amount',
+                    '[data-price]'
+                ];
+                
+                for (const sel of priceSelectors) {
+                    const priceEl = el.querySelector(sel);
+                    if (priceEl) {
+                        const priceText = priceEl.textContent || '';
+                        // Find all numbers in the price text
+                        const numbers = priceText.match(/[\d,]+\.?\d*/g);
+                        if (numbers && numbers.length > 0) {
+                            // First number is usually current/sale price
+                            const firstNum = parseFloat(numbers[0].replace(/,/g, ''));
+                            if (numbers.length > 1) {
+                                const secondNum = parseFloat(numbers[1].replace(/,/g, ''));
+                                // Determine which is sale price vs original
+                                if (secondNum > firstNum) {
+                                    price = secondNum; // Original
+                                    salePrice = firstNum; // Sale
+                                } else {
+                                    price = firstNum;
+                                    salePrice = secondNum > 0 && secondNum < firstNum ? secondNum : null;
+                                }
+                            } else {
+                                price = firstNum;
                             }
+                            break;
                         }
                     }
                 }
@@ -174,32 +272,36 @@
                         price: price,
                         salePrice: salePrice,
                         currency: 'ر.س',
-                        inStock: true
+                        inStock: !el.classList.contains('out-of-stock') && !el.querySelector('.out-of-stock, .sold-out')
                     });
-                    console.log('✅ Product:', name, price);
+                    console.log('✅ Scraped:', name, '→', salePrice || price, 'ر.س');
                 }
             });
         }
         
-        // Method 3: Try to find any product-like elements
+        // Method 4: Fallback - find any price + nearby text
         if (products.length === 0) {
-            console.log('🔍 Trying alternative selectors...');
-            const allLinks = document.querySelectorAll('a[href*="/p/"], a[href*="/product/"]');
-            allLinks.forEach((link, i) => {
-                if (i >= 30) return;
-                const name = link.textContent?.trim() || link.getAttribute('title');
-                if (name && name.length > 3 && name.length < 100) {
-                    // Try to find price near this link
-                    const parent = link.closest('div, article, li');
-                    let price = 0;
-                    if (parent) {
-                        const priceText = parent.textContent || '';
-                        const priceMatch = priceText.match(/(\d+[\d,]*)\s*(ر\.س|ريال|SAR)/);
-                        if (priceMatch) {
-                            price = parseFloat(priceMatch[1].replace(/,/g, ''));
+            console.log('🔍 Trying fallback method...');
+            const priceElements = document.querySelectorAll('[class*="price"], .amount');
+            priceElements.forEach((priceEl, i) => {
+                if (i >= 20 || products.length >= 20) return;
+                
+                const priceText = priceEl.textContent || '';
+                const priceMatch = priceText.match(/([\d,]+\.?\d*)\s*(ر\.س|ريال|SAR)?/);
+                if (priceMatch) {
+                    const price = parseFloat(priceMatch[1].replace(/,/g, ''));
+                    if (price > 0 && price < 100000) {
+                        // Look for nearby product name
+                        const parent = priceEl.closest('div, article, li, section');
+                        if (parent) {
+                            const link = parent.querySelector('a[href*="/p/"], a[href*="/product/"]');
+                            const name = link?.textContent?.trim() || link?.getAttribute('title') || 
+                                        parent.querySelector('h2, h3, h4, h5')?.textContent?.trim();
+                            if (name && name.length > 2 && name.length < 100) {
+                                products.push({ name, price, currency: 'ر.س', inStock: true });
+                            }
                         }
                     }
-                    products.push({ name, price, currency: 'ر.س', inStock: true });
                 }
             });
         }
@@ -807,6 +909,16 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
 
         // Load store data from Salla API (if available)
         loadStoreData();
+        
+        // Re-scrape products when user opens chat (in case they navigated)
+        bubble.addEventListener('click', () => {
+            // Refresh products every time chat is opened
+            const freshProducts = scrapeProductsFromPage();
+            if (freshProducts.length > 0) {
+                storeData.products = freshProducts;
+                console.log('🔄 Refreshed products:', freshProducts.length);
+            }
+        });
 
         // Send welcome message (use translated version)
         addMessage(t.welcome, 'bot');

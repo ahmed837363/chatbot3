@@ -252,6 +252,14 @@
             productElements.forEach((el, i) => {
                 if (i >= 50) return;
                 
+                // Get product ID and category from Salla data attributes
+                const productId = el.getAttribute('data-product-id') || 
+                                  el.querySelector('[data-product-id]')?.getAttribute('data-product-id') || '';
+                const category = el.getAttribute('data-category') || 
+                                 el.querySelector('[data-category]')?.getAttribute('data-category') ||
+                                 el.getAttribute('data-product-type') ||
+                                 el.querySelector('[data-product-type]')?.getAttribute('data-product-type') || '';
+                
                 // Get product name - try multiple selectors (Salla-specific first)
                 let name = null;
                 const nameSelectors = [
@@ -408,14 +416,25 @@
                 }
                 
                 if (name && name.length > 1) {
+                    // Add number suffix if name is generic to differentiate products
+                    let displayName = name.substring(0, 100);
+                    
+                    // Check if this name already exists and add a number
+                    const existingCount = products.filter(p => p.name.startsWith(name.split(' ')[0])).length;
+                    if (existingCount > 0) {
+                        displayName = `${name} (${existingCount + 1})`;
+                    }
+                    
                     products.push({
-                        name: name.substring(0, 100),
+                        name: displayName,
                         price: price,
                         salePrice: salePrice,
-                        currency: 'ر.س',
+                        currency: 'ريال',
+                        category: category || '',
+                        productId: productId || '',
                         inStock: !el.classList.contains('out-of-stock') && !el.querySelector('.out-of-stock, .sold-out')
                     });
-                    console.log('✅ Scraped:', name, '→', salePrice || price, 'ر.س');
+                    console.log('✅ Scraped:', displayName, '→', salePrice || price, 'ريال', category ? `[${category}]` : '');
                 }
             });
         }
@@ -850,10 +869,10 @@ Response Rules (IMPORTANT - Follow Exactly):
         }
 
         // Arabic system prompt (default)
-        return `أنت علام، مساعد ذكي لـ "${storeData.storeName}". تتحدث باللهجة السعودية.
+        return `أنت علام، مساعد ذكي لـ "${storeData.storeName}". تتحدث باللهجة السعودية فقط.
 
 ═══════════════════════════════════
-📦 المنتجات المتوفرة:
+📦 المنتجات المتوفرة (هذه القائمة الكاملة):
 ═══════════════════════════════════
 ${productList}
 
@@ -884,11 +903,12 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
 ═══════════════════════════════════
 قواعد الرد (مهم جداً - اتبعها بدقة):
 ═══════════════════════════════════
-1. المنتجات المتوفرة فقط هي الموجودة في القائمة أعلاه - لا يوجد منتجات أخرى
-2. إذا سأل العميل عن منتج (مثل جاكيت، شنطة، حذاء، الخ) وهذا المنتج غير موجود في القائمة أعلاه، قول: "للأسف ما عندنا [اسم المنتج] حالياً، بس عندنا فساتين وبلوزات"
-3. قبل ما ترد، تأكد إن المنتج موجود بالضبط في القائمة أعلاه
-4. لا تخترع أي منتج أو سعر غير موجود في القائمة
-5. استخدم اللهجة السعودية (وش، الحين، تمام، يعطيك العافية)
+1. رد بالعربي فقط - لا تستخدم كلمات انجليزية مثل SAR، استخدم "ريال" بدلاً منها
+2. المنتجات المتوفرة فقط هي الموجودة في القائمة أعلاه - لا يوجد منتجات أخرى
+3. إذا سأل العميل عن منتج غير موجود في القائمة، قول: "للأسف ما عندنا [اسم المنتج] حالياً"
+4. قبل ما ترد، تأكد إن المنتج موجود بالضبط في القائمة
+5. لا تخترع أي منتج أو سعر غير موجود في القائمة
+6. استخدم اللهجة السعودية (وش، الحين، تمام، يعطيك العافية)
 6. كن مختصر وودود
 7. لا تضيف أي روابط أو URLs`;
     }

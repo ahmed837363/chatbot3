@@ -1130,6 +1130,13 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
         conversationHistory.push({ role: 'user', content: message });
         input.value = '';
 
+        // Clear conversation history after 3 exchanges to keep AI fresh
+        // (3 user messages + 3 assistant messages = 6 items)
+        if (conversationHistory.length > 6) {
+            console.log('🔄 Clearing conversation history to keep AI accurate');
+            conversationHistory = [];
+        }
+
         // Show typing indicator
         showTypingIndicator();
 

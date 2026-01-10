@@ -227,41 +227,84 @@
                     }
                 }
                 
-                // Get price - look for price elements
+                // Get price - look for price elements (improved for Salla)
                 let price = 0;
                 let salePrice = null;
-                const priceSelectors = [
-                    '.s-product-card-entry__price',
-                    '.product-price',
-                    '.price',
-                    '[class*="price"]',
-                    '.amount',
-                    '[data-price]'
-                ];
                 
-                for (const sel of priceSelectors) {
-                    const priceEl = el.querySelector(sel);
-                    if (priceEl) {
-                        const priceText = priceEl.textContent || '';
-                        // Find all numbers in the price text
-                        const numbers = priceText.match(/[\d,]+\.?\d*/g);
-                        if (numbers && numbers.length > 0) {
-                            // First number is usually current/sale price
-                            const firstNum = parseFloat(numbers[0].replace(/,/g, ''));
-                            if (numbers.length > 1) {
-                                const secondNum = parseFloat(numbers[1].replace(/,/g, ''));
-                                // Determine which is sale price vs original
-                                if (secondNum > firstNum) {
-                                    price = secondNum; // Original
-                                    salePrice = firstNum; // Sale
-                                } else {
-                                    price = firstNum;
-                                    salePrice = secondNum > 0 && secondNum < firstNum ? secondNum : null;
+                // Method 1: Try data attributes first (most reliable)
+                const dataPrice = el.getAttribute('data-price') || 
+                                  el.querySelector('[data-price]')?.getAttribute('data-price') ||
+                                  el.querySelector('[data-product-price]')?.getAttribute('data-product-price');
+                if (dataPrice) {
+                    price = parseFloat(dataPrice) || 0;
+                }
+                
+                // Method 2: Look for price in nested elements
+                if (price === 0) {
+                    const priceSelectors = [
+                        '.s-product-card-entry__price-wrapper',
+                        '.s-product-card-entry__price',
+                        '.s-product-card__price',
+                        '.product-price',
+                        '.price-wrapper',
+                        '.price',
+                        '[class*="price"]'
+                    ];
+                    
+                    for (const sel of priceSelectors) {
+                        const priceContainer = el.querySelector(sel);
+                        if (priceContainer) {
+                            // Get all text content and extract numbers
+                            const allText = priceContainer.innerText || priceContainer.textContent || '';
+                            console.log('💰 Price text found:', allText.substring(0, 50));
+                            
+                            // Match numbers (handle both 149 and 149.00 formats)
+                            const numbers = allText.match(/(\d[\d,]*\.?\d*)/g);
+                            if (numbers && numbers.length > 0) {
+                                // Filter out very small numbers (might be decimals or ratings)
+                                const validPrices = numbers
+                                    .map(n => parseFloat(n.replace(/,/g, '')))
+                                    .filter(n => n >= 1 && n < 100000);
+                                
+                                if (validPrices.length > 0) {
+                                    // If there are two prices, smaller is sale price
+                                    if (validPrices.length >= 2) {
+                                        validPrices.sort((a, b) => a - b);
+                                        salePrice = validPrices[0]; // Smaller = sale
+                                        price = validPrices[validPrices.length - 1]; // Larger = original
+                                    } else {
+                                        price = validPrices[0];
+                                    }
+                                    console.log('💰 Extracted price:', price, 'sale:', salePrice);
+                                    break;
                                 }
-                            } else {
-                                price = firstNum;
                             }
-                            break;
+                        }
+                    }
+                }
+                
+                // Method 3: Look anywhere in the product card for price pattern
+                if (price === 0) {
+                    const cardText = el.innerText || el.textContent || '';
+                    // Look for price patterns like "149 ر.س" or "SAR 149" or just "149"
+                    const pricePatterns = [
+                        /(\d[\d,]*\.?\d*)\s*(ر\.س|ريال|SAR|SR)/gi,
+                        /(SAR|SR|ر\.س|ريال)\s*(\d[\d,]*\.?\d*)/gi,
+                        /(\d{2,5}\.?\d{0,2})/g
+                    ];
+                    
+                    for (const pattern of pricePatterns) {
+                        const matches = cardText.match(pattern);
+                        if (matches && matches.length > 0) {
+                            // Extract just the number
+                            const numMatch = matches[0].match(/\d[\d,]*\.?\d*/);
+                            if (numMatch) {
+                                price = parseFloat(numMatch[0].replace(/,/g, ''));
+                                if (price >= 1 && price < 100000) {
+                                    console.log('💰 Found price in text:', price);
+                                    break;
+                                }
+                            }
                         }
                     }
                 }

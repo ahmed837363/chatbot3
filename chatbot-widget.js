@@ -1,5 +1,5 @@
 /**
- * AI Chatbot Widget - Production Ready v2.1
+ * AI Chatbot Widget - Production Ready v2.8
  * Embed this on any website to add AI chat support
  * Supports: Arabic (Saudi dialect) and English with live language switching
  * 
@@ -10,7 +10,55 @@
 (function() {
     'use strict';
     
-    console.log('🤖 AI Chatbot Widget v2.1 loading...');
+    console.log('🤖 AI Chatbot Widget v2.8 loading...');
+
+    // ===== DEBUG LOGGING SYSTEM =====
+    const DEBUG_LOG = {
+        enabled: true,
+        logs: [],
+        maxLogs: 50,
+        
+        add(type, data) {
+            if (!this.enabled) return;
+            const entry = {
+                timestamp: new Date().toISOString(),
+                type: type,
+                data: data
+            };
+            this.logs.push(entry);
+            if (this.logs.length > this.maxLogs) {
+                this.logs.shift();
+            }
+            // Save to localStorage
+            try {
+                localStorage.setItem('chatbot_debug_log', JSON.stringify(this.logs, null, 2));
+            } catch(e) {}
+            console.log(`📋 [${type}]`, data);
+        },
+        
+        getAll() {
+            return this.logs;
+        },
+        
+        export() {
+            const blob = new Blob([JSON.stringify(this.logs, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `chatbot_log_${Date.now()}.json`;
+            a.click();
+        },
+        
+        show() {
+            console.log('📋 ===== CHATBOT DEBUG LOG =====');
+            console.log(JSON.stringify(this.logs, null, 2));
+            return this.logs;
+        }
+    };
+    
+    // Make debug available globally
+    window.chatbotDebug = DEBUG_LOG;
+    console.log('💡 Debug: Type chatbotDebug.show() to see logs, chatbotDebug.export() to download');
 
     // Bilingual text configuration
     const texts = {
@@ -386,6 +434,17 @@
         }
         
         console.log('📦 Total scraped:', products.length, 'products');
+        
+        // Log scraped products for debugging
+        DEBUG_LOG.add('PRODUCTS_SCRAPED', {
+            count: products.length,
+            products: products.map(p => ({
+                name: p.name,
+                price: p.price,
+                salePrice: p.salePrice
+            }))
+        });
+        
         return products;
     }
 
@@ -1065,6 +1124,14 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
         
         console.log('🤖 Calling AI with', storeData.products.length, 'products in context');
         console.log('📝 User message:', message);
+        
+        // Log the full request
+        DEBUG_LOG.add('AI_REQUEST', {
+            userMessage: message,
+            productsInContext: storeData.products.length,
+            productsList: storeData.products.slice(0, 30).map(p => `${p.name}: ${p.price} ${p.currency}`),
+            systemPromptPreview: systemPrompt.substring(0, 500) + '...'
+        });
 
         try {
             // Send to LM Studio (OpenAI format) via Cloudflare tunnel
@@ -1087,15 +1154,25 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
             });
 
             if (!response.ok) {
+                DEBUG_LOG.add('AI_ERROR', { status: response.status, statusText: response.statusText });
                 throw new Error('API request failed: ' + response.status);
             }
 
             const data = await response.json();
-            console.log('✅ AI Response received:', data.choices?.[0]?.message?.content?.substring(0, 100));
-            // LM Studio returns OpenAI format
-            return data.choices?.[0]?.message?.content || t.notUnderstood;
+            const aiResponse = data.choices?.[0]?.message?.content || t.notUnderstood;
+            
+            // Log the response
+            DEBUG_LOG.add('AI_RESPONSE', {
+                userMessage: message,
+                aiResponse: aiResponse,
+                model: data.model || 'unknown'
+            });
+            
+            console.log('✅ AI Response received:', aiResponse.substring(0, 100));
+            return aiResponse;
         } catch (error) {
             console.error('AI API Error:', error);
+            DEBUG_LOG.add('AI_ERROR', { error: error.message });
             return getLocalFallback(message);
         }
     }

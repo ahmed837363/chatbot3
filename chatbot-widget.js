@@ -315,12 +315,24 @@
                 let price = 0;
                 let salePrice = null;
                 
+                // Helper function to convert Arabic-Indic numerals to Western
+                const convertArabicNumerals = (str) => {
+                    const arabicNumerals = '٠١٢٣٤٥٦٧٨٩';
+                    const persianNumerals = '۰۱۲۳۴۵۶۷۸۹';
+                    let result = str;
+                    for (let i = 0; i < 10; i++) {
+                        result = result.replace(new RegExp(arabicNumerals[i], 'g'), i.toString());
+                        result = result.replace(new RegExp(persianNumerals[i], 'g'), i.toString());
+                    }
+                    return result;
+                };
+                
                 // Method 1: Try data attributes first (most reliable)
                 const dataPrice = el.getAttribute('data-price') || 
                                   el.querySelector('[data-price]')?.getAttribute('data-price') ||
                                   el.querySelector('[data-product-price]')?.getAttribute('data-product-price');
                 if (dataPrice) {
-                    price = parseFloat(dataPrice) || 0;
+                    price = parseFloat(convertArabicNumerals(dataPrice)) || 0;
                 }
                 
                 // Method 2: Look for price in nested elements
@@ -338,8 +350,9 @@
                     for (const sel of priceSelectors) {
                         const priceContainer = el.querySelector(sel);
                         if (priceContainer) {
-                            // Get all text content and extract numbers
-                            const allText = priceContainer.innerText || priceContainer.textContent || '';
+                            // Get all text content and convert Arabic numerals
+                            let allText = priceContainer.innerText || priceContainer.textContent || '';
+                            allText = convertArabicNumerals(allText);
                             console.log('💰 Price text found:', allText.substring(0, 50));
                             
                             // Match numbers (handle both 149 and 149.00 formats)
@@ -369,7 +382,8 @@
                 
                 // Method 3: Look anywhere in the product card for price pattern
                 if (price === 0) {
-                    const cardText = el.innerText || el.textContent || '';
+                    let cardText = el.innerText || el.textContent || '';
+                    cardText = convertArabicNumerals(cardText);
                     // Look for price patterns like "149 ر.س" or "SAR 149" or just "149"
                     const pricePatterns = [
                         /(\d[\d,]*\.?\d*)\s*(ر\.س|ريال|SAR|SR)/gi,

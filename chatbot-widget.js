@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AI Chatbot Widget - Production Ready v2.8
  * Embed this on any website to add AI chat support
  * Supports: Arabic (Saudi dialect) and English with live language switching
@@ -10,7 +10,7 @@
 (function() {
     'use strict';
     
-    console.log('🤖 AI Chatbot Widget v2.8 loading...');
+    console.log('ðŸ¤– AI Chatbot Widget v2.8 loading...');
 
     // ===== DEBUG LOGGING SYSTEM =====
     const DEBUG_LOG = {
@@ -33,7 +33,7 @@
             try {
                 localStorage.setItem('chatbot_debug_log', JSON.stringify(this.logs, null, 2));
             } catch(e) {}
-            console.log(`📋 [${type}]`, data);
+            console.log(`ðŸ“‹ [${type}]`, data);
         },
         
         getAll() {
@@ -50,7 +50,7 @@
         },
         
         show() {
-            console.log('📋 ===== CHATBOT DEBUG LOG =====');
+            console.log('ðŸ“‹ ===== CHATBOT DEBUG LOG =====');
             console.log(JSON.stringify(this.logs, null, 2));
             return this.logs;
         }
@@ -58,35 +58,35 @@
     
     // Make debug available globally
     window.chatbotDebug = DEBUG_LOG;
-    console.log('💡 Debug: Type chatbotDebug.show() to see logs, chatbotDebug.export() to download');
+    console.log('ðŸ’¡ Debug: Type chatbotDebug.show() to see logs, chatbotDebug.export() to download');
 
     // Bilingual text configuration
     const texts = {
         ar: {
-            welcome: 'هلا والله! كيف أقدر أساعدك اليوم؟ 😊',
-            placeholder: 'اكتب رسالتك...',
-            send: 'إرسال',
-            assistant: '🤖 مساعد ذكي',
-            connected: 'متصل',
-            error: 'عذراً، حصل خطأ. جرب مرة ثانية 📞',
-            greeting: 'هلا والله! وش أقدر أساعدك فيه؟ 😊',
-            askPrice: 'أبشر! قول لي اسم المنتج وأعطيك السعر 🏷️',
-            shipping: 'الشحن يوصل خلال ٢-٥ أيام عادة 🚚',
-            thanks: 'العفو! يسعدني أخدمك 😊',
-            askMore: 'أبشر! وش تبي تعرف بالضبط؟',
-            notUnderstood: 'ما قدرت أفهم، جرب مرة ثانية'
+            welcome: 'Ù‡Ù„Ø§ ÙˆØ§Ù„Ù„Ù‡! ÙƒÙŠÙ Ø£Ù‚Ø¯Ø± Ø£Ø³Ø§Ø¹Ø¯Ùƒ Ø§Ù„ÙŠÙˆÙ…ØŸ ðŸ˜Š',
+            placeholder: 'Ø§ÙƒØªØ¨ Ø±Ø³Ø§Ù„ØªÙƒ...',
+            send: 'Ø¥Ø±Ø³Ø§Ù„',
+            assistant: 'ðŸ¤– Ù…Ø³Ø§Ø¹Ø¯ Ø°ÙƒÙŠ',
+            connected: 'Ù…ØªØµÙ„',
+            error: 'Ø¹Ø°Ø±Ø§Ù‹ØŒ Ø­ØµÙ„ Ø®Ø·Ø£. Ø¬Ø±Ø¨ Ù…Ø±Ø© Ø«Ø§Ù†ÙŠØ© ðŸ“ž',
+            greeting: 'Ù‡Ù„Ø§ ÙˆØ§Ù„Ù„Ù‡! ÙˆØ´ Ø£Ù‚Ø¯Ø± Ø£Ø³Ø§Ø¹Ø¯Ùƒ ÙÙŠÙ‡ØŸ ðŸ˜Š',
+            askPrice: 'Ø£Ø¨Ø´Ø±! Ù‚ÙˆÙ„ Ù„ÙŠ Ø§Ø³Ù… Ø§Ù„Ù…Ù†ØªØ¬ ÙˆØ£Ø¹Ø·ÙŠÙƒ Ø§Ù„Ø³Ø¹Ø± ðŸ·ï¸',
+            shipping: 'Ø§Ù„Ø´Ø­Ù† ÙŠÙˆØµÙ„ Ø®Ù„Ø§Ù„ Ù¢-Ù¥ Ø£ÙŠØ§Ù… Ø¹Ø§Ø¯Ø© ðŸšš',
+            thanks: 'Ø§Ù„Ø¹ÙÙˆ! ÙŠØ³Ø¹Ø¯Ù†ÙŠ Ø£Ø®Ø¯Ù…Ùƒ ðŸ˜Š',
+            askMore: 'Ø£Ø¨Ø´Ø±! ÙˆØ´ ØªØ¨ÙŠ ØªØ¹Ø±Ù Ø¨Ø§Ù„Ø¶Ø¨Ø·ØŸ',
+            notUnderstood: 'Ù…Ø§ Ù‚Ø¯Ø±Øª Ø£ÙÙ‡Ù…ØŒ Ø¬Ø±Ø¨ Ù…Ø±Ø© Ø«Ø§Ù†ÙŠØ©'
         },
         en: {
-            welcome: 'Hello! How can I help you today? 😊',
+            welcome: 'Hello! How can I help you today? ðŸ˜Š',
             placeholder: 'Type your message...',
             send: 'Send',
-            assistant: '🤖 AI Assistant',
+            assistant: 'ðŸ¤– AI Assistant',
             connected: 'Online',
-            error: 'Sorry, an error occurred. Please try again 📞',
-            greeting: 'Hello! How can I help you? 😊',
-            askPrice: 'Sure! Tell me the product name and I\'ll give you the price 🏷️',
-            shipping: 'Shipping takes 2-5 days usually 🚚',
-            thanks: 'You\'re welcome! Happy to help 😊',
+            error: 'Sorry, an error occurred. Please try again ðŸ“ž',
+            greeting: 'Hello! How can I help you? ðŸ˜Š',
+            askPrice: 'Sure! Tell me the product name and I\'ll give you the price ðŸ·ï¸',
+            shipping: 'Shipping takes 2-5 days usually ðŸšš',
+            thanks: 'You\'re welcome! Happy to help ðŸ˜Š',
             askMore: 'Sure! What would you like to know?',
             notUnderstood: 'I didn\'t understand, please try again'
         }
@@ -106,7 +106,7 @@
         t = texts[currentLang];
         isRTL = currentLang === 'ar';
         updateWidgetLanguage();
-        console.log('🌐 Language switched to:', currentLang);
+        console.log('ðŸŒ Language switched to:', currentLang);
     }
 
     // Update widget UI for new language
@@ -132,7 +132,7 @@
         }
         if (messagesDiv) messagesDiv.style.direction = isRTL ? 'rtl' : 'ltr';
         if (inputContainer) inputContainer.style.direction = isRTL ? 'rtl' : 'ltr';
-        if (langBtn) langBtn.textContent = currentLang === 'ar' ? 'EN' : 'عربي';
+        if (langBtn) langBtn.textContent = currentLang === 'ar' ? 'EN' : 'Ø¹Ø±Ø¨ÙŠ';
     }
 
     // Configuration
@@ -142,15 +142,9 @@
         databaseId: '6946699d001194236820',
         collectionId: 'store_connections',
         productsCollectionId: 'products',
-        // AI Provider: 'groq' (cloud, no tunnel) or 'local' (needs tunnel)
-        aiProvider: 'groq',
-        // Groq API (free, no tunnel needed)
-        groqApiKey: '', // Will be set from data-groq-key attribute
-        groqApiUrl: 'https://api.groq.com/openai/v1/chat/completions',
-        groqModel: 'llama-3.3-70b-versatile',
-        // Local LM Studio via tunnel (fallback)
-        localAiUrl: 'https://allam-ai.mayasahstyle.me/v1/chat/completions',
-        localModel: 'allam-7b-instruct-preview',
+        // AI via Cloudflare Tunnel
+        aiUrl: 'https://allam-ai.mayasahstyle.me/v1/chat/completions',
+        aiModel: 'allam-7b-instruct-preview',
         chatbotColor: '#667eea',
         position: 'bottom-left',
         language: currentLang
@@ -158,17 +152,11 @@
 
     // Get store ID and custom config from script tag
     const storeId = scriptTag?.getAttribute('data-store-id') || 'demo';
-    const groqKey = scriptTag?.getAttribute('data-groq-key') || '';
     const customAiUrl = scriptTag?.getAttribute('data-ai-url') || '';
     const supportContact = scriptTag?.getAttribute('data-support') || '';
     
-    // Set API key if provided
-    if (groqKey) {
-        config.groqApiKey = groqKey;
-        config.aiProvider = 'groq';
-    } else if (customAiUrl) {
-        config.localAiUrl = customAiUrl;
-        config.aiProvider = 'local';
+    if (customAiUrl) {
+        config.aiUrl = customAiUrl;
     }
 
     // Conversation history for context
@@ -176,7 +164,7 @@
     
     // Store data (products, shipping, etc.) - will be loaded from Salla API
     let storeData = {
-        storeName: 'متجر',
+        storeName: 'Ù…ØªØ¬Ø±',
         products: [],
         shipping: [],
         coupons: [],
@@ -188,12 +176,12 @@
     // Scrape products directly from the current page - REAL TIME
     function scrapeProductsFromPage() {
         const products = [];
-        console.log('🔍 Scraping products from page...');
+        console.log('ðŸ” Scraping products from page...');
         
         // Method 1: Use Salla's Twilight global data (most reliable!)
         if (window.Salla || window.salla) {
             const sallaObj = window.Salla || window.salla;
-            console.log('🔍 Found Salla object:', Object.keys(sallaObj));
+            console.log('ðŸ” Found Salla object:', Object.keys(sallaObj));
             
             // Try to get products from Salla's data
             if (sallaObj.products || sallaObj.product) {
@@ -259,7 +247,7 @@
             for (const sel of selectors) {
                 productElements = document.querySelectorAll(sel);
                 if (productElements.length > 0) {
-                    console.log('🔍 Found products with:', sel, productElements.length);
+                    console.log('ðŸ” Found products with:', sel, productElements.length);
                     break;
                 }
             }
@@ -311,7 +299,7 @@
                             name = name.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
                         }
                         if (name && name.length > 1 && name.length < 150) {
-                            console.log('📝 Found name with selector:', sel, '→', name);
+                            console.log('ðŸ“ Found name with selector:', sel, 'â†’', name);
                             break;
                         }
                         name = null;
@@ -327,7 +315,7 @@
                             name = name.replace(/[\n\r\t]+/g, ' ').replace(/\s+/g, ' ').trim();
                         }
                         if (name && name.length > 1 && name.length < 150) {
-                            console.log('📝 Found name from link:', name);
+                            console.log('ðŸ“ Found name from link:', name);
                         } else {
                             name = null;
                         }
@@ -340,8 +328,8 @@
                 
                 // Helper function to convert Arabic-Indic numerals to Western
                 const convertArabicNumerals = (str) => {
-                    const arabicNumerals = '٠١٢٣٤٥٦٧٨٩';
-                    const persianNumerals = '۰۱۲۳۴۵۶۷۸۹';
+                    const arabicNumerals = 'Ù Ù¡Ù¢Ù£Ù¤Ù¥Ù¦Ù§Ù¨Ù©';
+                    const persianNumerals = 'Û°Û±Û²Û³Û´ÛµÛ¶Û·Û¸Û¹';
                     let result = str;
                     for (let i = 0; i < 10; i++) {
                         result = result.replace(new RegExp(arabicNumerals[i], 'g'), i.toString());
@@ -376,7 +364,7 @@
                             // Get all text content and convert Arabic numerals
                             let allText = priceContainer.innerText || priceContainer.textContent || '';
                             allText = convertArabicNumerals(allText);
-                            console.log('💰 Price text found:', allText.substring(0, 50));
+                            console.log('ðŸ’° Price text found:', allText.substring(0, 50));
                             
                             // Match numbers (handle both 149 and 149.00 formats)
                             const numbers = allText.match(/(\d[\d,]*\.?\d*)/g);
@@ -395,7 +383,7 @@
                                     } else {
                                         price = validPrices[0];
                                     }
-                                    console.log('💰 Extracted price:', price, 'sale:', salePrice);
+                                    console.log('ðŸ’° Extracted price:', price, 'sale:', salePrice);
                                     break;
                                 }
                             }
@@ -407,10 +395,10 @@
                 if (price === 0) {
                     let cardText = el.innerText || el.textContent || '';
                     cardText = convertArabicNumerals(cardText);
-                    // Look for price patterns like "149 ر.س" or "SAR 149" or just "149"
+                    // Look for price patterns like "149 Ø±.Ø³" or "SAR 149" or just "149"
                     const pricePatterns = [
-                        /(\d[\d,]*\.?\d*)\s*(ر\.س|ريال|SAR|SR)/gi,
-                        /(SAR|SR|ر\.س|ريال)\s*(\d[\d,]*\.?\d*)/gi,
+                        /(\d[\d,]*\.?\d*)\s*(Ø±\.Ø³|Ø±ÙŠØ§Ù„|SAR|SR)/gi,
+                        /(SAR|SR|Ø±\.Ø³|Ø±ÙŠØ§Ù„)\s*(\d[\d,]*\.?\d*)/gi,
                         /(\d{2,5}\.?\d{0,2})/g
                     ];
                     
@@ -422,7 +410,7 @@
                             if (numMatch) {
                                 price = parseFloat(numMatch[0].replace(/,/g, ''));
                                 if (price >= 1 && price < 100000) {
-                                    console.log('💰 Found price in text:', price);
+                                    console.log('ðŸ’° Found price in text:', price);
                                     break;
                                 }
                             }
@@ -444,25 +432,25 @@
                         name: displayName,
                         price: price,
                         salePrice: salePrice,
-                        currency: 'ريال',
+                        currency: 'Ø±ÙŠØ§Ù„',
                         category: category || '',
                         productId: productId || '',
                         inStock: !el.classList.contains('out-of-stock') && !el.querySelector('.out-of-stock, .sold-out')
                     });
-                    console.log('✅ Scraped:', displayName, '→', salePrice || price, 'ريال', category ? `[${category}]` : '');
+                    console.log('âœ… Scraped:', displayName, 'â†’', salePrice || price, 'Ø±ÙŠØ§Ù„', category ? `[${category}]` : '');
                 }
             });
         }
         
         // Method 4: Fallback - find any price + nearby text
         if (products.length === 0) {
-            console.log('🔍 Trying fallback method...');
+            console.log('ðŸ” Trying fallback method...');
             const priceElements = document.querySelectorAll('[class*="price"], .amount');
             priceElements.forEach((priceEl, i) => {
                 if (i >= 20 || products.length >= 20) return;
                 
                 const priceText = priceEl.textContent || '';
-                const priceMatch = priceText.match(/([\d,]+\.?\d*)\s*(ر\.س|ريال|SAR)?/);
+                const priceMatch = priceText.match(/([\d,]+\.?\d*)\s*(Ø±\.Ø³|Ø±ÙŠØ§Ù„|SAR)?/);
                 if (priceMatch) {
                     const price = parseFloat(priceMatch[1].replace(/,/g, ''));
                     if (price > 0 && price < 100000) {
@@ -473,7 +461,7 @@
                             const name = link?.textContent?.trim() || link?.getAttribute('title') || 
                                         parent.querySelector('h2, h3, h4, h5')?.textContent?.trim();
                             if (name && name.length > 2 && name.length < 100) {
-                                products.push({ name, price, currency: 'ر.س', inStock: true });
+                                products.push({ name, price, currency: 'Ø±.Ø³', inStock: true });
                             }
                         }
                     }
@@ -481,7 +469,7 @@
             });
         }
         
-        console.log('📦 Total scraped:', products.length, 'products');
+        console.log('ðŸ“¦ Total scraped:', products.length, 'products');
         
         // Log scraped products for debugging
         DEBUG_LOG.add('PRODUCTS_SCRAPED', {
@@ -503,9 +491,9 @@
             const pageProducts = scrapeProductsFromPage();
             if (pageProducts.length > 0) {
                 storeData.products = pageProducts;
-                storeData.storeName = document.title?.split('|')[0]?.trim() || document.title?.split('-')[0]?.trim() || 'المتجر';
+                storeData.storeName = document.title?.split('|')[0]?.trim() || document.title?.split('-')[0]?.trim() || 'Ø§Ù„Ù…ØªØ¬Ø±';
                 storeData.loaded = true;
-                console.log('✅ Loaded', pageProducts.length, 'products from page');
+                console.log('âœ… Loaded', pageProducts.length, 'products from page');
                 return;
             }
             
@@ -513,23 +501,23 @@
             const storeDoc = await fetchStoreFromAppwrite(storeId);
             
             if (storeDoc) {
-                storeData.storeName = storeDoc.storeName || 'متجر';
+                storeData.storeName = storeDoc.storeName || 'Ù…ØªØ¬Ø±';
                 
                 // Fetch products from products collection
                 const productsFromDB = await fetchProductsFromAppwrite(storeId);
                 if (productsFromDB.length > 0) {
                     storeData.products = productsFromDB;
-                    console.log('✅ Loaded', productsFromDB.length, 'products from Appwrite database');
+                    console.log('âœ… Loaded', productsFromDB.length, 'products from Appwrite database');
                 }
                 
                 storeData.loaded = true;
                 
-                console.log('✅ Store data loaded from Appwrite:');
+                console.log('âœ… Store data loaded from Appwrite:');
                 console.log('   - Store:', storeData.storeName);
                 console.log('   - Products:', storeData.products.length);
             }
         } catch (error) {
-            console.log('ℹ️ Using demo mode - no store data loaded:', error.message);
+            console.log('â„¹ï¸ Using demo mode - no store data loaded:', error.message);
         }
     }
 
@@ -540,7 +528,7 @@
             const query = encodeURIComponent(`equal("storeId",${storeIdInt})`);
             const url = `${config.appwriteEndpoint}/databases/${config.databaseId}/collections/${config.productsCollectionId}/documents?queries[]=${query}&queries[]=${encodeURIComponent('limit(50)')}`;
             
-            console.log('🔍 Fetching products from Appwrite...');
+            console.log('ðŸ” Fetching products from Appwrite...');
             
             const response = await fetch(url, { 
                 method: 'GET',
@@ -551,16 +539,16 @@
             });
             
             if (!response.ok) {
-                console.log('⚠️ Products fetch failed:', response.status);
+                console.log('âš ï¸ Products fetch failed:', response.status);
                 return [];
             }
             
             const data = await response.json();
-            console.log('📦 Products from DB:', data.total);
+            console.log('ðŸ“¦ Products from DB:', data.total);
             
             if (data.documents && data.documents.length > 0) {
                 return data.documents.map(doc => ({
-                    name: doc.name || 'منتج',
+                    name: doc.name || 'Ù…Ù†ØªØ¬',
                     nameEn: doc.nameEn || '', // English name (optional)
                     price: doc.price || 0,
                     salePrice: doc.salePrice || null,
@@ -573,7 +561,7 @@
             
             return [];
         } catch (e) {
-            console.log('⚠️ Products fetch error:', e.message);
+            console.log('âš ï¸ Products fetch error:', e.message);
             return [];
         }
     }
@@ -585,8 +573,8 @@
             const query = encodeURIComponent(`equal("merchantId",${merchantIdInt})`);
             const url = `${config.appwriteEndpoint}/databases/${config.databaseId}/collections/${config.collectionId}/documents?queries[]=${query}`;
             
-            console.log('🔍 Fetching store data from Appwrite...');
-            console.log('🏪 Store ID:', storeId, '→ Int:', merchantIdInt);
+            console.log('ðŸ” Fetching store data from Appwrite...');
+            console.log('ðŸª Store ID:', storeId, 'â†’ Int:', merchantIdInt);
             
             const response = await fetch(url, { 
                 method: 'GET',
@@ -597,19 +585,19 @@
             });
             
             if (!response.ok) {
-                console.log('⚠️ Appwrite response not OK:', response.status);
+                console.log('âš ï¸ Appwrite response not OK:', response.status);
                 return null;
             }
             const data = await response.json();
-            console.log('📦 Appwrite response:', data);
+            console.log('ðŸ“¦ Appwrite response:', data);
             
             // Parse data from 'notes' field (where we store the JSON)
             if (data.documents?.[0]?.notes) {
                 try {
                     const cachedData = JSON.parse(data.documents[0].notes);
-                    console.log('📦 Cached data:', cachedData);
+                    console.log('ðŸ“¦ Cached data:', cachedData);
                     return {
-                        storeName: cachedData.store || cachedData.storeName || 'متجر',
+                        storeName: cachedData.store || cachedData.storeName || 'Ù…ØªØ¬Ø±',
                         accessToken: cachedData.token || cachedData.accessToken,
                         // Products might not be cached in notes due to size limit
                         cachedProducts: '[]',
@@ -618,13 +606,13 @@
                         cachedOffers: '[]'
                     };
                 } catch (e) {
-                    console.log('⚠️ Could not parse notes:', e.message);
+                    console.log('âš ï¸ Could not parse notes:', e.message);
                 }
             }
             
             return data.documents?.[0];
         } catch (e) {
-            console.log('⚠️ Could not fetch from Appwrite (CORS):', e.message);
+            console.log('âš ï¸ Could not fetch from Appwrite (CORS):', e.message);
             // Try alternative: fetch products directly from Salla public API
             return await fetchFromSallaPublic(storeId);
         }
@@ -653,7 +641,7 @@
                 const found = document.querySelectorAll(selector);
                 if (found.length > 0) {
                     productElements = found;
-                    console.log('📦 Found products with selector:', selector, found.length);
+                    console.log('ðŸ“¦ Found products with selector:', selector, found.length);
                     break;
                 }
             }
@@ -694,14 +682,14 @@
                         currency: 'SAR',
                         inStock: true 
                     });
-                    console.log('📦 Found product:', name, price);
+                    console.log('ðŸ“¦ Found product:', name, price);
                 }
             });
 
             if (products.length > 0) {
-                console.log('📦 Found', products.length, 'products from page');
+                console.log('ðŸ“¦ Found', products.length, 'products from page');
                 return {
-                    storeName: document.title?.split('|')[0]?.trim() || 'المتجر',
+                    storeName: document.title?.split('|')[0]?.trim() || 'Ø§Ù„Ù…ØªØ¬Ø±',
                     cachedProducts: JSON.stringify(products),
                     cachedShipping: '[]',
                     cachedCoupons: '[]',
@@ -711,7 +699,7 @@
             
             return null;
         } catch (e) {
-            console.log('⚠️ Could not extract products from page:', e.message);
+            console.log('âš ï¸ Could not extract products from page:', e.message);
             return null;
         }
     }
@@ -719,33 +707,33 @@
     // Build dynamic system prompt with real store data
     function buildSystemPrompt() {
         // Debug: Log what products we have
-        console.log('🤖 Building prompt with', storeData.products.length, 'products');
+        console.log('ðŸ¤– Building prompt with', storeData.products.length, 'products');
         if (storeData.products.length > 0) {
-            console.log('📋 First 5 products:', storeData.products.slice(0, 5).map(p => `${p.name}: ${p.price}`));
+            console.log('ðŸ“‹ First 5 products:', storeData.products.slice(0, 5).map(p => `${p.name}: ${p.price}`));
         }
         
         // Products section - include ALL products (up to 50)
         let productList = '';
-        console.log('📦 Products available for prompt:', storeData.products.length);
-        console.log('📋 Product names:', storeData.products.map(p => p.name));
+        console.log('ðŸ“¦ Products available for prompt:', storeData.products.length);
+        console.log('ðŸ“‹ Product names:', storeData.products.map(p => p.name));
         
         if (storeData.products.length > 0) {
             productList = storeData.products.slice(0, 50).map((p, i) => {
-                let priceText = `${p.price} ${p.currency || 'ريال'}`;
+                let priceText = `${p.price} ${p.currency || 'Ø±ÙŠØ§Ù„'}`;
                 if (p.salePrice && p.salePrice < p.price) {
-                    priceText = `${p.salePrice} ريال (بدل ${p.price})`;
+                    priceText = `${p.salePrice} Ø±ÙŠØ§Ù„ (Ø¨Ø¯Ù„ ${p.price})`;
                 }
-                const stockStatus = p.inStock !== false ? '✓' : '(نفذ)';
+                const stockStatus = p.inStock !== false ? 'âœ“' : '(Ù†ÙØ°)';
                 return `${i+1}. ${p.name} - ${priceText} ${stockStatus}`;
             }).join('\n');
         } else {
-            productList = `(منتجات تجريبية - لم يتم تحميل بيانات المتجر)
-1. فستان سهرة أسود أنيق - 450 ريال
-2. عباية مطرزة فاخرة - 850 ريال
-3. بلوزة قطن كاجوال - 120 ريال
-4. جاكيت جينز نسائي - 280 ريال
-5. تنورة ميدي بليسيه - 180 ريال
-6. طقم بيجاما حرير - 320 ريال`;
+            productList = `(Ù…Ù†ØªØ¬Ø§Øª ØªØ¬Ø±ÙŠØ¨ÙŠØ© - Ù„Ù… ÙŠØªÙ… ØªØ­Ù…ÙŠÙ„ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…ØªØ¬Ø±)
+1. ÙØ³ØªØ§Ù† Ø³Ù‡Ø±Ø© Ø£Ø³ÙˆØ¯ Ø£Ù†ÙŠÙ‚ - 450 Ø±ÙŠØ§Ù„
+2. Ø¹Ø¨Ø§ÙŠØ© Ù…Ø·Ø±Ø²Ø© ÙØ§Ø®Ø±Ø© - 850 Ø±ÙŠØ§Ù„
+3. Ø¨Ù„ÙˆØ²Ø© Ù‚Ø·Ù† ÙƒØ§Ø¬ÙˆØ§Ù„ - 120 Ø±ÙŠØ§Ù„
+4. Ø¬Ø§ÙƒÙŠØª Ø¬ÙŠÙ†Ø² Ù†Ø³Ø§Ø¦ÙŠ - 280 Ø±ÙŠØ§Ù„
+5. ØªÙ†ÙˆØ±Ø© Ù…ÙŠØ¯ÙŠ Ø¨Ù„ÙŠØ³ÙŠÙ‡ - 180 Ø±ÙŠØ§Ù„
+6. Ø·Ù‚Ù… Ø¨ÙŠØ¬Ø§Ù…Ø§ Ø­Ø±ÙŠØ± - 320 Ø±ÙŠØ§Ù„`;
         }
 
         // Shipping section
@@ -754,7 +742,7 @@
             shippingInfo = storeData.shipping.map(s => {
                 let text = `- ${s.name}`;
                 if (s.methods && s.methods.length > 0) {
-                    text += ': ' + s.methods.map(m => `${m.name} (${m.cost} ريال)`).join(', ');
+                    text += ': ' + s.methods.map(m => `${m.name} (${m.cost} Ø±ÙŠØ§Ù„)`).join(', ');
                 }
                 if (s.countries && s.countries.length > 0) {
                     text += ` [${s.countries.join(', ')}]`;
@@ -762,18 +750,18 @@
                 return text;
             }).join('\n');
         } else {
-            shippingInfo = `- داخل السعودية: 25 ريال (مجاني فوق 200 ريال) - 2-5 أيام`;
+            shippingInfo = `- Ø¯Ø§Ø®Ù„ Ø§Ù„Ø³Ø¹ÙˆØ¯ÙŠØ©: 25 Ø±ÙŠØ§Ù„ (Ù…Ø¬Ø§Ù†ÙŠ ÙÙˆÙ‚ 200 Ø±ÙŠØ§Ù„) - 2-5 Ø£ÙŠØ§Ù…`;
         }
 
         // Coupons section
         let couponsInfo = '';
         if (storeData.coupons.length > 0) {
             couponsInfo = storeData.coupons.map(c => {
-                const discountText = c.type === 'percentage' ? `خصم ${c.discount}%` : `خصم ${c.discount} ريال`;
-                return `- كود "${c.code}": ${discountText}`;
+                const discountText = c.type === 'percentage' ? `Ø®ØµÙ… ${c.discount}%` : `Ø®ØµÙ… ${c.discount} Ø±ÙŠØ§Ù„`;
+                return `- ÙƒÙˆØ¯ "${c.code}": ${discountText}`;
             }).join('\n');
         } else {
-            couponsInfo = '- لا يوجد كوبونات نشطة حالياً';
+            couponsInfo = '- Ù„Ø§ ÙŠÙˆØ¬Ø¯ ÙƒÙˆØ¨ÙˆÙ†Ø§Øª Ù†Ø´Ø·Ø© Ø­Ø§Ù„ÙŠØ§Ù‹';
         }
 
         // Offers section
@@ -781,11 +769,11 @@
         if (storeData.offers.length > 0) {
             offersInfo = storeData.offers.map(o => {
                 let text = `- ${o.name}`;
-                if (o.discount) text += ` (خصم ${o.discount}%)`;
+                if (o.discount) text += ` (Ø®ØµÙ… ${o.discount}%)`;
                 return text;
             }).join('\n');
         } else {
-            offersInfo = '- لا يوجد عروض خاصة حالياً';
+            offersInfo = '- Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø¹Ø±ÙˆØ¶ Ø®Ø§ØµØ© Ø­Ø§Ù„ÙŠØ§Ù‹';
         }
 
         // English system prompt
@@ -797,7 +785,7 @@
                     if (p.salePrice && p.salePrice < p.price) {
                         priceText = `${p.salePrice} SAR (was ${p.price})`;
                     }
-                    const stockStatus = p.inStock !== false ? '✓' : '(out of stock)';
+                    const stockStatus = p.inStock !== false ? 'âœ“' : '(out of stock)';
                     return `${i+1}. ${p.name} - ${priceText} ${stockStatus}`;
                 }).join('\n');
             } else {
@@ -846,120 +834,120 @@
 
             return `You are ALLaM, a friendly AI assistant for "${storeData.storeName}". Respond in English.
 
-═══════════════════════════════════
-📦 Available Products:
-═══════════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ðŸ“¦ Available Products:
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 ${productListEn}
 
-═══════════════════════════════════
-🚚 Shipping & Delivery:
-═══════════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ðŸšš Shipping & Delivery:
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 ${shippingInfoEn}
 
-═══════════════════════════════════
-🏷️ Active Discount Codes:
-═══════════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ðŸ·ï¸ Active Discount Codes:
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 ${couponsInfoEn}
 
-═══════════════════════════════════
-🎉 Special Offers:
-═══════════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ðŸŽ‰ Special Offers:
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 ${offersInfoEn}
 
-═══════════════════════════════════
-💳 Payment Methods: Mada, Visa, Mastercard, Apple Pay, Tabby
-🔄 Returns: Within 14 days of receiving the order
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ðŸ’³ Payment Methods: Mada, Visa, Mastercard, Apple Pay, Tabby
+ðŸ”„ Returns: Within 14 days of receiving the order
 
-═══════════════════════════════════
-📞 Customer Support:
-═══════════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ðŸ“ž Customer Support:
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 ${storeData.supportContact || 'Contact info available on the website'}
 
-═══════════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 Response Rules (IMPORTANT - Follow Exactly):
-═══════════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-🔴 RULE 1 (MOST IMPORTANT):
+ðŸ”´ RULE 1 (MOST IMPORTANT):
 The ONLY products available are listed above. There are NO other products.
 
-🔴 RULE 2:
+ðŸ”´ RULE 2:
 If customer asks about a product NOT in the list above, say exactly:
-"Sorry, we don't have [product name] currently 😔"
+"Sorry, we don't have [product name] currently ðŸ˜”"
 
-🔴 Products we DON'T have (say NO to these):
-- Shoes ❌ NOT available
-- Glasses ❌ NOT available
-- Pants ❌ NOT available
-- Phone ❌ NOT available
-- TV ❌ NOT available
-- Furniture ❌ NOT available
+ðŸ”´ Products we DON'T have (say NO to these):
+- Shoes âŒ NOT available
+- Glasses âŒ NOT available
+- Pants âŒ NOT available
+- Phone âŒ NOT available
+- TV âŒ NOT available
+- Furniture âŒ NOT available
 
-🔴 RULE 3:
+ðŸ”´ RULE 3:
 Before saying "yes we have" - search the list above. If you don't find the exact product, say "we don't have".
 
-🟢 Response style:
+ðŸŸ¢ Response style:
 - Be friendly and brief
 - Do NOT add any URLs`;
         }
 
         // Arabic system prompt (default)
-        return `أنت علام، مساعد ذكي لـ "${storeData.storeName}". تتحدث باللهجة السعودية فقط.
+        return `Ø£Ù†Øª Ø¹Ù„Ø§Ù…ØŒ Ù…Ø³Ø§Ø¹Ø¯ Ø°ÙƒÙŠ Ù„Ù€ "${storeData.storeName}". ØªØªØ­Ø¯Ø« Ø¨Ø§Ù„Ù„Ù‡Ø¬Ø© Ø§Ù„Ø³Ø¹ÙˆØ¯ÙŠØ© ÙÙ‚Ø·.
 
-═══════════════════════════════════
-📦 المنتجات المتوفرة (هذه القائمة الكاملة):
-═══════════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ðŸ“¦ Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª Ø§Ù„Ù…ØªÙˆÙØ±Ø© (Ù‡Ø°Ù‡ Ø§Ù„Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ÙƒØ§Ù…Ù„Ø©):
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 ${productList}
 
-═══════════════════════════════════
-🚚 الشحن والتوصيل:
-═══════════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ðŸšš Ø§Ù„Ø´Ø­Ù† ÙˆØ§Ù„ØªÙˆØµÙŠÙ„:
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 ${shippingInfo}
 
-═══════════════════════════════════
-🏷️ كوبونات الخصم النشطة:
-═══════════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ðŸ·ï¸ ÙƒÙˆØ¨ÙˆÙ†Ø§Øª Ø§Ù„Ø®ØµÙ… Ø§Ù„Ù†Ø´Ø·Ø©:
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 ${couponsInfo}
 
-═══════════════════════════════════
-🎉 العروض الخاصة:
-═══════════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ðŸŽ‰ Ø§Ù„Ø¹Ø±ÙˆØ¶ Ø§Ù„Ø®Ø§ØµØ©:
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 ${offersInfo}
 
-═══════════════════════════════════
-💳 طرق الدفع: مدى، فيزا، ماستركارد، أبل باي، تابي
-🔄 الاسترجاع: خلال 14 يوم من الاستلام
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ðŸ’³ Ø·Ø±Ù‚ Ø§Ù„Ø¯ÙØ¹: Ù…Ø¯Ù‰ØŒ ÙÙŠØ²Ø§ØŒ Ù…Ø§Ø³ØªØ±ÙƒØ§Ø±Ø¯ØŒ Ø£Ø¨Ù„ Ø¨Ø§ÙŠØŒ ØªØ§Ø¨ÙŠ
+ðŸ”„ Ø§Ù„Ø§Ø³ØªØ±Ø¬Ø§Ø¹: Ø®Ù„Ø§Ù„ 14 ÙŠÙˆÙ… Ù…Ù† Ø§Ù„Ø§Ø³ØªÙ„Ø§Ù…
 
-═══════════════════════════════════
-📞 التواصل والدعم:
-═══════════════════════════════════
-${storeData.supportContact || 'معلومات التواصل موجودة في الموقع'}
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+ðŸ“ž Ø§Ù„ØªÙˆØ§ØµÙ„ ÙˆØ§Ù„Ø¯Ø¹Ù…:
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+${storeData.supportContact || 'Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„ØªÙˆØ§ØµÙ„ Ù…ÙˆØ¬ÙˆØ¯Ø© ÙÙŠ Ø§Ù„Ù…ÙˆÙ‚Ø¹'}
 
-═══════════════════════════════════
-⚠️ قواعد صارمة جداً - اتبعها بدقة:
-═══════════════════════════════════
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+âš ï¸ Ù‚ÙˆØ§Ø¹Ø¯ ØµØ§Ø±Ù…Ø© Ø¬Ø¯Ø§Ù‹ - Ø§ØªØ¨Ø¹Ù‡Ø§ Ø¨Ø¯Ù‚Ø©:
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-🔴 قاعدة رقم 1 (الأهم): 
-المنتجات الموجودة فقط هي المذكورة أعلاه. لا يوجد أي منتج آخر في المتجر.
+ðŸ”´ Ù‚Ø§Ø¹Ø¯Ø© Ø±Ù‚Ù… 1 (Ø§Ù„Ø£Ù‡Ù…): 
+Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª Ø§Ù„Ù…ÙˆØ¬ÙˆØ¯Ø© ÙÙ‚Ø· Ù‡ÙŠ Ø§Ù„Ù…Ø°ÙƒÙˆØ±Ø© Ø£Ø¹Ù„Ø§Ù‡. Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø£ÙŠ Ù…Ù†ØªØ¬ Ø¢Ø®Ø± ÙÙŠ Ø§Ù„Ù…ØªØ¬Ø±.
 
-🔴 قاعدة رقم 2:
-إذا سأل العميل عن منتج غير موجود في القائمة أعلاه، قل بالضبط:
-"للأسف ما عندنا [اسم المنتج] حالياً 😔"
+ðŸ”´ Ù‚Ø§Ø¹Ø¯Ø© Ø±Ù‚Ù… 2:
+Ø¥Ø°Ø§ Ø³Ø£Ù„ Ø§Ù„Ø¹Ù…ÙŠÙ„ Ø¹Ù† Ù…Ù†ØªØ¬ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯ ÙÙŠ Ø§Ù„Ù‚Ø§Ø¦Ù…Ø© Ø£Ø¹Ù„Ø§Ù‡ØŒ Ù‚Ù„ Ø¨Ø§Ù„Ø¶Ø¨Ø·:
+"Ù„Ù„Ø£Ø³Ù Ù…Ø§ Ø¹Ù†Ø¯Ù†Ø§ [Ø§Ø³Ù… Ø§Ù„Ù…Ù†ØªØ¬] Ø­Ø§Ù„ÙŠØ§Ù‹ ðŸ˜”"
 
-🔴 منتجات غير موجودة (قل لا لهذه المنتجات):
-- أحذية ❌ غير موجودة
-- نظارات ❌ غير موجودة  
-- بنطلون ❌ غير موجود
-- جوال ❌ غير موجود
-- تلفزيون ❌ غير موجود
-- أثاث ❌ غير موجود
+ðŸ”´ Ù…Ù†ØªØ¬Ø§Øª ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯Ø© (Ù‚Ù„ Ù„Ø§ Ù„Ù‡Ø°Ù‡ Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª):
+- Ø£Ø­Ø°ÙŠØ© âŒ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯Ø©
+- Ù†Ø¸Ø§Ø±Ø§Øª âŒ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯Ø©  
+- Ø¨Ù†Ø·Ù„ÙˆÙ† âŒ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯
+- Ø¬ÙˆØ§Ù„ âŒ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯
+- ØªÙ„ÙØ²ÙŠÙˆÙ† âŒ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯
+- Ø£Ø«Ø§Ø« âŒ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯
 
-🔴 قاعدة رقم 3:
-قبل ما تقول "نعم عندنا" - ابحث في القائمة أعلاه. إذا ما لقيت المنتج بالضبط، قل "ما عندنا".
+ðŸ”´ Ù‚Ø§Ø¹Ø¯Ø© Ø±Ù‚Ù… 3:
+Ù‚Ø¨Ù„ Ù…Ø§ ØªÙ‚ÙˆÙ„ "Ù†Ø¹Ù… Ø¹Ù†Ø¯Ù†Ø§" - Ø§Ø¨Ø­Ø« ÙÙŠ Ø§Ù„Ù‚Ø§Ø¦Ù…Ø© Ø£Ø¹Ù„Ø§Ù‡. Ø¥Ø°Ø§ Ù…Ø§ Ù„Ù‚ÙŠØª Ø§Ù„Ù…Ù†ØªØ¬ Ø¨Ø§Ù„Ø¶Ø¨Ø·ØŒ Ù‚Ù„ "Ù…Ø§ Ø¹Ù†Ø¯Ù†Ø§".
 
-🟢 أسلوب الرد:
-- استخدم اللهجة السعودية
-- كن مختصر وودود
-- لا تضيف روابط`;
+ðŸŸ¢ Ø£Ø³Ù„ÙˆØ¨ Ø§Ù„Ø±Ø¯:
+- Ø§Ø³ØªØ®Ø¯Ù… Ø§Ù„Ù„Ù‡Ø¬Ø© Ø§Ù„Ø³Ø¹ÙˆØ¯ÙŠØ©
+- ÙƒÙ† Ù…Ø®ØªØµØ± ÙˆÙˆØ¯ÙˆØ¯
+- Ù„Ø§ ØªØ¶ÙŠÙ Ø±ÙˆØ§Ø¨Ø·`;
     }
 
     // Create widget HTML
@@ -985,7 +973,7 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
                 transition: all 0.3s ease;
                 font-size: 28px;
             ">
-                💬
+                ðŸ’¬
             </div>
 
             <!-- Chat Window -->
@@ -1026,7 +1014,7 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
                             border-radius: 15px;
                             font-weight: 500;
                             transition: background 0.3s ease;
-                        ">${currentLang === 'ar' ? 'EN' : 'عربي'}</button>
+                        ">${currentLang === 'ar' ? 'EN' : 'Ø¹Ø±Ø¨ÙŠ'}</button>
                         <button id="close-chat" style="
                             background: none;
                             border: none;
@@ -1039,7 +1027,7 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
                             display: flex;
                             align-items: center;
                             justify-content: center;
-                        ">×</button>
+                        ">Ã—</button>
                     </div>
                 </div>
 
@@ -1142,19 +1130,19 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
             const freshProducts = scrapeProductsFromPage();
             if (freshProducts.length > 0) {
                 storeData.products = freshProducts;
-                console.log('🔄 Refreshed products:', freshProducts.length);
-                console.log('📋 Product names:', freshProducts.map(p => p.name).join(' | '));
+                console.log('ðŸ”„ Refreshed products:', freshProducts.length);
+                console.log('ðŸ“‹ Product names:', freshProducts.map(p => p.name).join(' | '));
             } else {
-                console.log('⚠️ NO PRODUCTS FOUND! Check scraping selectors');
+                console.log('âš ï¸ NO PRODUCTS FOUND! Check scraping selectors');
             }
         });
 
         // Send welcome message (use translated version)
         addMessage(t.welcome, 'bot');
 
-        console.log('✅ AI Chatbot Widget loaded!');
-        console.log('📍 Store ID:', storeId);
-        console.log('🌐 Language:', currentLang);
+        console.log('âœ… AI Chatbot Widget loaded!');
+        console.log('ðŸ“ Store ID:', storeId);
+        console.log('ðŸŒ Language:', currentLang);
     }
 
     function toggleChat() {
@@ -1185,7 +1173,7 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
         // Clear conversation history after 3 exchanges to keep AI fresh
         // (3 user messages + 3 assistant messages = 6 items)
         if (conversationHistory.length > 6) {
-            console.log('🔄 Clearing conversation history to keep AI accurate');
+            console.log('ðŸ”„ Clearing conversation history to keep AI accurate');
             conversationHistory = [];
         }
 
@@ -1214,29 +1202,29 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
         const msg = message.toLowerCase();
         
         // Log all available products for debugging
-        console.log('📦 All products in store:', storeData.products.map(p => p.name));
+        console.log('ðŸ“¦ All products in store:', storeData.products.map(p => p.name));
         
         // Common product keywords to detect (what user might ask for)
         const productKeywords = [
             // Arabic - Clothing
-            'جاكيت', 'جاكيتات', 'فستان', 'فساتين', 'بلوزة', 'بلوزات', 'بلايز',
-            'عباية', 'عبايات', 'تنورة', 'تنانير', 'بنطلون', 'بنطال', 'بناطيل',
-            'قميص', 'قمصان', 'شورت', 'بيجاما',
+            'Ø¬Ø§ÙƒÙŠØª', 'Ø¬Ø§ÙƒÙŠØªØ§Øª', 'ÙØ³ØªØ§Ù†', 'ÙØ³Ø§ØªÙŠÙ†', 'Ø¨Ù„ÙˆØ²Ø©', 'Ø¨Ù„ÙˆØ²Ø§Øª', 'Ø¨Ù„Ø§ÙŠØ²',
+            'Ø¹Ø¨Ø§ÙŠØ©', 'Ø¹Ø¨Ø§ÙŠØ§Øª', 'ØªÙ†ÙˆØ±Ø©', 'ØªÙ†Ø§Ù†ÙŠØ±', 'Ø¨Ù†Ø·Ù„ÙˆÙ†', 'Ø¨Ù†Ø·Ø§Ù„', 'Ø¨Ù†Ø§Ø·ÙŠÙ„',
+            'Ù‚Ù…ÙŠØµ', 'Ù‚Ù…ØµØ§Ù†', 'Ø´ÙˆØ±Øª', 'Ø¨ÙŠØ¬Ø§Ù…Ø§',
             // Arabic - Accessories
-            'شنطة', 'شنط', 'حقيبة', 'حقائب', 'ساعة', 'ساعات', 'نظارة', 'نظارات',
-            'خاتم', 'خواتم', 'سلسلة', 'سلاسل', 'اسوارة', 'أساور', 'قلادة', 'اقراط', 'أقراط',
-            'بروش', 'حزام', 'احزمة',
+            'Ø´Ù†Ø·Ø©', 'Ø´Ù†Ø·', 'Ø­Ù‚ÙŠØ¨Ø©', 'Ø­Ù‚Ø§Ø¦Ø¨', 'Ø³Ø§Ø¹Ø©', 'Ø³Ø§Ø¹Ø§Øª', 'Ù†Ø¸Ø§Ø±Ø©', 'Ù†Ø¸Ø§Ø±Ø§Øª',
+            'Ø®Ø§ØªÙ…', 'Ø®ÙˆØ§ØªÙ…', 'Ø³Ù„Ø³Ù„Ø©', 'Ø³Ù„Ø§Ø³Ù„', 'Ø§Ø³ÙˆØ§Ø±Ø©', 'Ø£Ø³Ø§ÙˆØ±', 'Ù‚Ù„Ø§Ø¯Ø©', 'Ø§Ù‚Ø±Ø§Ø·', 'Ø£Ù‚Ø±Ø§Ø·',
+            'Ø¨Ø±ÙˆØ´', 'Ø­Ø²Ø§Ù…', 'Ø§Ø­Ø²Ù…Ø©',
             // Arabic - Shoes
-            'حذاء', 'أحذية', 'احذية', 'صندل', 'كعب', 'رياضي',
+            'Ø­Ø°Ø§Ø¡', 'Ø£Ø­Ø°ÙŠØ©', 'Ø§Ø­Ø°ÙŠØ©', 'ØµÙ†Ø¯Ù„', 'ÙƒØ¹Ø¨', 'Ø±ÙŠØ§Ø¶ÙŠ',
             // Arabic - Head covers
-            'طرحة', 'طرح', 'شال', 'شيلة', 'شيلات', 'حجاب',
+            'Ø·Ø±Ø­Ø©', 'Ø·Ø±Ø­', 'Ø´Ø§Ù„', 'Ø´ÙŠÙ„Ø©', 'Ø´ÙŠÙ„Ø§Øª', 'Ø­Ø¬Ø§Ø¨',
             // Arabic - Beauty
-            'عطر', 'عطور', 'بخور', 'مكياج', 'روج', 'كريم', 'سيروم', 'ماسك', 'غسول',
-            'هايلايتر', 'باليت', 'فرش', 'طلاء',
+            'Ø¹Ø·Ø±', 'Ø¹Ø·ÙˆØ±', 'Ø¨Ø®ÙˆØ±', 'Ù…ÙƒÙŠØ§Ø¬', 'Ø±ÙˆØ¬', 'ÙƒØ±ÙŠÙ…', 'Ø³ÙŠØ±ÙˆÙ…', 'Ù…Ø§Ø³Ùƒ', 'ØºØ³ÙˆÙ„',
+            'Ù‡Ø§ÙŠÙ„Ø§ÙŠØªØ±', 'Ø¨Ø§Ù„ÙŠØª', 'ÙØ±Ø´', 'Ø·Ù„Ø§Ø¡',
             // Arabic - Electronics (usually NOT in fashion stores)
-            'جوال', 'جوالات', 'لابتوب', 'كمبيوتر', 'تلفزيون', 'سماعة', 'سماعات',
+            'Ø¬ÙˆØ§Ù„', 'Ø¬ÙˆØ§Ù„Ø§Øª', 'Ù„Ø§Ø¨ØªÙˆØ¨', 'ÙƒÙ…Ø¨ÙŠÙˆØªØ±', 'ØªÙ„ÙØ²ÙŠÙˆÙ†', 'Ø³Ù…Ø§Ø¹Ø©', 'Ø³Ù…Ø§Ø¹Ø§Øª',
             // Arabic - Other
-            'أثاث', 'سيارة', 'دراجة', 'كتاب', 'لعبة',
+            'Ø£Ø«Ø§Ø«', 'Ø³ÙŠØ§Ø±Ø©', 'Ø¯Ø±Ø§Ø¬Ø©', 'ÙƒØªØ§Ø¨', 'Ù„Ø¹Ø¨Ø©',
             // English
             'jacket', 'dress', 'blouse', 'abaya', 'skirt', 'pants', 'shirt',
             'bag', 'shoe', 'shoes', 'watch', 'ring', 'necklace', 'bracelet',
@@ -1256,11 +1244,11 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
         
         // If no known keyword found, let AI handle it
         if (!askedKeyword) {
-            console.log('🔍 No product keyword detected, letting AI handle');
+            console.log('ðŸ” No product keyword detected, letting AI handle');
             return { verified: true, productAsked: null };
         }
         
-        console.log('🔍 User asking about:', askedKeyword);
+        console.log('ðŸ” User asking about:', askedKeyword);
         
         // NOW CHECK: Does this keyword exist in ANY of our actual products?
         const allProductText = storeData.products.map(p => p.name.toLowerCase()).join(' ');
@@ -1268,33 +1256,33 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
         // Check if the keyword appears in any product name
         const keywordInProducts = allProductText.includes(askedKeyword);
         
-        // Also check for partial matches (e.g., "فساتين" should match "فستان")
+        // Also check for partial matches (e.g., "ÙØ³Ø§ØªÙŠÙ†" should match "ÙØ³ØªØ§Ù†")
         const keywordVariants = {
             // Arabic - Clothing plurals to singular
-            'فساتين': 'فستان', 'فستان': 'فستان',
-            'بلوزات': 'بلوزة', 'بلايز': 'بلوزة', 'بلوزة': 'بلوزة',
-            'جاكيتات': 'جاكيت', 'جاكيت': 'جاكيت',
-            'عبايات': 'عباية', 'عباية': 'عباية',
-            'تنانير': 'تنورة', 'تنورة': 'تنورة',
-            'بناطيل': 'بنطلون', 'بنطال': 'بنطلون', 'بنطلون': 'بنطلون',
-            'قمصان': 'قميص', 'قميص': 'قميص',
+            'ÙØ³Ø§ØªÙŠÙ†': 'ÙØ³ØªØ§Ù†', 'ÙØ³ØªØ§Ù†': 'ÙØ³ØªØ§Ù†',
+            'Ø¨Ù„ÙˆØ²Ø§Øª': 'Ø¨Ù„ÙˆØ²Ø©', 'Ø¨Ù„Ø§ÙŠØ²': 'Ø¨Ù„ÙˆØ²Ø©', 'Ø¨Ù„ÙˆØ²Ø©': 'Ø¨Ù„ÙˆØ²Ø©',
+            'Ø¬Ø§ÙƒÙŠØªØ§Øª': 'Ø¬Ø§ÙƒÙŠØª', 'Ø¬Ø§ÙƒÙŠØª': 'Ø¬Ø§ÙƒÙŠØª',
+            'Ø¹Ø¨Ø§ÙŠØ§Øª': 'Ø¹Ø¨Ø§ÙŠØ©', 'Ø¹Ø¨Ø§ÙŠØ©': 'Ø¹Ø¨Ø§ÙŠØ©',
+            'ØªÙ†Ø§Ù†ÙŠØ±': 'ØªÙ†ÙˆØ±Ø©', 'ØªÙ†ÙˆØ±Ø©': 'ØªÙ†ÙˆØ±Ø©',
+            'Ø¨Ù†Ø§Ø·ÙŠÙ„': 'Ø¨Ù†Ø·Ù„ÙˆÙ†', 'Ø¨Ù†Ø·Ø§Ù„': 'Ø¨Ù†Ø·Ù„ÙˆÙ†', 'Ø¨Ù†Ø·Ù„ÙˆÙ†': 'Ø¨Ù†Ø·Ù„ÙˆÙ†',
+            'Ù‚Ù…ØµØ§Ù†': 'Ù‚Ù…ÙŠØµ', 'Ù‚Ù…ÙŠØµ': 'Ù‚Ù…ÙŠØµ',
             // Arabic - Bags
-            'شنط': 'حقيبة', 'شنطة': 'حقيبة', 'حقائب': 'حقيبة', 'حقيبة': 'حقيبة',
+            'Ø´Ù†Ø·': 'Ø­Ù‚ÙŠØ¨Ø©', 'Ø´Ù†Ø·Ø©': 'Ø­Ù‚ÙŠØ¨Ø©', 'Ø­Ù‚Ø§Ø¦Ø¨': 'Ø­Ù‚ÙŠØ¨Ø©', 'Ø­Ù‚ÙŠØ¨Ø©': 'Ø­Ù‚ÙŠØ¨Ø©',
             // Arabic - Shoes
-            'أحذية': 'حذاء', 'احذية': 'حذاء', 'حذاء': 'حذاء',
+            'Ø£Ø­Ø°ÙŠØ©': 'Ø­Ø°Ø§Ø¡', 'Ø§Ø­Ø°ÙŠØ©': 'Ø­Ø°Ø§Ø¡', 'Ø­Ø°Ø§Ø¡': 'Ø­Ø°Ø§Ø¡',
             // Arabic - Watches
-            'ساعات': 'ساعة', 'ساعة': 'ساعة',
+            'Ø³Ø§Ø¹Ø§Øª': 'Ø³Ø§Ø¹Ø©', 'Ø³Ø§Ø¹Ø©': 'Ø³Ø§Ø¹Ø©',
             // Arabic - Accessories
-            'خواتم': 'خاتم', 'خاتم': 'خاتم',
-            'سلاسل': 'سلسلة', 'سلسلة': 'سلسلة',
-            'أساور': 'اسوارة', 'اسوارة': 'اسوارة',
-            'أقراط': 'اقراط', 'اقراط': 'اقراط',
-            'نظارات': 'نظارة', 'نظارة': 'نظارة',
+            'Ø®ÙˆØ§ØªÙ…': 'Ø®Ø§ØªÙ…', 'Ø®Ø§ØªÙ…': 'Ø®Ø§ØªÙ…',
+            'Ø³Ù„Ø§Ø³Ù„': 'Ø³Ù„Ø³Ù„Ø©', 'Ø³Ù„Ø³Ù„Ø©': 'Ø³Ù„Ø³Ù„Ø©',
+            'Ø£Ø³Ø§ÙˆØ±': 'Ø§Ø³ÙˆØ§Ø±Ø©', 'Ø§Ø³ÙˆØ§Ø±Ø©': 'Ø§Ø³ÙˆØ§Ø±Ø©',
+            'Ø£Ù‚Ø±Ø§Ø·': 'Ø§Ù‚Ø±Ø§Ø·', 'Ø§Ù‚Ø±Ø§Ø·': 'Ø§Ù‚Ø±Ø§Ø·',
+            'Ù†Ø¸Ø§Ø±Ø§Øª': 'Ù†Ø¸Ø§Ø±Ø©', 'Ù†Ø¸Ø§Ø±Ø©': 'Ù†Ø¸Ø§Ø±Ø©',
             // Arabic - Head covers
-            'شيلات': 'شيلة', 'شيلة': 'شيلة',
-            'طرح': 'طرحة', 'طرحة': 'طرحة',
+            'Ø´ÙŠÙ„Ø§Øª': 'Ø´ÙŠÙ„Ø©', 'Ø´ÙŠÙ„Ø©': 'Ø´ÙŠÙ„Ø©',
+            'Ø·Ø±Ø­': 'Ø·Ø±Ø­Ø©', 'Ø·Ø±Ø­Ø©': 'Ø·Ø±Ø­Ø©',
             // Arabic - Perfume
-            'عطور': 'عطر', 'عطر': 'عطر',
+            'Ø¹Ø·ÙˆØ±': 'Ø¹Ø·Ø±', 'Ø¹Ø·Ø±': 'Ø¹Ø·Ø±',
             // English plurals
             'dresses': 'dress', 'dress': 'dress',
             'blouses': 'blouse', 'blouse': 'blouse',
@@ -1309,9 +1297,9 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
         const normalizedKeyword = keywordVariants[askedKeyword] || askedKeyword;
         const hasProduct = allProductText.includes(normalizedKeyword) || allProductText.includes(askedKeyword);
         
-        console.log('🔍 Checking if "' + askedKeyword + '" exists in products...');
-        console.log('🔍 All product names:', allProductText.substring(0, 200));
-        console.log('🔍 Result:', hasProduct ? '✅ FOUND' : '❌ NOT FOUND');
+        console.log('ðŸ” Checking if "' + askedKeyword + '" exists in products...');
+        console.log('ðŸ” All product names:', allProductText.substring(0, 200));
+        console.log('ðŸ” Result:', hasProduct ? 'âœ… FOUND' : 'âŒ NOT FOUND');
         
         DEBUG_LOG.add('PRODUCT_VERIFICATION', {
             userMessage: message,
@@ -1326,16 +1314,16 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
             // PRODUCT DOES NOT EXIST - Return immediate response
             const availableTypes = [...new Set(storeData.products.map(p => p.name.split(' ')[0]))]
                 .slice(0, 5)
-                .join('، ');
+                .join('ØŒ ');
             
-            console.log('🚫 Product NOT found, returning "we dont have it"');
+            console.log('ðŸš« Product NOT found, returning "we dont have it"');
             
             return {
                 verified: false,
                 productAsked: askedKeyword,
                 response: isRTL 
-                    ? `للأسف ما عندنا ${askedKeyword} حالياً 😔\nبس عندنا: ${availableTypes}\nتبي تشوف شي منهم؟`
-                    : `Sorry, we don't have ${askedKeyword} right now 😔\nBut we have: ${availableTypes}\nWould you like to see any of these?`
+                    ? `Ù„Ù„Ø£Ø³Ù Ù…Ø§ Ø¹Ù†Ø¯Ù†Ø§ ${askedKeyword} Ø­Ø§Ù„ÙŠØ§Ù‹ ðŸ˜”\nØ¨Ø³ Ø¹Ù†Ø¯Ù†Ø§: ${availableTypes}\nØªØ¨ÙŠ ØªØ´ÙˆÙ Ø´ÙŠ Ù…Ù†Ù‡Ù…ØŸ`
+                    : `Sorry, we don't have ${askedKeyword} right now ðŸ˜”\nBut we have: ${availableTypes}\nWould you like to see any of these?`
             };
         }
         
@@ -1345,7 +1333,7 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
             p.name.toLowerCase().includes(askedKeyword)
         );
         
-        console.log('✅ Product FOUND, passing to AI with', matchingProducts.length, 'matches');
+        console.log('âœ… Product FOUND, passing to AI with', matchingProducts.length, 'matches');
         
         return { 
             verified: true, 
@@ -1358,46 +1346,46 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
         // Direct AI call - no pre-check algorithm, let AI handle everything
         const systemPrompt = buildSystemPrompt();
         
-        console.log('🤖 Calling AI with', storeData.products.length, 'products in context');
-        console.log('📝 User message:', message);
-        console.log('� AI Provider:', config.aiProvider);
+        console.log('ðŸ¤– Calling AI with', storeData.products.length, 'products in context');
+        console.log('ðŸ“ User message:', message);
+        
         
         // Log the full request
         DEBUG_LOG.add('AI_REQUEST', {
             userMessage: message,
-            aiProvider: config.aiProvider,
+            
             productsInContext: storeData.products.length,
             productsList: storeData.products.slice(0, 50).map(p => `${p.name}: ${p.price} ${p.currency}`),
             systemPromptPreview: systemPrompt.substring(0, 500) + '...'
         });
 
         try {
-            let apiUrl, headers, model;
+            let config.aiUrl, headers, model;
             
-            if (config.aiProvider === 'groq' && config.groqApiKey) {
+            if (config.aiProvider === 'groq' && '') {
                 // Use Groq API (cloud, no tunnel needed)
-                apiUrl = config.groqApiUrl;
+                config.aiUrl = config.aiUrl;
                 headers = {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${config.groqApiKey}`
+                    'Authorization': `Bearer ${''}`
                 };
-                model = config.groqModel;
-                console.log('☁️ Using Groq Cloud API');
+                model = config.aiModel;
+                console.log('â˜ï¸ Using Groq Cloud API');
             } else {
                 // Use local LM Studio via tunnel
-                apiUrl = config.localAiUrl;
+                config.aiUrl = config.aiUrl;
                 headers = {
                     'Content-Type': 'application/json'
                 };
-                model = config.localModel;
-                console.log('🖥️ Using Local LM Studio');
+                model = config.aiModel;
+                console.log('ðŸ–¥ï¸ Using Local LM Studio');
             }
             
-            const response = await fetch(apiUrl, {
+            const response = await fetch(config.aiUrl, {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify({
-                    model: model,
+                    model: config.aiModel,
                     messages: [
                         { role: 'system', content: systemPrompt },
                         ...conversationHistory.slice(-10),
@@ -1424,7 +1412,7 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
                 model: data.model || 'unknown'
             });
             
-            console.log('✅ AI Response received:', aiResponse.substring(0, 100));
+            console.log('âœ… AI Response received:', aiResponse.substring(0, 100));
             return aiResponse;
         } catch (error) {
             console.error('AI API Error:', error);
@@ -1439,35 +1427,35 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
         // English patterns
         if (!isRTL) {
             if (lower.includes('hi') || lower.includes('hello') || lower.includes('hey')) {
-                return 'Hello! How can I help you today? 😊';
+                return 'Hello! How can I help you today? ðŸ˜Š';
             }
             if (lower.includes('price') || lower.includes('cost') || lower.includes('how much')) {
-                return 'Sure! Tell me the product name and I\'ll give you the price 🏷️';
+                return 'Sure! Tell me the product name and I\'ll give you the price ðŸ·ï¸';
             }
             if (lower.includes('ship') || lower.includes('delivery') || lower.includes('deliver')) {
-                return 'Shipping usually takes 2-5 days 🚚';
+                return 'Shipping usually takes 2-5 days ðŸšš';
             }
             if (lower.includes('thank')) {
-                return 'You\'re welcome! Happy to help 😊';
+                return 'You\'re welcome! Happy to help ðŸ˜Š';
             }
             return 'Sure! What exactly would you like to know?';
         }
         
         // Arabic patterns (default)
-        if (lower.includes('هلا') || lower.includes('السلام') || lower.includes('مرحبا')) {
-            return 'هلا والله! وش أقدر أساعدك فيه؟ 😊';
+        if (lower.includes('Ù‡Ù„Ø§') || lower.includes('Ø§Ù„Ø³Ù„Ø§Ù…') || lower.includes('Ù…Ø±Ø­Ø¨Ø§')) {
+            return 'Ù‡Ù„Ø§ ÙˆØ§Ù„Ù„Ù‡! ÙˆØ´ Ø£Ù‚Ø¯Ø± Ø£Ø³Ø§Ø¹Ø¯Ùƒ ÙÙŠÙ‡ØŸ ðŸ˜Š';
         }
-        if (lower.includes('سعر') || lower.includes('كم') || lower.includes('بكم')) {
-            return 'أبشر! قول لي اسم المنتج وأعطيك السعر 🏷️';
+        if (lower.includes('Ø³Ø¹Ø±') || lower.includes('ÙƒÙ…') || lower.includes('Ø¨ÙƒÙ…')) {
+            return 'Ø£Ø¨Ø´Ø±! Ù‚ÙˆÙ„ Ù„ÙŠ Ø§Ø³Ù… Ø§Ù„Ù…Ù†ØªØ¬ ÙˆØ£Ø¹Ø·ÙŠÙƒ Ø§Ù„Ø³Ø¹Ø± ðŸ·ï¸';
         }
-        if (lower.includes('شحن') || lower.includes('توصيل')) {
-            return 'الشحن يوصل خلال ٢-٥ أيام عادة 🚚';
+        if (lower.includes('Ø´Ø­Ù†') || lower.includes('ØªÙˆØµÙŠÙ„')) {
+            return 'Ø§Ù„Ø´Ø­Ù† ÙŠÙˆØµÙ„ Ø®Ù„Ø§Ù„ Ù¢-Ù¥ Ø£ÙŠØ§Ù… Ø¹Ø§Ø¯Ø© ðŸšš';
         }
-        if (lower.includes('شكر') || lower.includes('مشكور')) {
-            return 'العفو! يسعدني أخدمك 😊';
+        if (lower.includes('Ø´ÙƒØ±') || lower.includes('Ù…Ø´ÙƒÙˆØ±')) {
+            return 'Ø§Ù„Ø¹ÙÙˆ! ÙŠØ³Ø¹Ø¯Ù†ÙŠ Ø£Ø®Ø¯Ù…Ùƒ ðŸ˜Š';
         }
         
-        return 'أبشر! وش تبي تعرف بالضبط؟';
+        return 'Ø£Ø¨Ø´Ø±! ÙˆØ´ ØªØ¨ÙŠ ØªØ¹Ø±Ù Ø¨Ø§Ù„Ø¶Ø¨Ø·ØŸ';
     }
 
     function showTypingIndicator() {
@@ -1485,9 +1473,9 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
             gap: 4px;
         `;
         typingDiv.innerHTML = `
-            <span style="animation: bounce 1s infinite; animation-delay: 0s;">●</span>
-            <span style="animation: bounce 1s infinite; animation-delay: 0.2s;">●</span>
-            <span style="animation: bounce 1s infinite; animation-delay: 0.4s;">●</span>
+            <span style="animation: bounce 1s infinite; animation-delay: 0s;">â—</span>
+            <span style="animation: bounce 1s infinite; animation-delay: 0.2s;">â—</span>
+            <span style="animation: bounce 1s infinite; animation-delay: 0.4s;">â—</span>
             <style>
                 @keyframes bounce {
                     0%, 60%, 100% { transform: translateY(0); }
@@ -1547,3 +1535,4 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
     };
 
 })();
+

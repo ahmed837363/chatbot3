@@ -600,8 +600,22 @@
 
 </div>
 
-<!-- Chatbot Widget -->
-<script src="https://cdn.jsdelivr.net/gh/ahmed837363/chatbot3@v3.4/chatbot-widget.js" 
+<!-- 
+====================================
+HOW TO USE THE CHATBOT:
+====================================
+
+Option 1: With Groq (FREE, no tunnel needed):
+1. Go to https://console.groq.com
+2. Sign up and create an API key
+3. Add data-groq-key="your-key-here"
+
+Option 2: With local LM Studio (needs tunnel):
+1. Start LM Studio with model loaded
+2. Run: cloudflared tunnel run allam-ai
+3. Remove the data-groq-key attribute
+-->
+<script src="https://cdn.jsdelivr.net/gh/ahmed837363/chatbot3@v4.1/chatbot-widget.js" 
         data-store-id="50products" 
         data-lang="ar">
 </script>

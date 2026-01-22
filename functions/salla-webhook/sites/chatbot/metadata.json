@@ -1,8 +1,0 @@
-{
-  "name": "Gemini RP Chat",
-  "description": "A sophisticated, mobile-first, multi-character roleplaying (RP) chat application inspired by SillyTavern, powered by Gemini. Features include character creation, world-building, story tracking, and persistent state via local storage.",
-  "requestFramePermissions": [],
-  "featureFlags": {
-    "enableGpt51PreviewForAllClients": true
-  }
-}

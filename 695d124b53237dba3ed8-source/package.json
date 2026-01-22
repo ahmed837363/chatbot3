@@ -1,9 +1,0 @@
-{
-  "name": "salla-webhook",
-  "version": "1.0.0",
-  "description": "Salla webhook handler for automatic chatbot installation",
-  "main": "index.js",
-  "dependencies": {
-    "node-appwrite": "^11.0.0"
-  }
-}

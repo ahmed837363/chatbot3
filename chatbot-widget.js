@@ -141,20 +141,35 @@
         appwriteProjectId: '694669640010920ea3f6',
         databaseId: '6946699d001194236820',
         collectionId: 'store_connections',
-        productsCollectionId: 'products', // NEW: Products collection
-        // Local ALLaM AI via Cloudflare Tunnel (permanent URL)
-        aiWorkerUrl: 'https://allam-ai.mayasahstyle.me/v1/chat/completions',
-        aiModel: 'allam-7b-instruct-preview',
+        productsCollectionId: 'products',
+        // AI Provider: 'groq' (cloud, no tunnel) or 'local' (needs tunnel)
+        aiProvider: 'groq',
+        // Groq API (free, no tunnel needed)
+        groqApiKey: '', // Will be set from data-groq-key attribute
+        groqApiUrl: 'https://api.groq.com/openai/v1/chat/completions',
+        groqModel: 'llama-3.3-70b-versatile',
+        // Local LM Studio via tunnel (fallback)
+        localAiUrl: 'https://allam-ai.mayasahstyle.me/v1/chat/completions',
+        localModel: 'allam-7b-instruct-preview',
         chatbotColor: '#667eea',
-        position: 'bottom-left', // or 'bottom-right'
+        position: 'bottom-left',
         language: currentLang
     };
 
     // Get store ID and custom config from script tag
     const storeId = scriptTag?.getAttribute('data-store-id') || 'demo';
-    const customWorkerUrl = scriptTag?.getAttribute('data-ai-url');
+    const groqKey = scriptTag?.getAttribute('data-groq-key') || '';
+    const customAiUrl = scriptTag?.getAttribute('data-ai-url') || '';
     const supportContact = scriptTag?.getAttribute('data-support') || '';
-    if (customWorkerUrl) config.aiWorkerUrl = customWorkerUrl;
+    
+    // Set API key if provided
+    if (groqKey) {
+        config.groqApiKey = groqKey;
+        config.aiProvider = 'groq';
+    } else if (customAiUrl) {
+        config.localAiUrl = customAiUrl;
+        config.aiProvider = 'local';
+    }
 
     // Conversation history for context
     let conversationHistory = [];
@@ -1314,26 +1329,44 @@ ${storeData.supportContact || 'معلومات التواصل موجودة في �
         
         console.log('🤖 Calling AI with', storeData.products.length, 'products in context');
         console.log('📝 User message:', message);
-        console.log('📦 Full system prompt length:', systemPrompt.length);
-        console.log('📋 Products in prompt:', storeData.products.map(p => p.name).join(', '));
+        console.log('� AI Provider:', config.aiProvider);
         
         // Log the full request
         DEBUG_LOG.add('AI_REQUEST', {
             userMessage: message,
+            aiProvider: config.aiProvider,
             productsInContext: storeData.products.length,
             productsList: storeData.products.slice(0, 50).map(p => `${p.name}: ${p.price} ${p.currency}`),
             systemPromptPreview: systemPrompt.substring(0, 500) + '...'
         });
 
         try {
-            // Send to LM Studio (OpenAI format) via Cloudflare tunnel
-            const response = await fetch(config.aiWorkerUrl, {
-                method: 'POST',
-                headers: { 
+            let apiUrl, headers, model;
+            
+            if (config.aiProvider === 'groq' && config.groqApiKey) {
+                // Use Groq API (cloud, no tunnel needed)
+                apiUrl = config.groqApiUrl;
+                headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${config.groqApiKey}`
+                };
+                model = config.groqModel;
+                console.log('☁️ Using Groq Cloud API');
+            } else {
+                // Use local LM Studio via tunnel
+                apiUrl = config.localAiUrl;
+                headers = {
                     'Content-Type': 'application/json'
-                },
+                };
+                model = config.localModel;
+                console.log('🖥️ Using Local LM Studio');
+            }
+            
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: headers,
                 body: JSON.stringify({
-                    model: config.aiModel || 'allam-7b-instruct-preview',
+                    model: model,
                     messages: [
                         { role: 'system', content: systemPrompt },
                         ...conversationHistory.slice(-10),

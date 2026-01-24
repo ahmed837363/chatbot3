@@ -130,9 +130,101 @@
             left: 20px;
             z-index: 9999;
         }
+        
+        /* Fake Salla product cards for scraping */
+        .s-product-card-entry {
+            background: #2d3748;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .s-product-card-entry__title { font-weight: bold; color: #fff; margin-bottom: 8px; }
+        .s-product-card-entry__title a { color: #fff; text-decoration: none; }
+        .s-product-card-entry__price { color: #68d391; }
+        .s-product-card-entry__price .sale-price { color: #68d391; font-weight: bold; }
+        .s-product-card-entry__price .original-price { color: #888; text-decoration: line-through; margin-right: 8px; font-size: 14px; }
+        .products-section { margin: 30px 0; padding: 20px; background: #0f0f23; border-radius: 12px; border: 1px solid #333; }
+        .products-section h3 { color: #667eea; margin-bottom: 15px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
     </style>
 </head>
 <body>
+    <!-- HIDDEN PRODUCTS SECTION - This is what the chatbot scrapes -->
+    <div class="products-section">
+        <h3>📦 منتجات المتجر (Products for Scraping Test)</h3>
+        <div class="products-grid">
+            <!-- Dresses -->
+            <div class="s-product-card-entry" data-product-id="1001">
+                <div class="s-product-card-entry__title"><a href="/p/1001">فستان أسود أنيق</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">349</span><span class="sale-price">174 ر.س</span></div>
+            </div>
+            <div class="s-product-card-entry" data-product-id="1002">
+                <div class="s-product-card-entry__title"><a href="/p/1002">فستان أحمر سهرة</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">299</span><span class="sale-price">149 ر.س</span></div>
+            </div>
+            <div class="s-product-card-entry" data-product-id="1003">
+                <div class="s-product-card-entry__title"><a href="/p/1003">فستان أبيض كاجوال</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">289</span><span class="sale-price">144 ر.س</span></div>
+            </div>
+            <div class="s-product-card-entry" data-product-id="1004">
+                <div class="s-product-card-entry__title"><a href="/p/1004">Elegant Black Dress</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">349</span><span class="sale-price">174 ر.س</span></div>
+            </div>
+            
+            <!-- Skirts -->
+            <div class="s-product-card-entry" data-product-id="2001">
+                <div class="s-product-card-entry__title"><a href="/p/2001">تنورة ميدي بليسيه</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">229</span><span class="sale-price">114 ر.س</span></div>
+            </div>
+            <div class="s-product-card-entry" data-product-id="2002">
+                <div class="s-product-card-entry__title"><a href="/p/2002">تنورة قصيرة جينز</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">189</span><span class="sale-price">94 ر.س</span></div>
+            </div>
+            <div class="s-product-card-entry" data-product-id="2003">
+                <div class="s-product-card-entry__title"><a href="/p/2003">تنورة طويلة شيفون</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">279</span><span class="sale-price">139 ر.س</span></div>
+            </div>
+            <div class="s-product-card-entry" data-product-id="2004">
+                <div class="s-product-card-entry__title"><a href="/p/2004">Pleated Midi Skirt</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">229</span><span class="sale-price">114 ر.س</span></div>
+            </div>
+            
+            <!-- Pants -->
+            <div class="s-product-card-entry" data-product-id="3001">
+                <div class="s-product-card-entry__title"><a href="/p/3001">بنطلون جينز واسع</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">189</span><span class="sale-price">94 ر.س</span></div>
+            </div>
+            <div class="s-product-card-entry" data-product-id="3002">
+                <div class="s-product-card-entry__title"><a href="/p/3002">بنطلون قماش رسمي</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">169</span><span class="sale-price">84 ر.س</span></div>
+            </div>
+            <div class="s-product-card-entry" data-product-id="3003">
+                <div class="s-product-card-entry__title"><a href="/p/3003">بنطلون رياضي أسود</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">149</span><span class="sale-price">74 ر.س</span></div>
+            </div>
+            <div class="s-product-card-entry" data-product-id="3004">
+                <div class="s-product-card-entry__title"><a href="/p/3004">Wide Leg Jeans</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">189</span><span class="sale-price">94 ر.س</span></div>
+            </div>
+            
+            <!-- Blouses -->
+            <div class="s-product-card-entry" data-product-id="4001">
+                <div class="s-product-card-entry__title"><a href="/p/4001">بلوزة قطن بيضاء</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">119</span><span class="sale-price">59 ر.س</span></div>
+            </div>
+            <div class="s-product-card-entry" data-product-id="4002">
+                <div class="s-product-card-entry__title"><a href="/p/4002">بلوزة شيفون ملونة</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">179</span><span class="sale-price">89 ر.س</span></div>
+            </div>
+            
+            <!-- Jackets -->
+            <div class="s-product-card-entry" data-product-id="5001">
+                <div class="s-product-card-entry__title"><a href="/p/5001">جاكيت جينز نسائي</a></div>
+                <div class="s-product-card-entry__price"><span class="original-price">169</span><span class="sale-price">84 ر.س</span></div>
+            </div>
+        </div>
+    </div>
+    
     <div class="container">
         <h1>🧪 Chatbot Stress Tester</h1>
         <p class="subtitle">اختبارات صعبة لكشف نقاط ضعف الشات بوت | Click any question to copy it</p>
@@ -531,32 +623,9 @@
                 }, 500);
             });
         }
-        
-        // Inject demo products for testing (since we're not on a real Salla store)
-        window.DEMO_PRODUCTS = [
-            { name: 'فستان أسود أنيق', price: 349, salePrice: 174, currency: 'ريال', inStock: true },
-            { name: 'فستان أحمر سهرة', price: 299, salePrice: 149, currency: 'ريال', inStock: true },
-            { name: 'فستان أبيض كاجوال', price: 289, salePrice: 144, currency: 'ريال', inStock: true },
-            { name: 'Elegant Black Dress', price: 349, salePrice: 174, currency: 'SAR', inStock: true },
-            { name: 'Red Evening Dress', price: 299, salePrice: 149, currency: 'SAR', inStock: true },
-            { name: 'تنورة ميدي بليسيه', price: 229, salePrice: 114, currency: 'ريال', inStock: true },
-            { name: 'تنورة قصيرة جينز', price: 189, salePrice: 94, currency: 'ريال', inStock: true },
-            { name: 'تنورة طويلة شيفون', price: 279, salePrice: 139, currency: 'ريال', inStock: true },
-            { name: 'Pleated Midi Skirt', price: 229, salePrice: 114, currency: 'SAR', inStock: true },
-            { name: 'Denim Mini Skirt', price: 189, salePrice: 94, currency: 'SAR', inStock: true },
-            { name: 'بنطلون جينز واسع', price: 189, salePrice: 94, currency: 'ريال', inStock: true },
-            { name: 'بنطلون قماش رسمي', price: 169, salePrice: 84, currency: 'ريال', inStock: true },
-            { name: 'بنطلون رياضي أسود', price: 149, salePrice: 74, currency: 'ريال', inStock: true },
-            { name: 'Wide Leg Jeans', price: 189, salePrice: 94, currency: 'SAR', inStock: true },
-            { name: 'Formal Trousers', price: 169, salePrice: 84, currency: 'SAR', inStock: true },
-            { name: 'بلوزة قطن بيضاء', price: 119, salePrice: 59, currency: 'ريال', inStock: true },
-            { name: 'بلوزة شيفون ملونة', price: 179, salePrice: 89, currency: 'ريال', inStock: true },
-            { name: 'جاكيت جينز نسائي', price: 169, salePrice: 84, currency: 'ريال', inStock: true },
-        ];
-        console.log('🧪 Demo products injected:', window.DEMO_PRODUCTS.length);
     </script>
     
-    <!-- Include the actual chatbot for testing -->
+    <!-- Include the actual chatbot for testing - it will SCRAPE products from the page -->
     <script src="chatbot-widget.js" data-store-id="demo" data-lang="ar"></script>
 </body>
 </html>

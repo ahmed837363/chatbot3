@@ -561,15 +561,6 @@
     // Fetch store data from Salla API (when access token is available)
     async function loadStoreData() {
         try {
-            // Check if demo products are injected (for testing pages)
-            if (window.DEMO_PRODUCTS && window.DEMO_PRODUCTS.length > 0) {
-                storeData.products = window.DEMO_PRODUCTS;
-                storeData.storeName = 'متجر تجريبي | Demo Store';
-                storeData.loaded = true;
-                console.log('🧪 Loaded', window.DEMO_PRODUCTS.length, 'DEMO products for testing');
-                return;
-            }
-            
             // First, try to scrape products from the current page
             const pageProducts = scrapeProductsFromPage();
             if (pageProducts.length > 0) {

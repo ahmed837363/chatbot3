@@ -92,10 +92,9 @@
         }
     };
 
-    // Detect language from script tag or browser
+    // Detect language from script tag or browser - Default to Arabic for Saudi Arabia
     const scriptTag = document.currentScript;
-    const detectedLang = scriptTag?.getAttribute('data-lang') || 
-                         (navigator.language?.startsWith('ar') ? 'ar' : 'en');
+    const detectedLang = scriptTag?.getAttribute('data-lang') || 'ar'; // Default Arabic
     let currentLang = ['ar', 'en'].includes(detectedLang) ? detectedLang : 'ar';
     let t = texts[currentLang]; // Current language texts
     let isRTL = currentLang === 'ar';
@@ -106,6 +105,17 @@
         t = texts[currentLang];
         isRTL = currentLang === 'ar';
         updateWidgetLanguage();
+        
+        // Add translated welcome message to chat
+        const messagesDiv = document.getElementById('chat-messages');
+        if (messagesDiv) {
+            const langNotice = currentLang === 'ar' 
+                ? '🌐 تم التبديل للعربية'
+                : '🌐 Switched to English';
+            addMessage(langNotice, 'bot');
+            addMessage(t.welcome, 'bot');
+        }
+        
         console.log('🌐 Language switched to:', currentLang);
     }
 
@@ -429,6 +439,14 @@
                         displayName = `${name} (${existingCount + 1})`;
                     }
                     
+                    // Get product URL/link
+                    const productLink = el.querySelector('a[href*="/p/"], a[href*="/product/"]');
+                    let productUrl = productLink ? productLink.href : '';
+                    // If no link found, try to build it from product ID
+                    if (!productUrl && productId) {
+                        productUrl = window.location.origin + '/p/' + productId;
+                    }
+                    
                     products.push({
                         name: displayName,
                         price: price,
@@ -436,6 +454,7 @@
                         currency: 'ريال',
                         category: category || '',
                         productId: productId || '',
+                        productUrl: productUrl || '',
                         inStock: !el.classList.contains('out-of-stock') && !el.querySelector('.out-of-stock, .sold-out')
                     });
                     console.log('✅ Scraped:', displayName, '→', salePrice || price, 'ريال', category ? `[${category}]` : '');
@@ -888,6 +907,10 @@ Before saying "yes we have" - search the list above. If you don't find the exact
 
 🟢 Response style:
 - Be friendly and brief
+- When listing products, put EACH product on its OWN LINE like:
+  1. Product Name - Price SAR
+  2. Product Name - Price SAR
+- Do NOT list products in a paragraph or comma-separated
 - Do NOT add any URLs`;
         }
 
@@ -898,6 +921,10 @@ Before saying "yes we have" - search the list above. If you don't find the exact
 1. إذا المنتج موجود في القائمة → قل "نعم عندنا" + السعر
 2. إذا المنتج غير موجود في القائمة → قل "للأسف ما عندنا"
 3. كن مختصر وودود
+4. عند سرد المنتجات، اكتب كل منتج في سطر منفصل كالتالي:
+   1. اسم المنتج - السعر ريال
+   2. اسم المنتج - السعر ريال
+5. لا تسرد المنتجات في فقرة واحدة أو بفواصل
 
 📦 المنتجات المتوفرة في المتجر:
 ${productList}
@@ -1429,7 +1456,8 @@ ${productList}
             margin-bottom: 15px;
             padding: 12px 16px;
             border-radius: 12px;
-            max-width: 80%;
+            max-width: 85%;
+            line-height: 1.6;
             ${sender === 'bot' ? `
                 background: #e9ecef;
                 align-self: flex-start;
@@ -1442,9 +1470,58 @@ ${productList}
             `}
         `;
         
-        messageDiv.textContent = text;
+        // Check if text contains product list (numbered items)
+        // Format each item on its own line for cleaner display
+        if (sender === 'bot' && (text.includes('1.') || text.includes('1-') || text.includes('•'))) {
+            // Convert numbered lists to clean line-by-line format
+            let formattedText = text
+                .replace(/([0-9]+[\.\-\)])\s*/g, '\n$1 ')  // Put each number on new line
+                .replace(/[•●]/g, '\n• ')                    // Bullets on new lines
+                .replace(/\n\n+/g, '\n')                     // Remove extra newlines
+                .trim();
+            
+            messageDiv.innerHTML = formatMessageWithLinks(formattedText);
+        } else {
+            messageDiv.innerHTML = formatMessageWithLinks(text);
+        }
+        
         messagesDiv.appendChild(messageDiv);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+    
+    // Format message text with clickable product links
+    function formatMessageWithLinks(text) {
+        // Escape HTML first
+        let safeText = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        
+        // Convert newlines to <br> for proper line breaks
+        safeText = safeText.replace(/\n/g, '<br>');
+        
+        // Try to add product links if products are loaded
+        if (storeData.products && storeData.products.length > 0) {
+            storeData.products.forEach(product => {
+                if (product.productUrl && product.name) {
+                    // Create regex to find product name in text (case insensitive)
+                    const escapedName = product.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`(${escapedName})`, 'gi');
+                    
+                    // Replace with clickable link
+                    safeText = safeText.replace(regex, 
+                        `<a href="${product.productUrl}" target="_blank" style="color: #667eea; text-decoration: underline; cursor: pointer;">$1</a>`);
+                }
+            });
+        }
+        
+        // Also detect and linkify any URLs in the text
+        safeText = safeText.replace(
+            /(https?:\/\/[^\s<]+)/gi,
+            '<a href="$1" target="_blank" style="color: #667eea; text-decoration: underline;">$1</a>'
+        );
+        
+        return safeText;
     }
 
     // Initialize

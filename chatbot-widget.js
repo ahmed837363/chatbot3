@@ -961,9 +961,11 @@ Before saying "yes we have" - search the list above. If you don't find the exact
 
 🟢 Response style:
 - Be friendly and brief
-- When listing products, put EACH product on its OWN LINE like:
+- When listing products, put EACH product on its OWN LINE
+- ALWAYS renumber filtered results starting from 1, like:
   1. Product Name - Price SAR
   2. Product Name - Price SAR
+- Do NOT use the original product numbers from the full list
 - Do NOT list products in a paragraph or comma-separated
 - Do NOT add any URLs`;
         }
@@ -975,10 +977,12 @@ Before saying "yes we have" - search the list above. If you don't find the exact
 1. إذا المنتج موجود في القائمة → قل "نعم عندنا" + السعر
 2. إذا المنتج غير موجود في القائمة → قل "للأسف ما عندنا"
 3. كن مختصر وودود
-4. عند سرد المنتجات، اكتب كل منتج في سطر منفصل كالتالي:
+4. عند سرد المنتجات، اكتب كل منتج في سطر منفصل
+5. دائماً رقّم النتائج من جديد بدءاً من 1 كالتالي:
    1. اسم المنتج - السعر ريال
    2. اسم المنتج - السعر ريال
-5. لا تسرد المنتجات في فقرة واحدة أو بفواصل
+6. لا تستخدم أرقام المنتجات الأصلية من القائمة الكاملة
+7. لا تسرد المنتجات في فقرة واحدة أو بفواصل
 
 📦 المنتجات المتوفرة في المتجر:
 ${productList}

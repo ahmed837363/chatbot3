@@ -531,6 +531,29 @@
                 }, 500);
             });
         }
+        
+        // Inject demo products for testing (since we're not on a real Salla store)
+        window.DEMO_PRODUCTS = [
+            { name: 'فستان أسود أنيق', price: 349, salePrice: 174, currency: 'ريال', inStock: true },
+            { name: 'فستان أحمر سهرة', price: 299, salePrice: 149, currency: 'ريال', inStock: true },
+            { name: 'فستان أبيض كاجوال', price: 289, salePrice: 144, currency: 'ريال', inStock: true },
+            { name: 'Elegant Black Dress', price: 349, salePrice: 174, currency: 'SAR', inStock: true },
+            { name: 'Red Evening Dress', price: 299, salePrice: 149, currency: 'SAR', inStock: true },
+            { name: 'تنورة ميدي بليسيه', price: 229, salePrice: 114, currency: 'ريال', inStock: true },
+            { name: 'تنورة قصيرة جينز', price: 189, salePrice: 94, currency: 'ريال', inStock: true },
+            { name: 'تنورة طويلة شيفون', price: 279, salePrice: 139, currency: 'ريال', inStock: true },
+            { name: 'Pleated Midi Skirt', price: 229, salePrice: 114, currency: 'SAR', inStock: true },
+            { name: 'Denim Mini Skirt', price: 189, salePrice: 94, currency: 'SAR', inStock: true },
+            { name: 'بنطلون جينز واسع', price: 189, salePrice: 94, currency: 'ريال', inStock: true },
+            { name: 'بنطلون قماش رسمي', price: 169, salePrice: 84, currency: 'ريال', inStock: true },
+            { name: 'بنطلون رياضي أسود', price: 149, salePrice: 74, currency: 'ريال', inStock: true },
+            { name: 'Wide Leg Jeans', price: 189, salePrice: 94, currency: 'SAR', inStock: true },
+            { name: 'Formal Trousers', price: 169, salePrice: 84, currency: 'SAR', inStock: true },
+            { name: 'بلوزة قطن بيضاء', price: 119, salePrice: 59, currency: 'ريال', inStock: true },
+            { name: 'بلوزة شيفون ملونة', price: 179, salePrice: 89, currency: 'ريال', inStock: true },
+            { name: 'جاكيت جينز نسائي', price: 169, salePrice: 84, currency: 'ريال', inStock: true },
+        ];
+        console.log('🧪 Demo products injected:', window.DEMO_PRODUCTS.length);
     </script>
     
     <!-- Include the actual chatbot for testing -->

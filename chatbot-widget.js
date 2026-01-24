@@ -1480,7 +1480,9 @@ ${productList}
                         ...conversationHistory.slice(-10)
                     ],
                     max_tokens: 500,
-                    temperature: 0.2,
+                    temperature: 0.1,
+                    top_p: 0.9,
+                    repeat_penalty: 1.15,
                     stream: false
                 })
             });

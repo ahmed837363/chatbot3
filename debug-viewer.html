@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Debug Viewer</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        h1 { color: #667eea; margin-bottom: 10px; }
+        h2 { color: #a0a0ff; margin-top: 30px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        .btn:hover { background: #5a6fd6; }
+        .btn-danger { background: #e74c3c; }
+        .btn-danger:hover { background: #c0392b; }
+        .btn-success { background: #27ae60; }
+        .btn-success:hover { background: #219a52; }
+        .info-box {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #333;
+        }
+        .json-display {
+            background: #0f0f23;
+            border-radius: 8px;
+            padding: 15px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        .label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        .stat { 
+            display: inline-block; 
+            background: #2d3748; 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            margin: 5px;
+        }
+        .stat-value { color: #68d391; font-weight: bold; }
+        .section { margin: 20px 0; }
+        .no-data { color: #888; font-style: italic; }
+        #status {
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: none;
+        }
+        #status.success { display: block; background: #27ae60; }
+        #status.error { display: block; background: #e74c3c; }
+        .product-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .product-item {
+            background: #2d3748;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+        .product-name { font-weight: bold; color: #fff; }
+        .product-price { color: #68d391; }
+        .product-sale { color: #f6ad55; text-decoration: line-through; margin-left: 5px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Chatbot Debug Viewer</h1>
+        <p>This page shows exactly what the AI sees and how it responds. Open your Salla store with the chatbot, ask a question, then click "Load Debug Data".</p>
+        
+        <div class="info-box">
+            <button class="btn" onclick="loadDebugData()">🔄 Load Debug Data from LocalStorage</button>
+            <button class="btn btn-success" onclick="exportToFile()">💾 Export to JSON File</button>
+            <button class="btn btn-danger" onclick="clearData()">🗑️ Clear Data</button>
+            <div id="status"></div>
+        </div>
+
+        <div id="content">
+            <div class="info-box">
+                <p class="no-data">No debug data loaded yet. Use the chatbot on your Salla store, ask a question, then click "Load Debug Data" above.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let debugData = null;
+
+        function loadDebugData() {
+            const status = document.getElementById('status');
+            
+            // Try to load from localStorage
+            const lastRequest = localStorage.getItem('chatbot_last_request');
+            const allLogs = localStorage.getItem('chatbot_debug_log');
+            
+            if (!lastRequest && !allLogs) {
+                status.textContent = '❌ No debug data found. Make sure you asked the chatbot a question first!';
+                status.className = 'error';
+                return;
+            }
+            
+            debugData = {
+                lastRequest: lastRequest ? JSON.parse(lastRequest) : null,
+                allLogs: allLogs ? JSON.parse(allLogs) : []
+            };
+            
+            status.textContent = '✅ Debug data loaded successfully!';
+            status.className = 'success';
+            
+            renderDebugData();
+        }
+
+        function renderDebugData() {
+            if (!debugData) return;
+            
+            const content = document.getElementById('content');
+            let html = '';
+            
+            // Last Request Section
+            if (debugData.lastRequest) {
+                const req = debugData.lastRequest;
+                html += `
+                    <h2>📝 Last AI Request</h2>
+                    <div class="info-box">
+                        <div class="stat">🕐 Time: <span class="stat-value">${new Date(req.timestamp).toLocaleString()}</span></div>
+                        <div class="stat">📦 Products: <span class="stat-value">${req.productsCount}</span></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="label">💬 User Message:</div>
+                        <div class="json-display">${escapeHtml(req.userMessage)}</div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="label">🤖 AI Response:</div>
+                        <div class="json-display">${escapeHtml(req.aiResponse)}</div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="label">📦 Products the AI Sees:</div>
+                        <div class="product-list">
+                            ${req.productsList.map((p, i) => `
+                                <div class="product-item">
+                                    <div class="product-name">${i+1}. ${escapeHtml(p.name)}</div>
+                                    <div>
+                                        <span class="product-price">${p.salePrice || p.price} ${p.currency}</span>
+                                        ${p.salePrice && p.salePrice < p.price ? `<span class="product-sale">${p.price}</span>` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="label">📋 Full System Prompt (what AI is instructed):</div>
+                        <div class="json-display">${escapeHtml(req.systemPrompt)}</div>
+                    </div>
+                `;
+            }
+            
+            // All Logs Section
+            if (debugData.allLogs && debugData.allLogs.length > 0) {
+                html += `
+                    <h2>📋 All Debug Logs (${debugData.allLogs.length} entries)</h2>
+                    <div class="info-box">
+                        <div class="json-display">${escapeHtml(JSON.stringify(debugData.allLogs, null, 2))}</div>
+                    </div>
+                `;
+            }
+            
+            // Raw JSON
+            html += `
+                <h2>🔧 Raw JSON Data</h2>
+                <div class="info-box">
+                    <div class="json-display">${escapeHtml(JSON.stringify(debugData, null, 2))}</div>
+                </div>
+            `;
+            
+            content.innerHTML = html;
+        }
+
+        function exportToFile() {
+            if (!debugData) {
+                loadDebugData();
+            }
+            if (!debugData) {
+                alert('No debug data to export!');
+                return;
+            }
+            
+            const blob = new Blob([JSON.stringify(debugData, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `chatbot_debug_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function clearData() {
+            if (confirm('Clear all debug data from localStorage?')) {
+                localStorage.removeItem('chatbot_last_request');
+                localStorage.removeItem('chatbot_debug_log');
+                debugData = null;
+                document.getElementById('content').innerHTML = '<div class="info-box"><p class="no-data">Debug data cleared.</p></div>';
+                document.getElementById('status').className = '';
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/\n/g, '<br>');
+        }
+
+        // Auto-load on page load
+        window.onload = function() {
+            loadDebugData();
+        };
+    </script>
+</body>
+</html>

@@ -1521,7 +1521,9 @@ ${productList}
             max-width: 85%;
             line-height: 1.6;
             ${sender === 'bot' ? `
-                background: #e9ecef;
+                background: #ffffff;
+                color: #333333;
+                border: 1px solid #e0e0e0;
                 align-self: flex-start;
                 margin-left: auto;
             ` : `

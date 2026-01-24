@@ -411,7 +411,38 @@
                     price = parseFloat(convertArabicNumerals(dataPrice)) || 0;
                 }
                 
-                // Method 2: Look for price in nested elements
+                // Method 2: Look for SEPARATE original/sale price elements first
+                if (price === 0) {
+                    // Look for explicit sale price and original price elements
+                    const salePriceEl = el.querySelector('.sale-price, .special-price, .discounted-price, [class*="sale"], .s-product-card-entry__price--sale');
+                    const originalPriceEl = el.querySelector('.original-price, .old-price, .regular-price, [class*="original"], .s-product-card-entry__price--regular, del, s');
+                    
+                    if (salePriceEl) {
+                        let saleText = convertArabicNumerals(salePriceEl.textContent || '');
+                        const saleMatch = saleText.match(/(\d[\d,]*\.?\d*)/);
+                        if (saleMatch) {
+                            salePrice = parseFloat(saleMatch[1].replace(/,/g, ''));
+                        }
+                    }
+                    
+                    if (originalPriceEl) {
+                        let origText = convertArabicNumerals(originalPriceEl.textContent || '');
+                        const origMatch = origText.match(/(\d[\d,]*\.?\d*)/);
+                        if (origMatch) {
+                            price = parseFloat(origMatch[1].replace(/,/g, ''));
+                        }
+                    }
+                    
+                    // If we found sale price but not original, sale becomes price
+                    if (salePrice > 0 && price === 0) {
+                        price = salePrice;
+                        salePrice = null;
+                    }
+                    
+                    console.log('💰 Separate price elements - Original:', price, 'Sale:', salePrice);
+                }
+                
+                // Method 3: Look for price container if no separate elements found
                 if (price === 0) {
                     const priceSelectors = [
                         '.s-product-card-entry__price-wrapper',
@@ -426,29 +457,54 @@
                     for (const sel of priceSelectors) {
                         const priceContainer = el.querySelector(sel);
                         if (priceContainer) {
-                            // Get all text content and convert Arabic numerals
-                            let allText = priceContainer.innerText || priceContainer.textContent || '';
-                            allText = convertArabicNumerals(allText);
-                            console.log('💰 Price text found:', allText.substring(0, 50));
+                            // Get child elements separately to avoid concatenation
+                            const children = priceContainer.querySelectorAll('span, div, p');
+                            const prices = [];
                             
-                            // Match numbers (handle both 149 and 149.00 formats)
-                            const numbers = allText.match(/(\d[\d,]*\.?\d*)/g);
-                            if (numbers && numbers.length > 0) {
-                                // Filter out very small numbers (might be decimals or ratings)
-                                const validPrices = numbers
-                                    .map(n => parseFloat(n.replace(/,/g, '')))
-                                    .filter(n => n >= 1 && n < 100000);
+                            children.forEach(child => {
+                                let text = convertArabicNumerals(child.textContent || '');
+                                const numMatch = text.match(/(\d[\d,]*\.?\d*)/);
+                                if (numMatch) {
+                                    const num = parseFloat(numMatch[1].replace(/,/g, ''));
+                                    if (num >= 1 && num < 100000) {
+                                        prices.push(num);
+                                    }
+                                }
+                            });
+                            
+                            if (prices.length >= 2) {
+                                prices.sort((a, b) => a - b);
+                                salePrice = prices[0];
+                                price = prices[prices.length - 1];
+                                console.log('💰 From children - Original:', price, 'Sale:', salePrice);
+                                break;
+                            } else if (prices.length === 1) {
+                                price = prices[0];
+                                break;
+                            }
+                            
+                            // Fallback: get text content but try to split by spaces
+                            if (price === 0) {
+                                let allText = priceContainer.innerText || priceContainer.textContent || '';
+                                allText = convertArabicNumerals(allText);
+                                // Add space before currency symbols to help split
+                                allText = allText.replace(/(ر\.س|ريال|SAR|SR)/gi, ' $1 ');
+                                console.log('💰 Price text:', allText.substring(0, 50));
                                 
-                                if (validPrices.length > 0) {
-                                    // If there are two prices, smaller is sale price
+                                const numbers = allText.match(/(\d[\d,]*\.?\d*)/g);
+                                if (numbers && numbers.length > 0) {
+                                    const validPrices = numbers
+                                        .map(n => parseFloat(n.replace(/,/g, '')))
+                                        .filter(n => n >= 1 && n < 100000);
+                                    
                                     if (validPrices.length >= 2) {
                                         validPrices.sort((a, b) => a - b);
-                                        salePrice = validPrices[0]; // Smaller = sale
-                                        price = validPrices[validPrices.length - 1]; // Larger = original
-                                    } else {
+                                        salePrice = validPrices[0];
+                                        price = validPrices[validPrices.length - 1];
+                                    } else if (validPrices.length === 1) {
                                         price = validPrices[0];
                                     }
-                                    console.log('💰 Extracted price:', price, 'sale:', salePrice);
+                                    console.log('💰 Extracted - Original:', price, 'Sale:', salePrice);
                                     break;
                                 }
                             }
@@ -456,7 +512,7 @@
                     }
                 }
                 
-                // Method 3: Look anywhere in the product card for price pattern
+                // Method 4: Look anywhere in the product card for price pattern
                 if (price === 0) {
                     let cardText = el.innerText || el.textContent || '';
                     cardText = convertArabicNumerals(cardText);

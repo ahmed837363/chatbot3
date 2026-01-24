@@ -972,6 +972,20 @@
 
             return `You are ALLaM, a friendly AI assistant for "${storeData.storeName}". Respond in English.
 
+🌐 TRANSLATION RULE (IMPORTANT):
+Product names below may be in Arabic. When responding to customers in English, you MUST translate the Arabic product names to English.
+Common translations:
+- فستان = Dress
+- تنورة = Skirt  
+- بنطلون = Pants/Trousers
+- بلوزة = Blouse
+- جاكيت = Jacket
+- أسود = Black, أبيض = White, أحمر = Red, أزرق = Blue
+- أنيق = Elegant, كاجوال = Casual, رسمي = Formal
+- سهرة = Evening, جينز = Denim/Jeans, شيفون = Chiffon
+- ميدي = Midi, طويل = Long, قصير = Short
+- بليسيه = Pleated, واسع = Wide, رياضي = Sports/Athletic
+
 ═══════════════════════════════════
 📦 Available Products:
 ═══════════════════════════════════
@@ -1034,11 +1048,13 @@ Before saying "yes we have" - search the list above. If you don't find the exact
 - Do NOT add any URLs
 
 🔴 CATEGORY FILTERING (CRITICAL):
-- When customer asks for "dresses", ONLY include products with "dress" in the name
-- When customer asks for "skirts", ONLY include products with "skirt" in the name
-- When customer asks for "pants", ONLY include products with "pants/trouser" in the name
+- When customer asks for "dresses", ONLY include products with "dress" OR "فستان" in the name
+- When customer asks for "skirts", ONLY include products with "skirt" OR "تنورة" in the name
+- When customer asks for "pants", ONLY include products with "pants/trouser" OR "بنطلون" in the name
+- When customer asks for "blouses", ONLY include products with "blouse" OR "بلوزة" in the name
 - NEVER mix categories! Dresses ≠ Skirts ≠ Pants ≠ Blouses
-- If unsure, DO NOT include the product - only include EXACT matches`;
+- Translate the Arabic product names to English in your response
+- If unsure, DO NOT include the product - only include EXACT category matches`;
         }
 
         // Arabic system prompt (default) - SIMPLE VERSION with products at END

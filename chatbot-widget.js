@@ -106,13 +106,14 @@
         isRTL = currentLang === 'ar';
         updateWidgetLanguage();
         
-        // Add translated welcome message to chat
+        // Clear chat and show welcome message in new language
         const messagesDiv = document.getElementById('chat-messages');
         if (messagesDiv) {
-            const langNotice = currentLang === 'ar' 
-                ? '🌐 تم التبديل للعربية'
-                : '🌐 Switched to English';
-            addMessage(langNotice, 'bot');
+            // Clear all previous messages
+            messagesDiv.innerHTML = '';
+            // Reset conversation history
+            conversationHistory = [];
+            // Show welcome in new language
             addMessage(t.welcome, 'bot');
         }
         
@@ -1470,20 +1471,29 @@ ${productList}
             `}
         `;
         
-        // Check if text contains product list (numbered items)
-        // Format each item on its own line for cleaner display
-        if (sender === 'bot' && (text.includes('1.') || text.includes('1-') || text.includes('•'))) {
-            // Convert numbered lists to clean line-by-line format
-            let formattedText = text
-                .replace(/([0-9]+[\.\-\)])\s*/g, '\n$1 ')  // Put each number on new line
-                .replace(/[•●]/g, '\n• ')                    // Bullets on new lines
-                .replace(/\n\n+/g, '\n')                     // Remove extra newlines
-                .trim();
+        // Format the message - clean up product lists for better display
+        let formattedText = text;
+        
+        // Check if text contains product list (numbered items like "1." or "2.")
+        if (sender === 'bot' && /\d+\./.test(text)) {
+            // Clean up product names - remove duplicate numbering like "Dress ( 2)"
+            formattedText = formattedText.replace(/\s*\(\s*\d+\s*\)/g, '');
             
-            messageDiv.innerHTML = formatMessageWithLinks(formattedText);
-        } else {
-            messageDiv.innerHTML = formatMessageWithLinks(text);
+            // Put each numbered item on its own line
+            // Match patterns like "1. Product" or "2. Product" 
+            formattedText = formattedText.replace(/\s*(\d+)\.\s*/g, '\n$1. ');
+            
+            // Clean up: remove leading newline and extra spaces
+            formattedText = formattedText.replace(/^\n/, '').replace(/\n\n+/g, '\n').trim();
         }
+        
+        // Handle bullet points
+        if (sender === 'bot' && /[•●]/.test(formattedText)) {
+            formattedText = formattedText.replace(/[•●]/g, '\n•');
+            formattedText = formattedText.replace(/^\n/, '').trim();
+        }
+        
+        messageDiv.innerHTML = formatMessageWithLinks(formattedText);
         
         messagesDiv.appendChild(messageDiv);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;

@@ -1031,7 +1031,14 @@ Before saying "yes we have" - search the list above. If you don't find the exact
   2. Product Name - Price SAR
 - Do NOT use the original product numbers from the full list
 - Do NOT list products in a paragraph or comma-separated
-- Do NOT add any URLs`;
+- Do NOT add any URLs
+
+🔴 CATEGORY FILTERING (CRITICAL):
+- When customer asks for "dresses", ONLY include products with "dress" in the name
+- When customer asks for "skirts", ONLY include products with "skirt" in the name
+- When customer asks for "pants", ONLY include products with "pants/trouser" in the name
+- NEVER mix categories! Dresses ≠ Skirts ≠ Pants ≠ Blouses
+- If unsure, DO NOT include the product - only include EXACT matches`;
         }
 
         // Arabic system prompt (default) - SIMPLE VERSION with products at END
@@ -1048,7 +1055,14 @@ Before saying "yes we have" - search the list above. If you don't find the exact
 6. لا تستخدم أرقام المنتجات الأصلية من القائمة الكاملة
 7. لا تسرد المنتجات في فقرة واحدة أو بفواصل
 
-📦 المنتجات المتوفرة في المتجر:
+� فلترة الفئات (مهم جداً):
+- إذا سأل العميل عن "فساتين" → فقط المنتجات التي تحتوي "فستان" في الاسم
+- إذا سأل عن "تنانير" → فقط المنتجات التي تحتوي "تنورة" في الاسم
+- إذا سأل عن "بناطيل" → فقط المنتجات التي تحتوي "بنطلون" في الاسم
+- لا تخلط الفئات! الفساتين ≠ التنانير ≠ البناطيل ≠ البلوزات
+- إذا لم تكن متأكد، لا تضف المنتج - أضف فقط المطابقات الدقيقة
+
+�📦 المنتجات المتوفرة في المتجر:
 ${productList}
 
 تذكر: فقط المنتجات أعلاه متوفرة. أي منتج غير مذكور = غير متوفر.`;

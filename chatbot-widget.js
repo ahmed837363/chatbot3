@@ -243,6 +243,92 @@
         const products = [];
         console.log('🔍 Scraping products from page...');
         
+        // Arabic to English translation function for product names
+        function translateArabicToEnglish(arabicName) {
+            if (!arabicName) return arabicName;
+            
+            // Check if the name contains Arabic characters
+            const hasArabic = /[\u0600-\u06FF]/.test(arabicName);
+            if (!hasArabic) return arabicName; // Already English
+            
+            // Translation dictionary
+            const translations = {
+                // Product types
+                'فستان': 'Dress',
+                'تنورة': 'Skirt',
+                'بنطلون': 'Pants',
+                'بلوزة': 'Blouse',
+                'جاكيت': 'Jacket',
+                'عباية': 'Abaya',
+                'طقم': 'Set',
+                'فستان سهرة': 'Evening Dress',
+                'بيجاما': 'Pajama',
+                'قميص': 'Shirt',
+                
+                // Colors
+                'أسود': 'Black',
+                'أبيض': 'White',
+                'أحمر': 'Red',
+                'أزرق': 'Blue',
+                'أخضر': 'Green',
+                'وردي': 'Pink',
+                'بني': 'Brown',
+                'رمادي': 'Gray',
+                'بيج': 'Beige',
+                'ذهبي': 'Gold',
+                'فضي': 'Silver',
+                
+                // Styles
+                'أنيق': 'Elegant',
+                'كاجوال': 'Casual',
+                'رسمي': 'Formal',
+                'سهرة': 'Evening',
+                'رياضي': 'Sports',
+                'كلاسيك': 'Classic',
+                'مطرز': 'Embroidered',
+                'فاخر': 'Luxury',
+                
+                // Materials/Styles
+                'جينز': 'Denim',
+                'شيفون': 'Chiffon',
+                'حرير': 'Silk',
+                'قطن': 'Cotton',
+                'صوف': 'Wool',
+                'جلد': 'Leather',
+                'دانتيل': 'Lace',
+                
+                // Lengths/Sizes
+                'طويل': 'Long',
+                'طويلة': 'Long',
+                'قصير': 'Short',
+                'قصيرة': 'Short',
+                'ميدي': 'Midi',
+                'واسع': 'Wide',
+                'واسعة': 'Wide',
+                'ضيق': 'Slim',
+                'بليسيه': 'Pleated'
+            };
+            
+            let englishName = arabicName;
+            
+            // Replace Arabic words with English translations
+            for (const [arabic, english] of Object.entries(translations)) {
+                englishName = englishName.replace(new RegExp(arabic, 'g'), english);
+            }
+            
+            // Clean up any remaining Arabic and extra spaces
+            englishName = englishName.replace(/[\u0600-\u06FF]+/g, '').trim();
+            englishName = englishName.replace(/\s+/g, ' ').trim();
+            
+            // If translation resulted in empty string, return original
+            if (!englishName || englishName.length < 2) {
+                return arabicName;
+            }
+            
+            console.log('🌐 Translated:', arabicName, '→', englishName);
+            return englishName;
+        }
+        
         // Method 1: Use Salla's Twilight global data (most reliable!)
         if (window.Salla || window.salla) {
             const sallaObj = window.Salla || window.salla;
@@ -254,7 +340,7 @@
                 prods.forEach(p => {
                     if (p && p.name) {
                         products.push({
-                            name: p.name,
+                            name: translateArabicToEnglish(p.name),
                             price: p.price?.amount || p.price || 0,
                             salePrice: p.sale_price?.amount || p.sale_price || null,
                             currency: p.price?.currency || 'SAR',
@@ -274,7 +360,7 @@
                     if (data['@type'] === 'Product' || data.product) {
                         const p = data.product || data;
                         products.push({
-                            name: p.name,
+                            name: translateArabicToEnglish(p.name),
                             price: parseFloat(p.offers?.price || p.price || 0),
                             currency: p.offers?.priceCurrency || 'SAR',
                             inStock: p.offers?.availability?.includes('InStock') !== false
@@ -283,7 +369,7 @@
                     if (data.products && Array.isArray(data.products)) {
                         data.products.forEach(p => {
                             products.push({
-                                name: p.name,
+                                name: translateArabicToEnglish(p.name),
                                 price: parseFloat(p.price?.amount || p.price || 0),
                                 currency: 'SAR',
                                 inStock: true
@@ -540,13 +626,13 @@
                 }
                 
                 if (name && name.length > 1) {
-                    // Add number suffix if name is generic to differentiate products
-                    let displayName = name.substring(0, 100);
+                    // Translate Arabic name to English
+                    let displayName = translateArabicToEnglish(name.substring(0, 100));
                     
                     // Check if this name already exists and add a number
-                    const existingCount = products.filter(p => p.name.startsWith(name.split(' ')[0])).length;
+                    const existingCount = products.filter(p => p.name.startsWith(displayName.split(' ')[0])).length;
                     if (existingCount > 0) {
-                        displayName = `${name} (${existingCount + 1})`;
+                        displayName = `${displayName} (${existingCount + 1})`;
                     }
                     
                     // Get product URL/link
@@ -588,10 +674,11 @@
                         const parent = priceEl.closest('div, article, li, section');
                         if (parent) {
                             const link = parent.querySelector('a[href*="/p/"], a[href*="/product/"]');
-                            const name = link?.textContent?.trim() || link?.getAttribute('title') || 
+                            let name = link?.textContent?.trim() || link?.getAttribute('title') || 
                                         parent.querySelector('h2, h3, h4, h5')?.textContent?.trim();
                             if (name && name.length > 2 && name.length < 100) {
-                                products.push({ name, price, currency: 'ر.س', inStock: true });
+                                name = translateArabicToEnglish(name);
+                                products.push({ name, price, currency: 'SAR', inStock: true });
                             }
                         }
                     }

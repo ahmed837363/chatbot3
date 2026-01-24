@@ -793,12 +793,16 @@
         
         if (storeData.products.length > 0) {
             productList = storeData.products.slice(0, 50).map((p, i) => {
-                let priceText = `${p.price} ${p.currency || 'ريال'}`;
-                if (p.salePrice && p.salePrice < p.price) {
-                    priceText = `${p.salePrice} ريال (بدل ${p.price})`;
+                // Ensure prices are numbers
+                const originalPrice = parseFloat(p.price) || 0;
+                const salePrice = parseFloat(p.salePrice) || 0;
+                
+                let priceText = `${originalPrice} ريال`;
+                if (salePrice > 0 && salePrice < originalPrice) {
+                    priceText = `${salePrice} ريال (بدل ${originalPrice})`;
                 }
-                const stockStatus = p.inStock !== false ? '✓' : '(نفذ)';
-                return `${i+1}. ${p.name} - ${priceText} ${stockStatus}`;
+                const stockStatus = p.inStock !== false ? '' : '(نفذ)';
+                return `${i+1}. ${p.name} - ${priceText} ${stockStatus}`.trim();
             }).join('\n');
         } else {
             productList = `(منتجات تجريبية - لم يتم تحميل بيانات المتجر)
@@ -855,12 +859,16 @@
             let productListEn = '';
             if (storeData.products.length > 0) {
                 productListEn = storeData.products.slice(0, 50).map((p, i) => {
-                    let priceText = `${p.price} SAR`;
-                    if (p.salePrice && p.salePrice < p.price) {
-                        priceText = `${p.salePrice} SAR (was ${p.price})`;
+                    // Ensure prices are numbers
+                    const originalPrice = parseFloat(p.price) || 0;
+                    const salePrice = parseFloat(p.salePrice) || 0;
+                    
+                    let priceText = `${originalPrice} SAR`;
+                    if (salePrice > 0 && salePrice < originalPrice) {
+                        priceText = `${salePrice} SAR (was ${originalPrice})`;
                     }
-                    const stockStatus = p.inStock !== false ? '✓' : '(out of stock)';
-                    return `${i+1}. ${p.name} - ${priceText} ${stockStatus}`;
+                    const stockStatus = p.inStock !== false ? '' : '(out of stock)';
+                    return `${i+1}. ${p.name} - ${priceText} ${stockStatus}`.trim();
                 }).join('\n');
             } else {
                 productListEn = `(Demo products - store data not loaded)
@@ -1562,37 +1570,25 @@ ${productList}
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
     
-    // Format message text with clickable product links
+    // Format message text - clean and simple
     function formatMessageWithLinks(text) {
-        // Escape HTML first
+        // Escape HTML first to prevent XSS
         let safeText = text
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
         
+        // Remove any URLs that the AI might have outputted (it shouldn't, but just in case)
+        safeText = safeText.replace(/https?:\/\/[^\s<]+/gi, '');
+        
+        // Remove any HTML-like artifacts that might slip through
+        safeText = safeText.replace(/target=.*?>/gi, '');
+        safeText = safeText.replace(/style=.*?>/gi, '');
+        safeText = safeText.replace(/&lt;a href=.*?&gt;/gi, '');
+        safeText = safeText.replace(/&lt;\/a&gt;/gi, '');
+        
         // Convert newlines to <br> for proper line breaks
         safeText = safeText.replace(/\n/g, '<br>');
-        
-        // Try to add product links if products are loaded
-        if (storeData.products && storeData.products.length > 0) {
-            storeData.products.forEach(product => {
-                if (product.productUrl && product.name) {
-                    // Create regex to find product name in text (case insensitive)
-                    const escapedName = product.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const regex = new RegExp(`(${escapedName})`, 'gi');
-                    
-                    // Replace with clickable link
-                    safeText = safeText.replace(regex, 
-                        `<a href="${product.productUrl}" target="_blank" style="color: #667eea; text-decoration: underline; cursor: pointer;">$1</a>`);
-                }
-            });
-        }
-        
-        // Also detect and linkify any URLs in the text
-        safeText = safeText.replace(
-            /(https?:\/\/[^\s<]+)/gi,
-            '<a href="$1" target="_blank" style="color: #667eea; text-decoration: underline;">$1</a>'
-        );
         
         return safeText;
     }

@@ -1117,10 +1117,12 @@ If customer asks about a product NOT in the list above, say:
 "Sorry, we don't have [product name] 😔"
 
 🟢 Response style:
-- Be brief and friendly
+- Be brief and friendly like a real salesperson
+- Answer directly without phrases like "Here is the response" or "Based on the list"
+- Just list the products naturally
 - List each product on its OWN line
 - Renumber from 1 (don't use original numbers)
-- Translate Arabic names to English`;
+- Don't say "let me know if you need help" at the end`;
         }
 
         // Arabic system prompt (default) - SIMPLE VERSION with products at END

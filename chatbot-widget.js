@@ -17,6 +17,7 @@
         enabled: true,
         logs: [],
         maxLogs: 50,
+        lastFullRequest: null, // Store full system prompt for debugging
         
         add(type, data) {
             if (!this.enabled) return;
@@ -36,10 +37,32 @@
             console.log(`📋 [${type}]`, data);
         },
         
+        // Store full AI request for debugging
+        storeFullRequest(userMessage, systemPrompt, products, aiResponse) {
+            this.lastFullRequest = {
+                timestamp: new Date().toISOString(),
+                userMessage: userMessage,
+                systemPrompt: systemPrompt,
+                productsCount: products.length,
+                productsList: products.map(p => ({
+                    name: p.name,
+                    price: p.price,
+                    salePrice: p.salePrice,
+                    currency: p.currency
+                })),
+                aiResponse: aiResponse
+            };
+            // Save to localStorage
+            try {
+                localStorage.setItem('chatbot_last_request', JSON.stringify(this.lastFullRequest, null, 2));
+            } catch(e) {}
+        },
+        
         getAll() {
             return this.logs;
         },
         
+        // Export all logs as JSON file
         export() {
             const blob = new Blob([JSON.stringify(this.logs, null, 2)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
@@ -47,6 +70,36 @@
             a.href = url;
             a.download = `chatbot_log_${Date.now()}.json`;
             a.click();
+        },
+        
+        // Export full last request (system prompt + products + response)
+        exportLastRequest() {
+            if (!this.lastFullRequest) {
+                console.log('⚠️ No request logged yet. Ask the chatbot something first!');
+                return null;
+            }
+            const blob = new Blob([JSON.stringify(this.lastFullRequest, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `chatbot_full_request_${Date.now()}.json`;
+            a.click();
+            return this.lastFullRequest;
+        },
+        
+        // Show last full request in console
+        showLastRequest() {
+            if (!this.lastFullRequest) {
+                console.log('⚠️ No request logged yet. Ask the chatbot something first!');
+                return null;
+            }
+            console.log('📋 ===== LAST AI REQUEST DEBUG =====');
+            console.log('📝 User Message:', this.lastFullRequest.userMessage);
+            console.log('📦 Products Count:', this.lastFullRequest.productsCount);
+            console.log('📦 Products:', this.lastFullRequest.productsList);
+            console.log('🤖 System Prompt:', this.lastFullRequest.systemPrompt);
+            console.log('✅ AI Response:', this.lastFullRequest.aiResponse);
+            return this.lastFullRequest;
         },
         
         show() {
@@ -1335,7 +1388,8 @@ ${productList}
             userMessage: message,
             productsInContext: storeData.products.length,
             productsList: storeData.products.slice(0, 50).map(p => `${p.name}: ${p.price} ${p.currency}`),
-            systemPromptPreview: systemPrompt.substring(0, 500) + '...'
+            currentLanguage: currentLang,
+            isRTL: isRTL
         });
 
         try {
@@ -1362,6 +1416,9 @@ ${productList}
 
             const data = await response.json();
             const aiResponse = data.choices?.[0]?.message?.content || t.notUnderstood;
+            
+            // Store FULL request for debugging (system prompt + products + response)
+            DEBUG_LOG.storeFullRequest(message, systemPrompt, storeData.products, aiResponse);
             
             DEBUG_LOG.add('AI_RESPONSE', {
                 userMessage: message,

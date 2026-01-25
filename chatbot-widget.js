@@ -213,6 +213,65 @@
         position: 'bottom-left',
         language: currentLang
     };
+    
+    // Available models for testing - add models you've loaded in LM Studio
+    const availableModels = [
+        { id: 'allam-7b-instruct-preview', name: 'ALLaM 7B (Arabic)', description: 'Best for Arabic' },
+        { id: 'qwen2.5-7b-instruct', name: 'Qwen 2.5 7B', description: 'Great instruction following' },
+        { id: 'mistral-7b-instruct-v0.3', name: 'Mistral 7B v0.3', description: 'Fast & accurate' },
+        { id: 'llama-3.2-3b-instruct', name: 'Llama 3.2 3B', description: 'Lightweight' },
+        { id: 'gemma-2-9b-it', name: 'Gemma 2 9B', description: 'Google model' },
+        { id: 'phi-3-mini-4k-instruct', name: 'Phi-3 Mini', description: 'Microsoft small model' }
+    ];
+    
+    // Current model (can be changed at runtime)
+    let currentModel = config.aiModel;
+    
+    // Function to switch models
+    function switchModel(modelId) {
+        currentModel = modelId;
+        console.log('🔄 Switched to model:', modelId);
+        // Clear conversation for fresh start with new model
+        conversationHistory = [];
+        return modelId;
+    }
+    
+    // Make model switcher available globally for testing
+    window.chatbotModels = {
+        list: () => {
+            console.log('📋 Available models:');
+            availableModels.forEach((m, i) => {
+                const current = m.id === currentModel ? ' ⬅️ CURRENT' : '';
+                console.log(`  ${i+1}. ${m.name} (${m.id}) - ${m.description}${current}`);
+            });
+            return availableModels;
+        },
+        switch: (modelId) => {
+            const model = availableModels.find(m => m.id === modelId || m.name.toLowerCase().includes(modelId.toLowerCase()));
+            if (model) {
+                switchModel(model.id);
+                console.log(`✅ Now using: ${model.name}`);
+                return model;
+            } else {
+                console.log('❌ Model not found. Use chatbotModels.list() to see available models');
+                console.log('💡 Or add the model ID directly: chatbotModels.switch("your-model-id")');
+                // Still allow switching to custom model ID
+                switchModel(modelId);
+                return { id: modelId, name: modelId };
+            }
+        },
+        current: () => {
+            console.log(`🤖 Current model: ${currentModel}`);
+            return currentModel;
+        },
+        add: (id, name, description) => {
+            availableModels.push({ id, name: name || id, description: description || '' });
+            console.log(`✅ Added model: ${name || id}`);
+            return availableModels;
+        }
+    };
+    
+    console.log('💡 Model switcher: Type chatbotModels.list() to see models, chatbotModels.switch("model-id") to change');
 
     // Get store ID and custom config from script tag
     const storeId = scriptTag?.getAttribute('data-store-id') || 'demo';
@@ -1566,11 +1625,12 @@ ${productList}
         });
 
         try {
+            console.log('🤖 Using model:', currentModel);
             const response = await fetch(config.aiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: config.aiModel,
+                    model: currentModel,
                     messages: [
                         { role: 'system', content: systemPrompt },
                         ...conversationHistory.slice(-10)

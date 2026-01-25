@@ -165,7 +165,7 @@
             // Clear all previous messages
             messagesDiv.innerHTML = '';
             // Reset conversation history
-            conversationHistory = [];
+            clearConversationHistory();
             // Show welcome in new language
             addMessage(t.welcome, 'bot');
         }
@@ -241,7 +241,7 @@
         currentModel = modelId;
         console.log('🔄 Switched to model:', modelId);
         // Clear conversation for fresh start with new model
-        conversationHistory = [];
+        clearConversationHistory();
         return modelId;
     }
     
@@ -292,8 +292,53 @@
         config.aiUrl = customAiUrl;
     }
 
-    // Conversation history for context
-    let conversationHistory = [];
+    // ===== SESSION-BASED CONVERSATION HISTORY =====
+    // Each customer gets their own unique session ID
+    // History is stored per session and doesn't mix between customers
+    
+    function generateSessionId() {
+        return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+    
+    // Get or create session ID for this customer
+    let sessionId = sessionStorage.getItem('chatbot_session_id');
+    if (!sessionId) {
+        sessionId = generateSessionId();
+        sessionStorage.setItem('chatbot_session_id', sessionId);
+        console.log('🆔 New session created:', sessionId);
+    } else {
+        console.log('🆔 Existing session:', sessionId);
+    }
+    
+    // Load conversation history from sessionStorage (per customer)
+    function loadConversationHistory() {
+        try {
+            const saved = sessionStorage.getItem('chatbot_history_' + sessionId);
+            return saved ? JSON.parse(saved) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+    
+    // Save conversation history to sessionStorage (per customer)
+    function saveConversationHistory() {
+        try {
+            sessionStorage.setItem('chatbot_history_' + sessionId, JSON.stringify(conversationHistory));
+        } catch (e) {
+            console.warn('Could not save conversation history');
+        }
+    }
+    
+    // Clear this customer's history
+    function clearConversationHistory() {
+        conversationHistory = [];
+        sessionStorage.removeItem('chatbot_history_' + sessionId);
+        console.log('🗑️ Conversation history cleared for session:', sessionId);
+    }
+    
+    // Initialize conversation history from storage
+    let conversationHistory = loadConversationHistory();
+    console.log('📜 Loaded', conversationHistory.length, 'messages from session');
     
     // Store data (products, shipping, etc.) - will be loaded from Salla API
     let storeData = {
@@ -1489,7 +1534,7 @@ ${productList}
             const messagesDiv = document.getElementById('chat-messages');
             if (messagesDiv) {
                 messagesDiv.innerHTML = '';
-                conversationHistory = [];
+                // switchModel already cleared history, just show welcome
                 addMessage(t.welcome, 'bot');
             }
         });
@@ -1567,6 +1612,7 @@ ${productList}
         
         // Now add current user message
         conversationHistory.push({ role: 'user', content: message });
+        saveConversationHistory(); // Save to sessionStorage
         input.value = '';
 
         // Show typing indicator
@@ -1578,6 +1624,7 @@ ${productList}
                 hideTypingIndicator();
                 addMessage(response, 'bot');
                 conversationHistory.push({ role: 'assistant', content: response });
+                saveConversationHistory(); // Save to sessionStorage
             })
             .catch(error => {
                 hideTypingIndicator();

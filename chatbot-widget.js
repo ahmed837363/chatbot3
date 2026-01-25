@@ -1099,8 +1099,7 @@
             if (useSimplePrompt) {
                 return `You are a helpful sales assistant for "${storeData.storeName}".
 
-PRODUCTS:
-${productListEn}
+
 
 STORE INFO:
 - Shipping: 25 SAR (FREE over 200 SAR), 2-5 days
@@ -1113,7 +1112,9 @@ RULES:
 3. List products one per line, numbered
 4. Don't combine or summarize products
 5. Answer questions directly (shipping, payment, etc.)
-6. Be friendly and concise`;
+6. Translate from Arabic to English if there isn't any English name available on the product and start translation first before listing
+7. Translate from English to Arabic if there isn't any Arabic name available on the product and start translation first before listing
+8. Be friendly and concise`;
             }
 
             let shippingInfoEn = '';
@@ -1556,15 +1557,17 @@ ${productList}
 
         // Add user message
         addMessage(message, 'user');
+        
+        // Clear old history if too long, but BEFORE adding current message
+        // (keep last 3 exchanges = 6 items, then add new user message)
+        if (conversationHistory.length >= 6) {
+            console.log('🔄 Trimming conversation history to keep AI accurate');
+            conversationHistory = conversationHistory.slice(-4); // Keep last 2 exchanges
+        }
+        
+        // Now add current user message
         conversationHistory.push({ role: 'user', content: message });
         input.value = '';
-
-        // Clear conversation history after 3 exchanges to keep AI fresh
-        // (3 user messages + 3 assistant messages = 6 items)
-        if (conversationHistory.length > 6) {
-            console.log('🔄 Clearing conversation history to keep AI accurate');
-            conversationHistory = [];
-        }
 
         // Show typing indicator
         showTypingIndicator();

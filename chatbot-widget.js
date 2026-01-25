@@ -215,14 +215,23 @@
     };
     
     // Available models for testing - add models you've loaded in LM Studio
+    // reasoning: true = uses thinking/reasoning (needs simpler prompt)
     const availableModels = [
-        { id: 'allam-7b-instruct-preview', name: 'ALLaM 7B (Arabic)', description: 'Best for Arabic' },
-        { id: 'qwen2.5-7b-instruct', name: 'Qwen 2.5 7B', description: 'Great instruction following' },
-        { id: 'mistral-7b-instruct-v0.3', name: 'Mistral 7B v0.3', description: 'Fast & accurate' },
-        { id: 'llama-3.2-3b-instruct', name: 'Llama 3.2 3B', description: 'Lightweight' },
-        { id: 'gemma-2-9b-it', name: 'Gemma 2 9B', description: 'Google model' },
-        { id: 'phi-3-mini-4k-instruct', name: 'Phi-3 Mini', description: 'Microsoft small model' }
+        { id: 'allam-7b-instruct-preview', name: 'ALLaM 7B (Arabic)', description: 'Best for Arabic', reasoning: false },
+        { id: 'qwen2.5-7b-instruct', name: 'Qwen 2.5 7B', description: 'Great instruction following', reasoning: false },
+        { id: 'qwen3-8b', name: 'Qwen 3 8B (Reasoning)', description: 'Thinking model', reasoning: true },
+        { id: 'deepseek-r1-distill-qwen-7b', name: 'DeepSeek R1 7B', description: 'Reasoning model', reasoning: true },
+        { id: 'mistral-7b-instruct-v0.3', name: 'Mistral 7B v0.3', description: 'Fast & accurate', reasoning: false },
+        { id: 'llama-3.2-3b-instruct', name: 'Llama 3.2 3B', description: 'Lightweight', reasoning: false },
+        { id: 'gemma-2-9b-it', name: 'Gemma 2 9B', description: 'Google model', reasoning: false },
+        { id: 'phi-3-mini-4k-instruct', name: 'Phi-3 Mini', description: 'Microsoft small model', reasoning: false }
     ];
+    
+    // Check if current model is a reasoning model
+    function isReasoningModel() {
+        const model = availableModels.find(m => m.id === currentModel);
+        return model?.reasoning || currentModel.includes('deepseek') || currentModel.includes('r1') || currentModel.includes('qwen3');
+    }
     
     // Current model (can be changed at runtime)
     let currentModel = config.aiModel;
@@ -982,6 +991,10 @@
 
     // Build dynamic system prompt with real store data
     function buildSystemPrompt() {
+        // Check if using a reasoning model - they need simpler prompts
+        const useSimplePrompt = isReasoningModel();
+        console.log('🧠 Reasoning model:', useSimplePrompt ? 'YES (simple prompt)' : 'NO (detailed prompt)');
+        
         // Debug: Log what products we have
         console.log('🤖 Building prompt with', storeData.products.length, 'products');
         if (storeData.products.length > 0) {
@@ -1080,6 +1093,26 @@
 4. Women's Denim Jacket - 280 SAR
 5. Pleated Midi Skirt - 180 SAR
 6. Silk Pajama Set - 320 SAR`;
+            }
+
+            // SIMPLE prompt for reasoning models (less rules, more natural)
+            if (useSimplePrompt) {
+                return `You are a helpful sales assistant for "${storeData.storeName}", a fashion store in Saudi Arabia.
+
+Our products:
+${productListEn}
+
+Store info:
+- Shipping: 25 SAR within Saudi Arabia (FREE over 200 SAR), 2-5 days delivery
+- Payment: Mada, Visa, Mastercard, Apple Pay, Tabby
+- Returns: 14 days
+
+Your job:
+- Help customers find products from the list above
+- Answer questions about shipping, payment, returns
+- Be friendly and natural
+- If someone asks for electronics, furniture, food, cars, etc - politely say we only sell fashion items
+- Only mention products that exist in the list above`;
             }
 
             let shippingInfoEn = '';
@@ -1205,7 +1238,28 @@ If customer asks for something not in our list, say:
 - End with a brief friendly question like "Would you like more details?" or "Anything catch your eye? 😊"`;
         }
 
-        // Arabic system prompt (default) - SIMPLE VERSION with products at END
+        // Arabic system prompt (default)
+        // SIMPLE prompt for reasoning models
+        if (useSimplePrompt) {
+            return `أنت مساعد مبيعات ودود لمتجر "${storeData.storeName}" للأزياء في السعودية.
+
+منتجاتنا:
+${productList}
+
+معلومات المتجر:
+- الشحن: 25 ريال داخل السعودية (مجاني فوق 200 ريال)، 2-5 أيام
+- الدفع: مدى، فيزا، ماستركارد، Apple Pay، تابي
+- الإرجاع: خلال 14 يوم
+
+مهمتك:
+- ساعد العملاء يلقون منتجات من القائمة فوق
+- جاوب على أسئلة الشحن والدفع والإرجاع
+- كن ودود وطبيعي باللهجة السعودية
+- إذا سألوا عن إلكترونيات أو أثاث أو أكل أو سيارات - قل بلطف إننا نبيع أزياء فقط
+- فقط اذكر منتجات موجودة في القائمة`;
+        }
+        
+        // Detailed prompt for non-reasoning models
         return `أنت مساعد متجر "${storeData.storeName}". رد باللهجة السعودية.
 
 ⚠️ قواعد مهمة:
@@ -1345,7 +1399,7 @@ ${productList}
                         background: white;
                         cursor: pointer;
                     ">
-                        ${availableModels.map(m => `<option value="${m.id}" ${m.id === currentModel ? 'selected' : ''}>${m.name}</option>`).join('')}
+                        ${availableModels.map(m => `<option value="${m.id}" ${m.id === currentModel ? 'selected' : ''}>${m.name}${m.reasoning ? ' 🧠' : ''}</option>`).join('')}
                     </select>
                 </div>
 

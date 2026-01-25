@@ -1298,6 +1298,30 @@ ${productList}
                         ">×</button>
                     </div>
                 </div>
+                
+                <!-- Model Selector (for testing) -->
+                <div id="model-selector-bar" style="
+                    background: #f0f0f0;
+                    padding: 8px 15px;
+                    border-bottom: 1px solid #ddd;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    font-size: 12px;
+                ">
+                    <span style="color: #666;">🤖 Model:</span>
+                    <select id="model-select" style="
+                        flex: 1;
+                        padding: 5px 8px;
+                        border: 1px solid #ccc;
+                        border-radius: 5px;
+                        font-size: 12px;
+                        background: white;
+                        cursor: pointer;
+                    ">
+                        ${availableModels.map(m => `<option value="${m.id}" ${m.id === currentModel ? 'selected' : ''}>${m.name}</option>`).join('')}
+                    </select>
+                </div>
 
                 <!-- Messages -->
                 <div id="chat-messages" style="
@@ -1364,12 +1388,27 @@ ${productList}
         const sendBtn = document.getElementById('send-btn');
         const input = document.getElementById('chat-input');
         const langBtn = document.getElementById('lang-switch-btn');
+        const modelSelect = document.getElementById('model-select');
 
         bubble.addEventListener('click', toggleChat);
         closeBtn.addEventListener('click', toggleChat);
         sendBtn.addEventListener('click', sendMessage);
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
+        });
+        
+        // Model selector - change model when dropdown changes
+        modelSelect.addEventListener('change', (e) => {
+            const newModel = e.target.value;
+            switchModel(newModel);
+            console.log('🔄 Model switched to:', newModel);
+            // Clear chat for fresh start with new model
+            const messagesDiv = document.getElementById('chat-messages');
+            if (messagesDiv) {
+                messagesDiv.innerHTML = '';
+                conversationHistory = [];
+                addMessage(t.welcome, 'bot');
+            }
         });
         
         // Language switch button

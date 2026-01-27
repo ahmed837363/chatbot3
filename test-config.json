@@ -1,0 +1,15 @@
+{
+    "configId": 1,
+    "merchantId": 123456789,
+    "botName": "مساعد المتجر",
+    "language": "ar",
+    "storeName": "متجر تجريبي",
+    "shippingCost": "30",
+    "freeShippingMin": "250",
+    "deliveryDays": "3-7",
+    "paymentMethods": "مدى، فيزا، ماستركارد، Apple Pay",
+    "returnDays": "14",
+    "supportPhone": "920012345",
+    "supportEmail": "support@test.com",
+    "supportWhatsApp": "+966512345678"
+}

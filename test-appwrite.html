@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار إعدادات المتجر - Appwrite Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 { color: #333; margin-bottom: 20px; }
+        .test-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .test-section h3 { color: #667eea; margin-bottom: 15px; }
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 13px;
+            direction: ltr;
+            text-align: left;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #5a6fd6; }
+        #result { margin-top: 20px; }
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .setting-label { color: #666; }
+        .setting-value { color: #333; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 اختبار إعدادات المتجر من Appwrite</h1>
+        
+        <div class="test-section">
+            <h3>📝 معلومات الاختبار</h3>
+            <p>هذه الصفحة تختبر جلب إعدادات المتجر من قاعدة بيانات Appwrite</p>
+            <p><strong>Store ID:</strong> <span id="storeId">123456789</span></p>
+            <p><strong>Collection:</strong> chatbot_configs</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🚀 تشغيل الاختبار</h3>
+            <button onclick="testFetch()">جلب الإعدادات من Appwrite</button>
+            <button onclick="clearCache()">مسح الكاش</button>
+            <button onclick="testChatbot()">فتح الشات بوت</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 النتيجة</h3>
+            <div id="result">
+                <p class="info">اضغط على "جلب الإعدادات" للبدء...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>⚙️ الإعدادات المحملة</h3>
+            <div id="settings">
+                <p class="info">لم يتم تحميل الإعدادات بعد</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load chatbot with test store ID -->
+    <script 
+        src="chatbot-widget.js" 
+        data-store-id="123456789"
+        data-lang="ar"
+    ></script>
+
+    <script>
+        const STORE_ID = '123456789';
+        const APPWRITE_ENDPOINT = 'https://fra.cloud.appwrite.io/v1';
+        const PROJECT_ID = '694669640010920ea3f6';
+        const DATABASE_ID = '6946699d001194236820';
+        const COLLECTION_ID = 'chatbot_configs';
+
+        async function testFetch() {
+            const resultDiv = document.getElementById('result');
+            const settingsDiv = document.getElementById('settings');
+            
+            resultDiv.innerHTML = '<p class="info">⏳ جاري الجلب...</p>';
+            
+            try {
+                const merchantIdInt = parseInt(STORE_ID) || 0;
+                const query = encodeURIComponent(`equal("merchantId",${merchantIdInt})`);
+                const url = `${APPWRITE_ENDPOINT}/databases/${DATABASE_ID}/collections/${COLLECTION_ID}/documents?queries[]=${query}`;
+                
+                console.log('🔍 Fetching from:', url);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'X-Appwrite-Project': PROJECT_ID,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                console.log('📦 Response:', data);
+                
+                if (!response.ok) {
+                    resultDiv.innerHTML = `<p class="error">❌ خطأ: ${data.message || response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    return;
+                }
+                
+                if (data.documents && data.documents.length > 0) {
+                    const doc = data.documents[0];
+                    resultDiv.innerHTML = `<p class="success">✅ تم جلب الإعدادات بنجاح!</p>
+                        <p>Document ID: ${doc.$id}</p>
+                        <p>آخر تحديث: ${doc.$updatedAt}</p>`;
+                    
+                    // Show settings
+                    settingsDiv.innerHTML = `
+                        <div class="setting-row"><span class="setting-label">اسم المتجر:</span><span class="setting-value">${doc.storeName || '-'}</span></div>
+                        <div class="setting-row"><span class="setting-label">تكلفة الشحن:</span><span class="setting-value">${doc.shippingCost || '25'} ريال</span></div>
+                        <div class="setting-row"><span class="setting-label">شحن مجاني فوق:</span><span class="setting-value">${doc.freeShippingMin || '200'} ريال</span></div>
+                        <div class="setting-row"><span class="setting-label">مدة التوصيل:</span><span class="setting-value">${doc.deliveryDays || '2-5'} أيام</span></div>
+                        <div class="setting-row"><span class="setting-label">طرق الدفع:</span><span class="setting-value">${doc.paymentMethods || '-'}</span></div>
+                        <div class="setting-row"><span class="setting-label">مدة الإرجاع:</span><span class="setting-value">${doc.returnDays || '14'} يوم</span></div>
+                        <div class="setting-row"><span class="setting-label">هاتف الدعم:</span><span class="setting-value">${doc.supportPhone || '-'}</span></div>
+                        <div class="setting-row"><span class="setting-label">البريد:</span><span class="setting-value">${doc.supportEmail || '-'}</span></div>
+                        <div class="setting-row"><span class="setting-label">واتساب:</span><span class="setting-value">${doc.supportWhatsApp || '-'}</span></div>
+                    `;
+                    
+                    // Show raw JSON
+                    resultDiv.innerHTML += `<h4 style="margin-top:15px;">البيانات الخام:</h4><pre>${JSON.stringify(doc, null, 2)}</pre>`;
+                } else {
+                    resultDiv.innerHTML = `<p class="error">⚠️ لم يتم العثور على إعدادات للمتجر ${STORE_ID}</p>
+                        <p>تأكد من إنشاء document في chatbot_configs بـ merchantId = ${STORE_ID}</p>`;
+                    settingsDiv.innerHTML = '<p class="error">لا توجد إعدادات</p>';
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p class="error">❌ خطأ في الاتصال: ${error.message}</p>`;
+            }
+        }
+
+        function clearCache() {
+            localStorage.removeItem(`store_settings_${STORE_ID}`);
+            alert('تم مسح الكاش! ✅');
+            console.log('🗑️ Cache cleared');
+        }
+
+        function testChatbot() {
+            // Open chatbot
+            const bubble = document.getElementById('chat-bubble');
+            if (bubble) bubble.click();
+            
+            // Check settings
+            if (window.chatbotSettings) {
+                console.log('📊 Chatbot Settings:', window.chatbotSettings.get());
+                alert('راجع Console للإعدادات المحملة');
+            }
+        }
+
+        // Auto-run test on load
+        setTimeout(testFetch, 1000);
+    </script>
+</body>
+</html>

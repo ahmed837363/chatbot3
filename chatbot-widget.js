@@ -287,6 +287,27 @@
     const customAiUrl = scriptTag?.getAttribute('data-ai-url') || '';
     const supportContact = scriptTag?.getAttribute('data-support') || '';
     
+    // ===== STORE CONFIGURATION (Customizable per store) =====
+    const storeConfig = {
+        // Shipping settings
+        shippingCost: scriptTag?.getAttribute('data-shipping-cost') || '25',
+        freeShippingMin: scriptTag?.getAttribute('data-free-shipping') || '200',
+        deliveryDays: scriptTag?.getAttribute('data-delivery-days') || '2-5',
+        
+        // Payment methods
+        paymentMethods: scriptTag?.getAttribute('data-payment') || 'مدى، فيزا، ماستركارد، Apple Pay، تابي',
+        
+        // Returns policy
+        returnDays: scriptTag?.getAttribute('data-return-days') || '14',
+        
+        // Support contact
+        supportPhone: scriptTag?.getAttribute('data-support-phone') || '',
+        supportEmail: scriptTag?.getAttribute('data-support-email') || '',
+        supportWhatsApp: scriptTag?.getAttribute('data-whatsapp') || ''
+    };
+    
+    console.log('⚙️ Store config:', storeConfig);
+    
     // Use custom AI URL if provided
     if (customAiUrl) {
         config.aiUrl = customAiUrl;
@@ -1140,16 +1161,25 @@
 6. Silk Pajama Set - 320 SAR`;
             }
 
+            // Build support info string
+            let supportInfo = '';
+            if (storeConfig.supportPhone) supportInfo += `Phone: ${storeConfig.supportPhone}\n`;
+            if (storeConfig.supportEmail) supportInfo += `Email: ${storeConfig.supportEmail}\n`;
+            if (storeConfig.supportWhatsApp) supportInfo += `WhatsApp: ${storeConfig.supportWhatsApp}\n`;
+            if (!supportInfo) supportInfo = 'Contact info available on website';
+
             // SIMPLE prompt for reasoning models (generic for any store)
             if (useSimplePrompt) {
                 return `You are a helpful sales assistant for "${storeData.storeName}".
 
-
+PRODUCTS:
+${productListEn}
 
 STORE INFO:
-- Shipping: 25 SAR (FREE over 200 SAR), 2-5 days
-- Payment: Mada, Visa, Mastercard, Apple Pay, Tabby
-- Returns: 14 days
+- Shipping: ${storeConfig.shippingCost} SAR (FREE over ${storeConfig.freeShippingMin} SAR), ${storeConfig.deliveryDays} days
+- Payment: ${storeConfig.paymentMethods}
+- Returns: ${storeConfig.returnDays} days
+- Support: ${supportInfo}
 
 RULES:
 1. Only mention products from the list above
@@ -1287,6 +1317,13 @@ If customer asks for something not in our list, say:
 
         // Arabic system prompt (default)
         // SIMPLE prompt for reasoning models
+        // Build Arabic support info
+        let supportInfoAr = '';
+        if (storeConfig.supportPhone) supportInfoAr += `الهاتف: ${storeConfig.supportPhone}\n`;
+        if (storeConfig.supportEmail) supportInfoAr += `البريد: ${storeConfig.supportEmail}\n`;
+        if (storeConfig.supportWhatsApp) supportInfoAr += `واتساب: ${storeConfig.supportWhatsApp}\n`;
+        if (!supportInfoAr) supportInfoAr = 'معلومات التواصل على الموقع';
+
         if (useSimplePrompt) {
             return `أنت مساعد مبيعات ودود لمتجر "${storeData.storeName}".
 
@@ -1294,9 +1331,10 @@ If customer asks for something not in our list, say:
 ${productList}
 
 معلومات المتجر:
-- الشحن: 25 ريال (مجاني فوق 200 ريال)، 2-5 أيام
-- الدفع: مدى، فيزا، ماستركارد، Apple Pay، تابي
-- الإرجاع: 14 يوم
+- الشحن: ${storeConfig.shippingCost} ريال (مجاني فوق ${storeConfig.freeShippingMin} ريال)، ${storeConfig.deliveryDays} أيام
+- الدفع: ${storeConfig.paymentMethods}
+- الإرجاع: ${storeConfig.returnDays} يوم
+- التواصل: ${supportInfoAr}
 
 القواعد:
 1. فقط اذكر منتجات من القائمة فوق

@@ -206,6 +206,7 @@
         databaseId: '6946699d001194236820',
         collectionId: 'store_connections',
         productsCollectionId: 'products',
+        storeSettingsCollectionId: 'store_settings', // NEW: Store settings collection
         // AI via Cloudflare Tunnel to LM Studio
         aiUrl: 'https://allam-ai.mayasahstyle.me/v1/chat/completions',
         aiModel: 'allam-7b-instruct-preview',
@@ -287,8 +288,9 @@
     const customAiUrl = scriptTag?.getAttribute('data-ai-url') || '';
     const supportContact = scriptTag?.getAttribute('data-support') || '';
     
-    // ===== STORE CONFIGURATION (Customizable per store) =====
-    const storeConfig = {
+    // ===== STORE CONFIGURATION (Loaded from Appwrite or HTML attributes) =====
+    // Priority: 1. Appwrite DB  2. HTML attributes  3. Defaults
+    let storeConfig = {
         // Shipping settings
         shippingCost: scriptTag?.getAttribute('data-shipping-cost') || '25',
         freeShippingMin: scriptTag?.getAttribute('data-free-shipping') || '200',
@@ -303,10 +305,129 @@
         // Support contact
         supportPhone: scriptTag?.getAttribute('data-support-phone') || '',
         supportEmail: scriptTag?.getAttribute('data-support-email') || '',
-        supportWhatsApp: scriptTag?.getAttribute('data-whatsapp') || ''
+        supportWhatsApp: scriptTag?.getAttribute('data-whatsapp') || '',
+        
+        // Metadata
+        source: 'html', // 'appwrite' or 'html'
+        lastUpdated: null
     };
     
-    console.log('⚙️ Store config:', storeConfig);
+    // ===== APPWRITE STORE SETTINGS =====
+    // Fetch store settings from Appwrite database (cached for 24 hours)
+    async function fetchStoreSettingsFromAppwrite() {
+        const cacheKey = `store_settings_${storeId}`;
+        const cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours in ms
+        
+        // Check cache first
+        try {
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+                const { data, timestamp } = JSON.parse(cached);
+                const age = Date.now() - timestamp;
+                if (age < cacheExpiry) {
+                    console.log('⚡ Using cached store settings (age:', Math.round(age / 60000), 'min)');
+                    return data;
+                }
+                console.log('🔄 Cache expired, fetching fresh settings...');
+            }
+        } catch (e) {
+            console.log('⚠️ Cache read error:', e.message);
+        }
+        
+        // Fetch from Appwrite
+        try {
+            const merchantIdInt = parseInt(storeId) || 0;
+            const query = encodeURIComponent(`equal("merchantId",${merchantIdInt})`);
+            const url = `${config.appwriteEndpoint}/databases/${config.databaseId}/collections/${config.storeSettingsCollectionId}/documents?queries[]=${query}`;
+            
+            console.log('🔍 Fetching store settings from Appwrite...');
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Appwrite-Project': config.appwriteProjectId,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                console.log('⚠️ Store settings not found in Appwrite, using HTML/defaults');
+                return null;
+            }
+            
+            const data = await response.json();
+            
+            if (data.documents && data.documents.length > 0) {
+                const doc = data.documents[0];
+                const settings = {
+                    storeName: doc.storeName || storeData.storeName,
+                    shippingCost: doc.shippingCost || storeConfig.shippingCost,
+                    freeShippingMin: doc.freeShippingMin || storeConfig.freeShippingMin,
+                    deliveryDays: doc.deliveryDays || storeConfig.deliveryDays,
+                    paymentMethods: doc.paymentMethods || storeConfig.paymentMethods,
+                    returnDays: doc.returnDays || storeConfig.returnDays,
+                    supportPhone: doc.supportPhone || storeConfig.supportPhone,
+                    supportEmail: doc.supportEmail || storeConfig.supportEmail,
+                    supportWhatsApp: doc.supportWhatsApp || storeConfig.supportWhatsApp,
+                    source: 'appwrite',
+                    lastUpdated: doc.$updatedAt || doc.$createdAt
+                };
+                
+                // Cache the settings
+                try {
+                    localStorage.setItem(cacheKey, JSON.stringify({
+                        data: settings,
+                        timestamp: Date.now()
+                    }));
+                    console.log('💾 Store settings cached');
+                } catch (e) {
+                    console.log('⚠️ Could not cache settings:', e.message);
+                }
+                
+                console.log('✅ Loaded store settings from Appwrite:', settings);
+                return settings;
+            }
+            
+            return null;
+        } catch (e) {
+            console.log('⚠️ Could not fetch store settings:', e.message);
+            return null;
+        }
+    }
+    
+    // Load settings and update storeConfig
+    async function loadStoreSettings() {
+        const appwriteSettings = await fetchStoreSettingsFromAppwrite();
+        if (appwriteSettings) {
+            storeConfig = { ...storeConfig, ...appwriteSettings };
+            console.log('✅ Store config updated from Appwrite');
+        } else {
+            console.log('ℹ️ Using HTML attributes/defaults for store config');
+        }
+        console.log('⚙️ Final store config:', storeConfig);
+    }
+    
+    // Force refresh settings (bypass cache)
+    async function refreshStoreSettings() {
+        const cacheKey = `store_settings_${storeId}`;
+        localStorage.removeItem(cacheKey);
+        console.log('🗑️ Cache cleared, fetching fresh settings...');
+        await loadStoreSettings();
+        return storeConfig;
+    }
+    
+    // Make settings management available globally
+    window.chatbotSettings = {
+        get: () => storeConfig,
+        refresh: refreshStoreSettings,
+        clearCache: () => {
+            localStorage.removeItem(`store_settings_${storeId}`);
+            console.log('🗑️ Store settings cache cleared');
+        }
+    };
+    
+    console.log('💡 Settings: chatbotSettings.get() to view, chatbotSettings.refresh() to reload from Appwrite');
+    console.log('⚙️ Initial store config (HTML/defaults):', storeConfig);
     
     // Use custom AI URL if provided
     if (customAiUrl) {
@@ -838,11 +959,14 @@
     // Fetch store data from Salla API (when access token is available)
     async function loadStoreData() {
         try {
-            // First, try to scrape products from the current page
+            // FIRST: Load store settings from Appwrite (shipping, support, etc.)
+            await loadStoreSettings();
+            
+            // Second, try to scrape products from the current page
             const pageProducts = scrapeProductsFromPage();
             if (pageProducts.length > 0) {
                 storeData.products = pageProducts;
-                storeData.storeName = document.title?.split('|')[0]?.trim() || document.title?.split('-')[0]?.trim() || 'المتجر';
+                storeData.storeName = storeConfig.storeName || document.title?.split('|')[0]?.trim() || document.title?.split('-')[0]?.trim() || 'المتجر';
                 storeData.loaded = true;
                 console.log('✅ Loaded', pageProducts.length, 'products from page');
                 return;
@@ -852,7 +976,7 @@
             const storeDoc = await fetchStoreFromAppwrite(storeId);
             
             if (storeDoc) {
-                storeData.storeName = storeDoc.storeName || 'متجر';
+                storeData.storeName = storeConfig.storeName || storeDoc.storeName || 'متجر';
                 
                 // Fetch products from products collection
                 const productsFromDB = await fetchProductsFromAppwrite(storeId);
@@ -866,6 +990,7 @@
                 console.log('✅ Store data loaded from Appwrite:');
                 console.log('   - Store:', storeData.storeName);
                 console.log('   - Products:', storeData.products.length);
+                console.log('   - Settings source:', storeConfig.source);
             }
         } catch (error) {
             console.log('ℹ️ Using demo mode - no store data loaded:', error.message);

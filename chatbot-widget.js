@@ -334,13 +334,14 @@
             console.log('⚠️ Cache read error:', e.message);
         }
         
-        // Fetch from Appwrite
+        // Fetch from Appwrite (using chatbot_configs collection)
         try {
             const merchantIdInt = parseInt(storeId) || 0;
             const query = encodeURIComponent(`equal("merchantId",${merchantIdInt})`);
-            const url = `${config.appwriteEndpoint}/databases/${config.databaseId}/collections/${config.storeSettingsCollectionId}/documents?queries[]=${query}`;
+            // Use chatbot_configs collection which now has store settings fields
+            const url = `${config.appwriteEndpoint}/databases/${config.databaseId}/collections/chatbot_configs/documents?queries[]=${query}`;
             
-            console.log('🔍 Fetching store settings from Appwrite...');
+            console.log('🔍 Fetching store settings from Appwrite (chatbot_configs)...');
             
             const response = await fetch(url, {
                 method: 'GET',
